@@ -7,6 +7,6 @@ void main() {
 
     expect(find.text('MNSCloud Pulse'), findsOneWidget);
     expect(find.text('Secure workforce time clock'), findsOneWidget);
-    expect(find.text('Pulse login coming next'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
   });
 }

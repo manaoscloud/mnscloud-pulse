@@ -35,10 +35,21 @@ flutter pub get
 flutter run
 ```
 
+The first development screen accepts an API base URL and talks to the public Pulse API:
+
+- `POST /api/v1/pulse/auth/signin`
+- `GET /api/v1/pulse/auth/me`
+- `POST /api/v1/pulse/auth/change-password`
+- `POST /api/v1/pulse/punches`
+- `GET /api/v1/pulse/punches`
+
+Punch creation uses a client-generated idempotency key so retries and future offline sync can be
+processed exactly once by the API.
+
 ## Runtime Configuration
 
-The API base URL must be supplied through a public-safe runtime configuration mechanism before real
-API integration is added. Use placeholders in examples:
+The API base URL must be supplied through public-safe runtime configuration. Use placeholders in
+examples:
 
 ```text
 https://api.example.com/api/v1
