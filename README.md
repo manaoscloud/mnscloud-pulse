@@ -8,7 +8,7 @@ or private infrastructure details.
 
 ## Product Scope
 
-- Employee login with a random Pulse login code, not CPF, document, phone, or personal email.
+- Employee login with a random employee login code, not CPF, document, phone, or personal email.
 - First-login temporary password flow.
 - Clock in, break start, break end, and clock out.
 - Employee timesheet visibility.
@@ -21,7 +21,7 @@ The Flutter client only handles user experience and local session state.
 
 The MNSCloud API owns:
 
-- Pulse login code uniqueness.
+- Employee login code uniqueness.
 - Password hashing and reset flows.
 - Tenant and employee scope.
 - Rate limiting and lockout decisions.
@@ -32,10 +32,10 @@ The MNSCloud API owns:
 
 ```bash
 flutter pub get
-flutter run -d web-server --web-port 8081 --dart-define PULSE_API_BASE_URL=http://localhost:8000/api/v1
+flutter run -d web-server --web-port 8081 --dart-define PULSE_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-The first development screen accepts an API base URL and talks to the public Pulse API:
+The client reads the public API base from deployment configuration and talks to the public Pulse API:
 
 - `POST /api/v1/pulse/auth/signin`
 - `GET /api/v1/pulse/auth/me`
@@ -48,14 +48,15 @@ processed exactly once by the API.
 
 ## Runtime Configuration
 
-The API base URL is supplied through public-safe runtime configuration. In the MNSCloud workspace,
-use `make pulse-web` or `make pulse-web-debug`; the script injects `PULSE_API_BASE_URL` from
-`/etc/mnscloud/workspace.env`.
+The public API endpoint is supplied through public-safe module configuration. In production, the webapps
+runtime reads `/etc/mnscloud/webapps/apps.d/pulse.env`. In the MNSCloud workspace, use
+`make pulse-web` or `make pulse-web-debug`; the script reads the same `pulse.env` contract when it
+exists and falls back to development workspace values.
 
 For standalone Flutter commands, pass a dart define. Use placeholders in examples:
 
 ```bash
-flutter build web --release --dart-define PULSE_API_BASE_URL=https://api.example.com/api/v1
+flutter build web --release --dart-define PULSE_PUBLIC_API_BASE_URL=https://api.example.com/api/v1
 ```
 
 Do not commit production domains, customer tenant domains, tokens, or credentials.

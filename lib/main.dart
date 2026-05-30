@@ -35,15 +35,11 @@ class PulseShell extends StatefulWidget {
 }
 
 class _PulseShellState extends State<PulseShell> {
-  static const _configuredApiBaseUrl = String.fromEnvironment(
-    'PULSE_API_BASE_URL',
+  static const _apiBaseUrl = String.fromEnvironment(
+    'PULSE_PUBLIC_API_BASE_URL',
+    defaultValue: '/api/v1',
   );
 
-  final _apiBaseController = TextEditingController(
-    text: _configuredApiBaseUrl == ''
-        ? 'http://localhost:8000/api/v1'
-        : _configuredApiBaseUrl,
-  );
   final _loginCodeController = TextEditingController();
   final _passwordController = TextEditingController();
   final _newPasswordController = TextEditingController();
@@ -56,7 +52,6 @@ class _PulseShellState extends State<PulseShell> {
 
   @override
   void dispose() {
-    _apiBaseController.dispose();
     _loginCodeController.dispose();
     _passwordController.dispose();
     _newPasswordController.dispose();
@@ -64,7 +59,7 @@ class _PulseShellState extends State<PulseShell> {
   }
 
   Uri _uri(String path) {
-    final base = _apiBaseController.text.trim().replaceAll(RegExp(r'/+$'), '');
+    final base = _apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
     return Uri.parse('$base$path');
   }
 
@@ -282,14 +277,8 @@ class _PulseShellState extends State<PulseShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TextField(
-          controller: _apiBaseController,
-          decoration: const InputDecoration(labelText: 'API base URL'),
-          keyboardType: TextInputType.url,
-        ),
-        const SizedBox(height: 12),
-        TextField(
           controller: _loginCodeController,
-          decoration: const InputDecoration(labelText: 'Pulse code'),
+          decoration: const InputDecoration(labelText: 'Employee login'),
           textCapitalization: TextCapitalization.characters,
         ),
         const SizedBox(height: 12),
