@@ -32,7 +32,7 @@ The MNSCloud API owns:
 
 ```bash
 flutter pub get
-flutter run
+flutter run -d web-server --web-port 8081 --dart-define PULSE_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
 The first development screen accepts an API base URL and talks to the public Pulse API:
@@ -48,11 +48,14 @@ processed exactly once by the API.
 
 ## Runtime Configuration
 
-The API base URL must be supplied through public-safe runtime configuration. Use placeholders in
-examples:
+The API base URL is supplied through public-safe runtime configuration. In the MNSCloud workspace,
+use `make pulse-web` or `make pulse-web-debug`; the script injects `PULSE_API_BASE_URL` from
+`/etc/mnscloud/workspace.env`.
 
-```text
-https://api.example.com/api/v1
+For standalone Flutter commands, pass a dart define. Use placeholders in examples:
+
+```bash
+flutter build web --release --dart-define PULSE_API_BASE_URL=https://api.example.com/api/v1
 ```
 
 Do not commit production domains, customer tenant domains, tokens, or credentials.

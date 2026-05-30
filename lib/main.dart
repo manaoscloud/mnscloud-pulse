@@ -35,8 +35,14 @@ class PulseShell extends StatefulWidget {
 }
 
 class _PulseShellState extends State<PulseShell> {
+  static const _configuredApiBaseUrl = String.fromEnvironment(
+    'PULSE_API_BASE_URL',
+  );
+
   final _apiBaseController = TextEditingController(
-    text: 'http://localhost:8000/api/v1',
+    text: _configuredApiBaseUrl == ''
+        ? 'http://localhost:8000/api/v1'
+        : _configuredApiBaseUrl,
   );
   final _loginCodeController = TextEditingController();
   final _passwordController = TextEditingController();
