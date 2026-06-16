@@ -1,0 +1,12 @@
+{
+  "product": "mnscloud-pulse",
+  "repository": "manaoscloud/mnscloud-pulse",
+  "channels": {
+    "stable": {
+      "version": "1.0.1",
+      "ref": "v1.0.1",
+      "releasedAt": "2026-06-16T20:20:56Z",
+      "minimumVersion": "1.0.0"
+    }
+  }
+}
