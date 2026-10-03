@@ -27,10 +27,21 @@ RUNTIME_KIT_DIR="$(find_runtime_kit)" || {
 # shellcheck source=/opt/mnscloud/runtime-kit/lib/release.sh
 source "${RUNTIME_KIT_DIR}/lib/release.sh"
 
+# Static web release artifact consumed by mnscloud-webapps (APP_SOURCE=release). It is built with
+# the default same-origin API base (/api/v1) and a portable root base href; the hosting runtime
+# rewrites <base href> to its own path.
+export MNSCLOUD_RUNTIME_KIT_DIR="$RUNTIME_KIT_DIR"
+package_web_artifact='"$MNSCLOUD_RUNTIME_KIT_DIR/scripts/package-static-artifact.sh" --source-dir build/web --name "mnscloud-pulse-web-v$(tr -d "[:space:]" < VERSION).tar.gz"'
+
 mrtk_release_prepare \
   --product mnscloud-pulse \
   --repository manaoscloud/mnscloud-pulse \
   --minimum-version 1.0.0 \
   --sync-pubspec \
   --validate "grep -q '^version:' pubspec.yaml" \
+  --validate "flutter pub get" \
+  --validate "flutter build web --release --base-href /" \
+  --validate "grep -qF '<base href=\"/\">' build/web/index.html" \
+  --validate "$package_web_artifact" \
+  --asset-glob "releases/mnscloud-pulse-web-v*.tar.gz*" \
   "$@"

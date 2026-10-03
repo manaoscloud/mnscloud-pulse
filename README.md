@@ -60,3 +60,11 @@ flutter build web --release --dart-define PULSE_PUBLIC_API_BASE_URL=https://api.
 ```
 
 Do not commit production domains, customer tenant domains, tokens, or credentials.
+
+### Prebuilt web bundle
+
+Every GitHub Release ships `mnscloud-pulse-web-v<version>.tar.gz` plus `.sha256`, built with
+`--base-href /` and the default same-origin API base `/api/v1`. `mnscloud-webapps` installs it with
+`APP_SOURCE=release`, verifies the checksum and rewrites `<base href>` to its hosting path (for
+example `/pulse/`), so the host needs no Flutter SDK. Deployments that need a different API base
+must build from source with the `--dart-define` above (`APP_SOURCE=build`).
