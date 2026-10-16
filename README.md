@@ -68,3 +68,13 @@ Every GitHub Release ships `mnscloud-pulse-web-v<version>.tar.gz` plus `.sha256`
 `APP_SOURCE=release`, verifies the checksum and rewrites `<base href>` to its hosting path (for
 example `/pulse/`), so the host needs no Flutter SDK. Deployments that need a different API base
 must build from source with the `--dart-define` above (`APP_SOURCE=build`).
+
+## New version notice
+
+On the web build an open Pulse detects a newer release without a refresh:
+`lib/src/version/app_update_controller.dart` reads `build.json` (written by `mnscloud-webapps` next
+to `index.html` of the active release) on start, every ~5 min while visible and when the page
+becomes visible or online again, and compares it with `appBuildInfo.version`, stamped from
+`pubspec.yaml` at release by `scripts/sync-app-build-info.sh`. A different version is accepted
+after two reads 45 s apart and shown as a calm card (`Update now` / `Later`, 4 h per version) that
+says the employee will sign in again. Native builds do not run the detector.

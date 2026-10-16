@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'src/version/app_update_overlay.dart';
+
 void main() {
   runApp(const PulseApp());
 }
@@ -22,6 +24,8 @@ class PulseApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
+      builder: (context, child) =>
+          AppUpdateOverlay(child: child ?? const SizedBox.shrink()),
       home: const PulseShell(),
     );
   }

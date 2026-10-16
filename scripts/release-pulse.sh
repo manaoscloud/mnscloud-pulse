@@ -38,7 +38,9 @@ mrtk_release_prepare \
   --repository manaoscloud/mnscloud-pulse \
   --minimum-version 1.0.0 \
   --sync-pubspec \
+  --add-path lib/src/version/app_build_info.dart \
   --validate "grep -q '^version:' pubspec.yaml" \
+  --validate "bash scripts/sync-app-build-info.sh" \
   --validate "flutter pub get" \
   --validate "flutter build web --release --base-href /" \
   --validate "grep -qF '<base href=\"/\">' build/web/index.html" \
