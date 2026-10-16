@@ -71,11 +71,12 @@ class _AppUpdateNotice extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final version = controller.deployed?.version;
+    final critical = controller.critical;
 
     return Semantics(
       liveRegion: true,
       container: true,
-      label: 'New version available',
+      label: critical ? 'Important update' : 'New version available',
       child: Material(
         elevation: 6,
         color: colorScheme.surfaceContainerHigh,
@@ -85,14 +86,22 @@ class _AppUpdateNotice extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 14, 6, 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: colorScheme.outlineVariant),
+            border: Border.all(
+              color: critical
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant,
+              width: critical ? 2 : 1,
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Icon(Icons.auto_awesome, color: colorScheme.primary),
+                child: Icon(
+                  critical ? Icons.system_update : Icons.auto_awesome,
+                  color: colorScheme.primary,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -101,7 +110,9 @@ class _AppUpdateNotice extends StatelessWidget {
                   children: [
                     Text.rich(
                       TextSpan(
-                        text: 'New version available',
+                        text: critical
+                            ? 'Important update'
+                            : 'New version available',
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -117,24 +128,34 @@ class _AppUpdateNotice extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Pulse was updated with improvements and fixes. Update '
-                      'when convenient; you will need to sign in again.',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: 1.4,
+                    if (critical)
+                      Text(
+                        'This version fixes an important issue. Update as soon as possible; you will need to sign in again.',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      )
+                    else
+                      Text(
+                        'Pulse was updated with improvements and fixes. Update '
+                        'when convenient; you will need to sign in again.',
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       alignment: WrapAlignment.end,
                       spacing: 8,
                       runSpacing: 4,
                       children: [
-                        TextButton(
-                          onPressed: controller.postpone,
-                          child: const Text('Later'),
-                        ),
+                        if (!critical)
+                          TextButton(
+                            onPressed: controller.postpone,
+                            child: const Text('Later'),
+                          ),
                         FilledButton.icon(
                           onPressed: controller.reloadNow,
                           icon: const Icon(Icons.refresh, size: 18),
@@ -145,12 +166,13 @@ class _AppUpdateNotice extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                tooltip: 'Remind me later',
-                onPressed: controller.postpone,
-                icon: const Icon(Icons.close),
-                color: colorScheme.onSurfaceVariant,
-              ),
+              if (!critical)
+                IconButton(
+                  tooltip: 'Remind me later',
+                  onPressed: controller.postpone,
+                  icon: const Icon(Icons.close),
+                  color: colorScheme.onSurfaceVariant,
+                ),
             ],
           ),
         ),

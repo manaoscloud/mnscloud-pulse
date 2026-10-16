@@ -78,3 +78,8 @@ becomes visible or online again, and compares it with `appBuildInfo.version`, st
 `pubspec.yaml` at release by `scripts/sync-app-build-info.sh`. A different version is accepted
 after two reads 45 s apart and shown as a calm card (`Update now` / `Later`, 4 h per version) that
 says the employee will sign in again. Native builds do not run the detector.
+
+Critical updates: a release that fixes a serious problem sets `minimumVersion` in
+`web/update-policy.json` (usually to its own version, in the same PR). `mnscloud-webapps` copies it
+into `build.json`; pages running below it get an "important update" notice without the postpone
+action. It never reloads by itself. Keep it `null` for regular releases.
