@@ -1,0 +1,160 @@
+import 'package:flutter/material.dart';
+
+import 'app_update_controller.dart';
+
+/// Wraps the app and shows a calm "new version" card when a newer Pulse
+/// release goes live while the page stays open. It never reloads by itself.
+class AppUpdateOverlay extends StatefulWidget {
+  const AppUpdateOverlay({super.key, required this.child, this.controller});
+
+  final Widget child;
+  final AppUpdateController? controller;
+
+  @override
+  State<AppUpdateOverlay> createState() => _AppUpdateOverlayState();
+}
+
+class _AppUpdateOverlayState extends State<AppUpdateOverlay> {
+  late final AppUpdateController _controller =
+      widget.controller ?? AppUpdateController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onChanged);
+    _controller.start();
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onChanged);
+    if (widget.controller == null) _controller.dispose();
+    super.dispose();
+  }
+
+  void _onChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_controller.noticeVisible) return widget.child;
+    final mobile = MediaQuery.sizeOf(context).width < 600;
+    final notice = _AppUpdateNotice(controller: _controller);
+    return Stack(
+      children: [
+        widget.child,
+        Positioned(
+          left: mobile ? 8 : null,
+          right: mobile ? 8 : 24,
+          bottom: 0,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: mobile ? 8 : 24),
+              child: notice,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AppUpdateNotice extends StatelessWidget {
+  const _AppUpdateNotice({required this.controller});
+
+  final AppUpdateController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final version = controller.deployed?.version;
+
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      label: 'New version available',
+      child: Material(
+        elevation: 6,
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 380),
+          padding: const EdgeInsets.fromLTRB(16, 14, 6, 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(Icons.auto_awesome, color: colorScheme.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        text: 'New version available',
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        children: [
+                          if (version != null)
+                            TextSpan(
+                              text: '  v$version',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Pulse was updated with improvements and fixes. Update '
+                      'when convenient; you will need to sign in again.',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        TextButton(
+                          onPressed: controller.postpone,
+                          child: const Text('Later'),
+                        ),
+                        FilledButton.icon(
+                          onPressed: controller.reloadNow,
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Update now'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Remind me later',
+                onPressed: controller.postpone,
+                icon: const Icon(Icons.close),
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
