@@ -7,9 +7,10 @@ file="lib/src/version/app_build_info.dart"
 version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | head -n 1 | tr -d '[:space:]')"
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$ ]] ||
   { printf '[sync-app-build-info] invalid pubspec version: %s\n' "$version" >&2; exit 1; }
-grep -qE '^[[:space:]]*version: "[^"]*",$' "$file" ||
-  { printf '[sync-app-build-info] version field not found in %s\n' "$file" >&2; exit 1; }
-sed -i -E "s/^([[:space:]]*)version: \"[^\"]*\",$/\1version: \"${version}\",/" "$file"
-grep -qF "version: \"${version}\"," "$file" ||
+# Match the field wherever dart format puts it (one line or one argument per line).
+[[ "$(grep -oE 'version: "[^"]*"' "$file" | wc -l)" == "1" ]] ||
+  { printf '[sync-app-build-info] expected one version field in %s\n' "$file" >&2; exit 1; }
+sed -i -E "s/version: \"[^\"]*\"/version: \"${version}\"/" "$file"
+grep -qF "version: \"${version}\"" "$file" ||
   { printf '[sync-app-build-info] stamping failed\n' >&2; exit 1; }
 printf '[sync-app-build-info] %s = %s\n' "$file" "$version"
