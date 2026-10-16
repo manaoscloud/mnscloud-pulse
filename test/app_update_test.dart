@@ -66,4 +66,29 @@ void main() {
     expect(find.textContaining('New version available'), findsNothing);
     expect(find.text('content'), findsOneWidget);
   });
+
+  testWidgets('a critical release shows no "Later"', (tester) async {
+    final update = controller();
+    addTearDown(update.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AppUpdateOverlay(
+          controller: update,
+          child: const Scaffold(body: Text('content')),
+        ),
+      ),
+    );
+    const critical = RuntimeReleaseInfo(
+      version: '1.0.5',
+      minimumVersion: '1.0.5',
+    );
+    update.observe(critical, t0);
+    update.observe(critical, t0.add(AppUpdateController.confirmDelay));
+    await tester.pump();
+    expect(find.textContaining('Important update'), findsOneWidget);
+    expect(find.text('Later'), findsNothing);
+    update.postpone();
+    await tester.pump();
+    expect(find.textContaining('Important update'), findsOneWidget);
+  });
 }
