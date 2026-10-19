@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'src/brand/brand.dart';
 import 'src/version/app_update_overlay.dart';
 
 void main() {
   runApp(const PulseApp());
+  loadPulseBrand();
 }
 
 class PulseApp extends StatelessWidget {
@@ -14,19 +16,22 @@ class PulseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'MNSCloud Pulse',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xff2ed7d0),
-          brightness: Brightness.dark,
+    return ValueListenableBuilder<Brand?>(
+      valueListenable: pulseBrand,
+      builder: (context, brand, _) => MaterialApp(
+        title: brand?.title ?? 'MNSCloud Pulse',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: brand?.primaryColor ?? const Color(0xff2ed7d0),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
+        builder: (context, child) =>
+            AppUpdateOverlay(child: child ?? const SizedBox.shrink()),
+        home: const PulseShell(),
       ),
-      builder: (context, child) =>
-          AppUpdateOverlay(child: child ?? const SizedBox.shrink()),
-      home: const PulseShell(),
     );
   }
 }
@@ -55,7 +60,18 @@ class _PulseShellState extends State<PulseShell> {
   String? _message;
 
   @override
+  void initState() {
+    super.initState();
+    pulseBrand.addListener(_brandChanged);
+  }
+
+  void _brandChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    pulseBrand.removeListener(_brandChanged);
     _loginCodeController.dispose();
     _passwordController.dispose();
     _newPasswordController.dispose();
@@ -198,10 +214,12 @@ class _PulseShellState extends State<PulseShell> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final brand = pulseBrand.value;
+    final logo = brand?.logoUrl;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MNSCloud Pulse'),
+        title: Text(brand?.title ?? 'MNSCloud Pulse'),
         actions: [
           if (_token != null)
             IconButton(
@@ -220,18 +238,29 @@ class _PulseShellState extends State<PulseShell> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(14),
+                    if (logo != null)
+                      SizedBox(
+                        height: 48,
+                        child: Image.network(
+                          logo,
+                          key: const Key('brandLogo'),
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => const SizedBox(width: 48),
+                        ),
+                      )
+                    else
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.fingerprint,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.fingerprint,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                    ),
                     const SizedBox(width: 14),
                     const Expanded(
                       child: Column(
