@@ -6,7 +6,7 @@ void main() {
     await tester.pumpWidget(const PulseApp());
 
     expect(find.text('MNSCloud Pulse'), findsOneWidget);
-    expect(find.text('Secure workforce time clock'), findsOneWidget);
+    expect(find.text('Access your time clock'), findsOneWidget);
     expect(find.text('Sign in'), findsOneWidget);
   });
 }
