@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -56,6 +57,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hidePassword => 'Hide password';
+
+  @override
+  String get forgotPassword => 'Forgot your password?';
+
+  @override
+  String get forgotPasswordTitle => 'Reset your password';
+
+  @override
+  String get forgotPasswordHelp =>
+      'Your Pulse password is managed by your company. Ask the person in charge of your access for a new temporary password; on your next sign-in you will choose your own.';
+
+  @override
+  String get close => 'Close';
 
   @override
   String get required => 'This field is required.';
@@ -197,6 +211,19 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get hidePassword => 'Hide password';
+
+  @override
+  String get forgotPassword => 'Forgot your password?';
+
+  @override
+  String get forgotPasswordTitle => 'Reset your password';
+
+  @override
+  String get forgotPasswordHelp =>
+      'Your Pulse password is managed by your company. Ask the person in charge of your access for a new temporary password; on your next sign-in you will choose your own.';
+
+  @override
+  String get close => 'Close';
 
   @override
   String get required => 'This field is required.';

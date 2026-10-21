@@ -199,6 +199,30 @@ abstract class AppLocalizations {
   /// **'Hide password'**
   String get hidePassword;
 
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Forgot your password?'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Reset your password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your Pulse password is managed by your company. Ask the person in charge of your access for a new temporary password; on your next sign-in you will choose your own.'**
+  String get forgotPasswordHelp;
+
+  /// No description provided for @close.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Close'**
+  String get close;
+
   /// No description provided for @required.
   ///
   /// In en_US, this message translates to:

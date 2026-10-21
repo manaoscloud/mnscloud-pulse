@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -57,6 +58,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get hidePassword => 'Ocultar contraseña';
+
+  @override
+  String get forgotPassword => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get forgotPasswordTitle => 'Recuperar contraseña';
+
+  @override
+  String get forgotPasswordHelp =>
+      'Tu empresa gestiona la contraseña de Pulse. Pide al responsable de tu acceso una nueva contraseña temporal; en el próximo acceso elegirás la tuya.';
+
+  @override
+  String get close => 'Cerrar';
 
   @override
   String get required => 'Este campo es obligatorio.';
@@ -200,6 +214,19 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get hidePassword => 'Ocultar contraseña';
+
+  @override
+  String get forgotPassword => '¿Olvidaste tu contraseña?';
+
+  @override
+  String get forgotPasswordTitle => 'Recuperar contraseña';
+
+  @override
+  String get forgotPasswordHelp =>
+      'Tu empresa gestiona la contraseña de Pulse. Pide al responsable de tu acceso una nueva contraseña temporal; en el próximo acceso elegirás la tuya.';
+
+  @override
+  String get close => 'Cerrar';
 
   @override
   String get required => 'Este campo es obligatorio.';

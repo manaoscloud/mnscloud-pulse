@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../l10n/app_localizations.dart';
 import '../brand/brand.dart';
 import 'access_preferences.dart';
@@ -17,6 +18,36 @@ String accessText(BuildContext context, String key, String fallback) {
       ? texts[language][key]
       : null;
   return value is String && value.trim().isNotEmpty ? value.trim() : fallback;
+}
+
+/// Pulse passwords are managed by the company (no public reset yet): explains how to get a new
+/// temporary one and offers the Themes support link when there is one.
+Future<void> showForgotPasswordDialog(BuildContext context) {
+  final l = AppLocalizations.of(context)!;
+  final support = Brand.safeLink(pulseBrand.value?.login['supportUrl']);
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: Text(l.forgotPasswordTitle),
+      content: Text(l.forgotPasswordHelp),
+      actions: [
+        if (support != null)
+          TextButton(
+            onPressed: () => launchUrl(
+              Uri.parse(support),
+              mode: LaunchMode.externalApplication,
+            ),
+            child: Text(
+              accessText(dialogContext, 'supportLabel', l.supportLabel),
+            ),
+          ),
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(l.close),
+        ),
+      ],
+    ),
+  );
 }
 
 class AccessLanguageButton extends StatelessWidget {
@@ -269,15 +300,13 @@ class AccessShell extends StatelessWidget {
                         mode: LaunchMode.externalApplication,
                       ) &&
                       context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(l.requestError)));
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(l.requestError)));
                   }
                 } catch (_) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(l.requestError)));
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(l.requestError)));
                   }
                 }
               },

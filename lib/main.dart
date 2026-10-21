@@ -435,7 +435,15 @@ class _PulseShellState extends State<PulseShell> {
                   value == null || value.isEmpty ? l.required : null,
               onFieldSubmitted: (_) => _signIn(),
             ),
-            const SizedBox(height: 28),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                key: const Key('forgotPassword'),
+                onPressed: () => showForgotPasswordDialog(context),
+                child: Text(l.forgotPassword),
+              ),
+            ),
+            const SizedBox(height: 8),
             FilledButton(
               onPressed: _loading ? null : _signIn,
               child: Text(l.signIn),
@@ -455,9 +463,8 @@ class _PulseShellState extends State<PulseShell> {
       children: [
         Text(
           account['employeeName']?.toString() ?? l.employee,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w800),
         ),
         Text(account['loginCode']?.toString() ?? ''),
         const SizedBox(height: 20),
