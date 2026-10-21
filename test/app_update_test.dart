@@ -1,4 +1,5 @@
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mnscloud_pulse/src/version/app_update_controller.dart';
@@ -96,4 +97,39 @@ void main() {
     await tester.pump();
     expect(find.textContaining('Important update'), findsOneWidget);
   });
+  testWidgets(
+    'hovering the close button above the Navigator shows its tooltip',
+    (tester) async {
+      // Mounted like lib/main.dart: MaterialApp.builder, outside the Navigator.
+      final update = controller();
+      addTearDown(update.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) =>
+              AppUpdateOverlay(controller: update, child: child!),
+          home: const Scaffold(body: Text('content')),
+        ),
+      );
+      update.observe(const RuntimeReleaseInfo(version: '1.0.4'), t0);
+      update.observe(
+        const RuntimeReleaseInfo(version: '1.0.4'),
+        t0.add(AppUpdateController.confirmDelay),
+      );
+      await tester.pump();
+
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(mouse.removePointer);
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(tester.getCenter(find.byIcon(Icons.close)));
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(Tooltip), findsOneWidget);
+      expect(find.text('Later'), findsNWidgets(2));
+      expect(find.text('Update now'), findsOneWidget);
+      expect(find.text('content'), findsOneWidget);
+    },
+  );
 }
