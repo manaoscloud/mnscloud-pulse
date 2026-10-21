@@ -1,3 +1,4 @@
+import 'package:mnscloud_pulse/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mnscloud_pulse/src/version/app_update_controller.dart';
@@ -44,6 +45,8 @@ void main() {
     addTearDown(update.dispose);
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: AppUpdateOverlay(
           controller: update,
           child: const Scaffold(body: Text('content')),
@@ -72,6 +75,8 @@ void main() {
     addTearDown(update.dispose);
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: AppUpdateOverlay(
           controller: update,
           child: const Scaffold(body: Text('content')),

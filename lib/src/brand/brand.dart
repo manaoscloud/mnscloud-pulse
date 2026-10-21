@@ -8,12 +8,30 @@ import 'brand_dom.dart';
 /// Brand of the host for Pulse (Settings › Themes › Pulse tab of the tenant domain); every field
 /// the Pulse tab leaves empty comes from the App brand. Null fields keep the MNSCloud defaults.
 class Brand {
-  const Brand({this.title, this.logoUrl, this.faviconUrl, this.primaryColor});
+  const Brand({
+    this.title,
+    this.logoUrl,
+    this.faviconUrl,
+    this.primaryColor,
+    this.login = const {},
+  });
 
   final String? title;
   final String? logoUrl;
   final String? faviconUrl;
   final Color? primaryColor;
+  final Map<String, dynamic> login;
+
+  static String? safeLink(Object? value) {
+    if (value is! String) return null;
+    final uri = Uri.tryParse(value);
+    return uri != null &&
+            uri.scheme == 'https' &&
+            uri.host.isNotEmpty &&
+            uri.userInfo.isEmpty
+        ? value
+        : null;
+  }
 
   /// Body of `GET /public/theme/context?app=pulse`: `{ data: { context: {...} | null } }`.
   static Brand? fromResponse(dynamic body) {
@@ -27,6 +45,9 @@ class Brand {
 
     return Brand(
       title: text(context['PageTitle']),
+      login: context['LoginAppearance'] is Map
+          ? Map<String, dynamic>.from(context['LoginAppearance'])
+          : const {},
       logoUrl: safeImageUrl(text(context['LogoUrl'])),
       faviconUrl: safeImageUrl(text(context['FaviconUrl'])),
       primaryColor: parseHexColor(text(context['PrimaryColor'])),

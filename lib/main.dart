@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'src/brand/brand.dart';
+import 'src/access/access_shell.dart';
+import 'src/access/access_preferences.dart';
+import 'l10n/app_localizations.dart';
 import 'src/version/app_update_overlay.dart';
 
 void main() {
   runApp(const PulseApp());
   loadPulseBrand();
+  loadAccessLocale();
 }
 
 class PulseApp extends StatelessWidget {
@@ -16,28 +20,70 @@ class PulseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Brand?>(
-      valueListenable: pulseBrand,
-      builder: (context, brand, _) => MaterialApp(
-        title: brand?.title ?? 'MNSCloud Pulse',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: brand?.primaryColor ?? const Color(0xff2ed7d0),
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
-        builder: (context, child) =>
-            AppUpdateOverlay(child: child ?? const SizedBox.shrink()),
-        home: const PulseShell(),
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: accessLocale,
+      builder: (context, locale, _) => ValueListenableBuilder<Brand?>(
+        valueListenable: pulseBrand,
+        builder: (context, brand, _) {
+          final seed = brand?.primaryColor ?? const Color(0xff1264ed);
+          ThemeData theme(Brightness brightness) {
+            final scheme = ColorScheme.fromSeed(
+              seedColor: seed,
+              brightness: brightness,
+            );
+            return ThemeData(
+              colorScheme: scheme,
+              useMaterial3: true,
+              inputDecorationTheme: InputDecorationTheme(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 18,
+                ),
+              ),
+              filledButtonTheme: FilledButtonThemeData(
+                style: FilledButton.styleFrom(
+                  backgroundColor: seed,
+                  foregroundColor: seed.computeLuminance() > .179
+                      ? Colors.black
+                      : Colors.white,
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return MaterialApp(
+            title: brand?.title ?? 'MNSCloud Pulse',
+            debugShowCheckedModeBanner: false,
+            locale: locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            theme: theme(Brightness.light),
+            darkTheme: theme(Brightness.dark),
+            themeMode: switch (brand?.login['appearance']) {
+              'light' => ThemeMode.light,
+              'dark' => ThemeMode.dark,
+              _ => ThemeMode.system,
+            },
+            builder: (context, child) =>
+                AppUpdateOverlay(child: child ?? const SizedBox.shrink()),
+            home: const PulseShell(),
+          );
+        },
       ),
     );
   }
 }
 
 class PulseShell extends StatefulWidget {
-  const PulseShell({super.key});
+  const PulseShell({super.key, this.client});
+  final http.Client? client;
 
   @override
   State<PulseShell> createState() => _PulseShellState();
@@ -53,6 +99,14 @@ class _PulseShellState extends State<PulseShell> {
   final _passwordController = TextEditingController();
   final _newPasswordController = TextEditingController();
 
+  final _confirmPasswordController = TextEditingController();
+  final _loginForm = GlobalKey<FormState>();
+  final _passwordForm = GlobalKey<FormState>();
+  final _codeFocus = FocusNode();
+  final _passwordFocus = FocusNode();
+  bool _showPassword = false;
+  bool _messageError = false;
+  AppLocalizations get l => AppLocalizations.of(context)!;
   String? _token;
   Map<String, dynamic>? _account;
   List<Map<String, dynamic>> _punches = [];
@@ -72,6 +126,9 @@ class _PulseShellState extends State<PulseShell> {
   @override
   void dispose() {
     pulseBrand.removeListener(_brandChanged);
+    _confirmPasswordController.dispose();
+    _codeFocus.dispose();
+    _passwordFocus.dispose();
     _loginCodeController.dispose();
     _passwordController.dispose();
     _newPasswordController.dispose();
@@ -97,7 +154,8 @@ class _PulseShellState extends State<PulseShell> {
     request.headers.addAll(_jsonHeaders);
     if (body != null) request.body = jsonEncode(body);
 
-    final streamed = await request.send();
+    final streamed = await (widget.client?.send(request) ?? request.send())
+        .timeout(const Duration(seconds: 20));
     final response = await http.Response.fromStream(streamed);
     final decoded = response.body.isEmpty
         ? <String, dynamic>{}
@@ -107,7 +165,14 @@ class _PulseShellState extends State<PulseShell> {
         : <String, dynamic>{};
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(data['error'] ?? data['message'] ?? 'Request failed.');
+      throw _AccessFailure(
+        response.statusCode == 429
+            ? 'rateLimited'
+            : data['code'] == 'PULSE_INVALID_CREDENTIALS' ||
+                  (path.endsWith('/signin') && response.statusCode == 401)
+            ? 'invalidCredentials'
+            : 'requestError',
+      );
     }
 
     return data;
@@ -117,19 +182,32 @@ class _PulseShellState extends State<PulseShell> {
     setState(() {
       _loading = true;
       _message = null;
+      _messageError = false;
     });
     try {
       await task();
     } catch (error) {
-      setState(
-        () => _message = error.toString().replaceFirst('Exception: ', ''),
-      );
+      if (mounted) {
+        setState(() {
+          _messageError = true;
+          _message = error is _AccessFailure ? error.code : 'networkError';
+        });
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _signIn() async {
+    if (_loading) return;
+    if (!(_loginForm.currentState?.validate() ?? false)) {
+      if (_loginCodeController.text.trim().isEmpty) {
+        _codeFocus.requestFocus();
+      } else {
+        _passwordFocus.requestFocus();
+      }
+      return;
+    }
     await _run(() async {
       final response = await _request(
         'POST',
@@ -143,13 +221,14 @@ class _PulseShellState extends State<PulseShell> {
       setState(() {
         _token = data['jwt'] as String?;
         _account = data['account'] as Map<String, dynamic>?;
-        _message = 'Signed in successfully.';
+        _message = 'signedIn';
       });
-      await _loadPunches();
+      if (_account?['mustChangePassword'] != true) await _loadPunches();
     });
   }
 
   Future<void> _changePassword() async {
+    if (_loading || !(_passwordForm.currentState?.validate() ?? false)) return;
     await _run(() async {
       await _request(
         'POST',
@@ -162,8 +241,10 @@ class _PulseShellState extends State<PulseShell> {
       final profile = await _request('GET', '/pulse/auth/me');
       setState(() {
         _account = profile['data']?['item'] as Map<String, dynamic>?;
+        _passwordController.clear();
         _newPasswordController.clear();
-        _message = 'Password changed successfully.';
+        _confirmPasswordController.clear();
+        _message = 'passwordChanged';
       });
     });
   }
@@ -182,9 +263,7 @@ class _PulseShellState extends State<PulseShell> {
       );
       final item = response['data']?['item'] as Map<String, dynamic>?;
       setState(
-        () => _message = item?['Duplicate'] == 1
-            ? 'Punch already synced.'
-            : 'Punch saved.',
+        () => _message = item?['Duplicate'] == 1 ? 'punchSynced' : 'punchSaved',
       );
       await _loadPunches();
     });
@@ -207,97 +286,77 @@ class _PulseShellState extends State<PulseShell> {
       _punches = [];
       _passwordController.clear();
       _newPasswordController.clear();
-      _message = 'Signed out.';
+      _message = 'signedOut';
     });
   }
 
+  String message(String key) => switch (key) {
+    'invalidCredentials' => l.invalidCredentials,
+    'rateLimited' => l.rateLimited,
+    'requestError' => l.requestError,
+    'networkError' => l.networkError,
+    'signedIn' => l.signedIn,
+    'signedOut' => l.signedOut,
+    'passwordChanged' => l.passwordChanged,
+    'punchSaved' => l.punchSaved,
+    'punchSynced' => l.punchSynced,
+    _ => l.requestError,
+  };
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final brand = pulseBrand.value;
-    final logo = brand?.logoUrl;
-
+    final access = _token == null || _account?['mustChangePassword'] == true;
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_message != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Semantics(
+              liveRegion: true,
+              child: Text(
+                message(_message!),
+                style: TextStyle(
+                  color: _messageError
+                      ? Theme.of(context).colorScheme.error
+                      : Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+        if (_token == null) _buildLogin(context) else _buildWorkspace(context),
+        if (_loading)
+          const Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: LinearProgressIndicator(),
+          ),
+      ],
+    );
+    if (access) {
+      return AccessShell(
+        onSignOut: _token == null || _loading ? null : _signOut,
+        child: content,
+      );
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text(brand?.title ?? 'MNSCloud Pulse'),
+        title: Text(pulseBrand.value?.title ?? 'MNSCloud Pulse'),
         actions: [
-          if (_token != null)
-            IconButton(
-              tooltip: 'Sign out',
-              onPressed: _loading ? null : _signOut,
-              icon: const Icon(Icons.logout),
-            ),
+          const AccessLanguageButton(),
+          IconButton(
+            tooltip: l.signOut,
+            onPressed: _loading ? null : _signOut,
+            icon: const Icon(Icons.logout),
+          ),
         ],
       ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
-            child: ListView(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              children: [
-                Row(
-                  children: [
-                    if (logo != null)
-                      SizedBox(
-                        height: 48,
-                        child: Image.network(
-                          logo,
-                          key: const Key('brandLogo'),
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => const SizedBox(width: 48),
-                        ),
-                      )
-                    else
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(
-                          Icons.fingerprint,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                      ),
-                    const SizedBox(width: 14),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Pulse',
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Text('Secure workforce time clock'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 28),
-                if (_message != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      _message!,
-                      style: TextStyle(color: colorScheme.primary),
-                    ),
-                  ),
-                if (_token == null)
-                  _buildLogin(context)
-                else
-                  _buildWorkspace(context),
-                if (_loading)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: LinearProgressIndicator(),
-                  ),
-              ],
+              child: content,
             ),
           ),
         ),
@@ -306,27 +365,84 @@ class _PulseShellState extends State<PulseShell> {
   }
 
   Widget _buildLogin(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextField(
-          controller: _loginCodeController,
-          decoration: const InputDecoration(labelText: 'Employee login'),
-          textCapitalization: TextCapitalization.characters,
+    return Form(
+      key: _loginForm,
+      child: AutofillGroup(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              accessText(context, 'eyebrow', l.eyebrow).toUpperCase(),
+              style: TextStyle(
+                fontSize: 11,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              accessText(context, 'title', l.title),
+              style: const TextStyle(
+                fontSize: 34,
+                height: 1.15,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              accessText(context, 'subtitle', l.subtitle),
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.6,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 32),
+            TextFormField(
+              controller: _loginCodeController,
+              focusNode: _codeFocus,
+              decoration: InputDecoration(labelText: l.employeeCode),
+              textCapitalization: TextCapitalization.characters,
+              autofillHints: const [AutofillHints.username],
+              textInputAction: TextInputAction.next,
+              autocorrect: false,
+              validator: (value) =>
+                  value == null || value.trim().isEmpty ? l.required : null,
+              onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: _passwordController,
+              focusNode: _passwordFocus,
+              decoration: InputDecoration(
+                labelText: l.password,
+                suffixIcon: IconButton(
+                  tooltip: _showPassword ? l.hidePassword : l.showPassword,
+                  onPressed: () =>
+                      setState(() => _showPassword = !_showPassword),
+                  icon: Icon(
+                    _showPassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                ),
+              ),
+              obscureText: !_showPassword,
+              autofillHints: const [AutofillHints.password],
+              enableSuggestions: false,
+              autocorrect: false,
+              validator: (value) =>
+                  value == null || value.isEmpty ? l.required : null,
+              onFieldSubmitted: (_) => _signIn(),
+            ),
+            const SizedBox(height: 28),
+            FilledButton(
+              onPressed: _loading ? null : _signIn,
+              child: Text(l.signIn),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _passwordController,
-          decoration: const InputDecoration(labelText: 'Password'),
-          obscureText: true,
-        ),
-        const SizedBox(height: 18),
-        FilledButton.icon(
-          onPressed: _loading ? null : _signIn,
-          icon: const Icon(Icons.login),
-          label: const Text('Sign in'),
-        ),
-      ],
+      ),
     );
   }
 
@@ -338,7 +454,7 @@ class _PulseShellState extends State<PulseShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          account['employeeName']?.toString() ?? 'Employee',
+          account['employeeName']?.toString() ?? l.employee,
           style: Theme.of(
             context,
           ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -346,16 +462,54 @@ class _PulseShellState extends State<PulseShell> {
         Text(account['loginCode']?.toString() ?? ''),
         const SizedBox(height: 20),
         if (mustChange) ...[
-          TextField(
-            controller: _newPasswordController,
-            decoration: const InputDecoration(labelText: 'New password'),
-            obscureText: true,
-          ),
+          Text(l.firstAccess, style: Theme.of(context).textTheme.headlineSmall),
           const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: _loading ? null : _changePassword,
-            icon: const Icon(Icons.lock_reset),
-            label: const Text('Change password'),
+          Text(l.firstAccessHelp),
+          const SizedBox(height: 24),
+          Form(
+            key: _passwordForm,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextFormField(
+                  controller: _newPasswordController,
+                  autofocus: true,
+                  obscureText: !_showPassword,
+                  autofillHints: const [AutofillHints.newPassword],
+                  decoration: InputDecoration(
+                    labelText: l.newPassword,
+                    helperText: l.passwordLength,
+                    suffixIcon: IconButton(
+                      tooltip: _showPassword ? l.hidePassword : l.showPassword,
+                      onPressed: () =>
+                          setState(() => _showPassword = !_showPassword),
+                      icon: Icon(
+                        _showPassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                    ),
+                  ),
+                  validator: (value) =>
+                      (value?.length ?? 0) < 10 ? l.passwordLength : null,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: !_showPassword,
+                  decoration: InputDecoration(labelText: l.confirmPassword),
+                  validator: (value) => value != _newPasswordController.text
+                      ? l.passwordMismatch
+                      : value == null || value.isEmpty
+                      ? l.required
+                      : null,
+                  onFieldSubmitted: (_) => _changePassword(),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: _loading ? null : _changePassword,
+                  child: Text(l.changePassword),
+                ),
+              ],
+            ),
           ),
         ] else ...[
           Wrap(
@@ -363,32 +517,29 @@ class _PulseShellState extends State<PulseShell> {
             runSpacing: 12,
             children: [
               _PunchButton(
-                label: 'Clock in',
+                label: l.clockIn,
                 icon: Icons.login,
                 onPressed: () => _recordPunch('clock_in'),
               ),
               _PunchButton(
-                label: 'Break start',
+                label: l.breakStart,
                 icon: Icons.coffee,
                 onPressed: () => _recordPunch('break_start'),
               ),
               _PunchButton(
-                label: 'Break end',
+                label: l.breakEnd,
                 icon: Icons.work,
                 onPressed: () => _recordPunch('break_end'),
               ),
               _PunchButton(
-                label: 'Clock out',
+                label: l.clockOut,
                 icon: Icons.logout,
                 onPressed: () => _recordPunch('clock_out'),
               ),
             ],
           ),
           const SizedBox(height: 28),
-          Text(
-            'Recent punches',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text(l.recentPunches, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           for (final punch in _punches)
             ListTile(
@@ -427,4 +578,9 @@ class _PunchButton extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AccessFailure implements Exception {
+  const _AccessFailure(this.code);
+  final String code;
 }

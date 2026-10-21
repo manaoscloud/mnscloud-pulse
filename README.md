@@ -83,3 +83,20 @@ Critical updates: a release that fixes a serious problem sets `minimumVersion` i
 `web/update-policy.json` (usually to its own version, in the same PR). `mnscloud-webapps` copies it
 into `build.json`; pages running below it get an "important update" notice without the postpone
 action. It never reloads by itself. Keep it `null` for regular releases.
+
+## Themed access and languages
+
+Pulse loads the domain's public brand and `LoginAppearance` from
+`GET /api/v1/public/theme/context?app=pulse`. Settings › Themes configures the brand and login
+presentation. Missing Pulse presentation inherits App layout/image/links, while access instructions
+use Pulse's own PT-BR, EN-US and ES-ES defaults. Language can follow the device or a saved preference;
+switching it does not clear the form. Only that preference is persisted, never the session or password.
+
+The access shell adapts to desktop/mobile and light/dark/system. First access uses the same shell
+for the mandatory password change and never loads punches before that change. There is no public
+self-registration, account recovery or remember-me flow added by the presentation configuration.
+
+Panel images and help/legal links are optional HTTPS URLs. Logo/favicon retain their existing
+upload contract. PWA installation name/icons remain the release defaults; the runtime favicon and
+page identity follow the theme. Native clients keep the default brand unless their configured API
+resolves a theme; organization discovery and store-icon branding are outside this web delivery.

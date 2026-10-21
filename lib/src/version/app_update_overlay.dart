@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import 'app_update_controller.dart';
@@ -68,6 +69,7 @@ class _AppUpdateNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final version = controller.deployed?.version;
@@ -76,7 +78,7 @@ class _AppUpdateNotice extends StatelessWidget {
     return Semantics(
       liveRegion: true,
       container: true,
-      label: critical ? 'Important update' : 'New version available',
+      label: critical ? l.importantUpdate : l.newVersion,
       child: Material(
         elevation: 6,
         color: colorScheme.surfaceContainerHigh,
@@ -110,9 +112,7 @@ class _AppUpdateNotice extends StatelessWidget {
                   children: [
                     Text.rich(
                       TextSpan(
-                        text: critical
-                            ? 'Important update'
-                            : 'New version available',
+                        text: critical ? l.importantUpdate : l.newVersion,
                         style: textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -130,7 +130,7 @@ class _AppUpdateNotice extends StatelessWidget {
                     const SizedBox(height: 4),
                     if (critical)
                       Text(
-                        'This version fixes an important issue. Update as soon as possible; you will need to sign in again.',
+                        l.updateHelp,
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           height: 1.4,
@@ -138,8 +138,7 @@ class _AppUpdateNotice extends StatelessWidget {
                       )
                     else
                       Text(
-                        'Pulse was updated with improvements and fixes. Update '
-                        'when convenient; you will need to sign in again.',
+                        l.updateHelp,
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           height: 1.4,
@@ -154,12 +153,12 @@ class _AppUpdateNotice extends StatelessWidget {
                         if (!critical)
                           TextButton(
                             onPressed: controller.postpone,
-                            child: const Text('Later'),
+                            child: Text(l.later),
                           ),
                         FilledButton.icon(
                           onPressed: controller.reloadNow,
                           icon: const Icon(Icons.refresh, size: 18),
-                          label: const Text('Update now'),
+                          label: Text(l.updateNow),
                         ),
                       ],
                     ),
@@ -168,7 +167,7 @@ class _AppUpdateNotice extends StatelessWidget {
               ),
               if (!critical)
                 IconButton(
-                  tooltip: 'Remind me later',
+                  tooltip: l.later,
                   onPressed: controller.postpone,
                   icon: const Icon(Icons.close),
                   color: colorScheme.onSurfaceVariant,
