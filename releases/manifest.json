@@ -3,14 +3,14 @@
   "repository": "manaoscloud/mnscloud-pulse",
   "channels": {
     "stable": {
-      "version": "1.0.7",
-      "ref": "v1.0.7",
-      "releasedAt": "2026-10-21T13:06:02Z",
+      "version": "1.0.8",
+      "ref": "v1.0.8",
+      "releasedAt": "2026-10-21T15:09:02Z",
       "minimumVersion": "1.0.0",
       "artifact": {
-        "name": "mnscloud-pulse-web-v1.0.7.tar.gz",
-        "sha256": "afce9058d9b6df7422d83a2193b99b9aab6e86d8525fb48adc08018eb8beeb85",
-        "sizeBytes": 14060974,
+        "name": "mnscloud-pulse-web-v1.0.8.tar.gz",
+        "sha256": "c402c7fe3b0f73ed592aa3591b5b14f3d0e1a1292608b95f2893af92d6b17b1d",
+        "sizeBytes": 14061609,
         "contentType": "application/gzip"
       }
     }
