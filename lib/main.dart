@@ -47,7 +47,7 @@ class PulseApp extends StatelessWidget {
                 style: FilledButton.styleFrom(
                   backgroundColor: seed,
                   foregroundColor: seed.computeLuminance() > .179
-                      ? const Color(0xff101828)
+                      ? Colors.black
                       : Colors.white,
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(

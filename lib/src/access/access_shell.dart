@@ -74,9 +74,7 @@ class AccessBrand extends StatelessWidget {
         style: TextStyle(
           fontSize: 26,
           fontWeight: FontWeight.w900,
-          color: color.computeLuminance() > .179
-              ? const Color(0xff101828)
-              : Colors.white,
+          color: color.computeLuminance() > .179 ? Colors.black : Colors.white,
         ),
       ),
     );
