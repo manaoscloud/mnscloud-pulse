@@ -35,6 +35,29 @@ void main() {
     },
   );
   testWidgets(
+    'forgot password explains the company reset and offers the Themes support link',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      accessLocale.value = const Locale('pt', 'BR');
+      pulseBrand.value = const Brand(
+        login: {'supportUrl': 'https://example.com/help'},
+      );
+      await tester.pumpWidget(const PulseApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('forgotPassword')));
+      await tester.pumpAndSettle();
+      expect(find.text('Recuperar senha'), findsOneWidget);
+      expect(find.text('Precisa de acesso? Fale com sua empresa'), findsWidgets);
+      await tester.tap(find.text('Fechar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Recuperar senha'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
     'temporary password opens the change form without requesting punches',
     (tester) async {
       final paths = <String>[];
