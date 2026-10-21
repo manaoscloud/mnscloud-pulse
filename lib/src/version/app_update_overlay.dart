@@ -19,11 +19,22 @@ class _AppUpdateOverlayState extends State<AppUpdateOverlay> {
   late final AppUpdateController _controller =
       widget.controller ?? AppUpdateController();
 
+  // MaterialApp.builder sits above the Navigator and its Overlay, so the notice
+  // brings its own: without one the close button tooltip throws on hover and the
+  // release build replaces the card with a grey error box.
+  late final OverlayEntry _entry = OverlayEntry(builder: _buildContent);
+
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onChanged);
     _controller.start();
+  }
+
+  @override
+  void didUpdateWidget(AppUpdateOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _entry.markNeedsBuild();
   }
 
   @override
@@ -34,29 +45,31 @@ class _AppUpdateOverlayState extends State<AppUpdateOverlay> {
   }
 
   void _onChanged() {
-    if (mounted) setState(() {});
+    if (mounted) _entry.markNeedsBuild();
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (!_controller.noticeVisible) return widget.child;
+  Widget build(BuildContext context) => Overlay(initialEntries: [_entry]);
+
+  Widget _buildContent(BuildContext context) {
     final mobile = MediaQuery.sizeOf(context).width < 600;
-    final notice = _AppUpdateNotice(controller: _controller);
     return Stack(
+      fit: StackFit.expand,
       children: [
         widget.child,
-        Positioned(
-          left: mobile ? 8 : null,
-          right: mobile ? 8 : 24,
-          bottom: 0,
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: mobile ? 8 : 24),
-              child: notice,
+        if (_controller.noticeVisible)
+          Positioned(
+            left: mobile ? 8 : null,
+            right: mobile ? 8 : 24,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: mobile ? 8 : 24),
+                child: _AppUpdateNotice(controller: _controller),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
