@@ -9,6 +9,7 @@ import '../core/location.dart';
 import '../core/pulse_api.dart';
 import '../core/punch_queue.dart';
 import '../core/server_clock.dart';
+import '../timesheet/today_card.dart';
 import 'punch_labels.dart';
 
 /// Employee home: official time, the suggested next mark (every mark stays available), the
@@ -47,6 +48,9 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   bool _messageError = false;
   Timer? _retry;
 
+  /// Bumped when a mark reaches the API, so the today summary reads the new state.
+  final _delivered = ValueNotifier<int>(0);
+
   AppLocalizations get l => AppLocalizations.of(context)!;
   String get _source => kIsWeb ? 'web' : 'mobile';
 
@@ -59,6 +63,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   @override
   void dispose() {
     _retry?.cancel();
+    _delivered.dispose();
     super.dispose();
   }
 
@@ -102,6 +107,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   Future<void> _flush() async {
     if (_flushing) return;
     _flushing = true;
+    var sent = false;
     try {
       for (final punch in List.of(_pending)) {
         try {
@@ -109,6 +115,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
             punch.body(offline: true, source: _source),
           );
           await _queue.remove(punch.idempotencyKey);
+          sent = true;
         } on PulseFailure catch (failure) {
           if (_handleFailure(failure)) return;
           if (failure.code == 'networkError' ||
@@ -127,6 +134,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     } finally {
       _flushing = false;
       _scheduleRetry();
+      if (sent && mounted) _delivered.value++;
     }
   }
 
@@ -158,6 +166,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       await _queue.remove(punch.idempotencyKey);
       if (item['Duplicate'] == 1) message = 'punchSynced';
       _online = true;
+      _delivered.value++;
     } on PulseFailure catch (failure) {
       if (_handleFailure(failure)) return;
       if (failure.code == 'networkError') {
@@ -257,6 +266,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
             ],
           ],
         ),
+        TodayCard(api: widget.api, reload: _delivered),
         const SizedBox(height: 20),
         if (_message != null)
           Padding(

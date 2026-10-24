@@ -249,4 +249,23 @@ class PulseApi {
         ? items.whereType<Map<String, dynamic>>().toList()
         : const [];
   }
+
+  /// Today of the employee: expected shift, marks and live worked minutes (results only, never
+  /// the rules behind them).
+  Future<Map<String, dynamic>> today() async {
+    final data = await call('GET', '/pulse/today');
+    final body = data['data'];
+    if (body is! Map<String, dynamic> || body['date'] is! String) {
+      throw const PulseFailure('requestError');
+    }
+    return body;
+  }
+
+  /// Monthly timesheet (`month` is YYYY-MM): consolidated days with their marks and the totals.
+  Future<Map<String, dynamic>> timesheet(String month) async {
+    final data = await call('GET', '/pulse/timesheet?month=$month');
+    final body = data['data'];
+    if (body is! Map<String, dynamic>) throw const PulseFailure('requestError');
+    return body;
+  }
 }

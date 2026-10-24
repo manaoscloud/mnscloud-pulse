@@ -540,6 +540,210 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Waiting to be sent'**
   String get pendingSend;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navTimesheet.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Timesheet'**
+  String get navTimesheet;
+
+  /// No description provided for @today.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Today'**
+  String get today;
+
+  /// No description provided for @workDay.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Workday'**
+  String get workDay;
+
+  /// No description provided for @dayOff.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Day off'**
+  String get dayOff;
+
+  /// No description provided for @holiday.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Holiday'**
+  String get holiday;
+
+  /// No description provided for @holidayNamed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Holiday: {name}'**
+  String holidayNamed(String name);
+
+  /// No description provided for @noSchedule.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No schedule set'**
+  String get noSchedule;
+
+  /// No description provided for @workedToday.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Worked today'**
+  String get workedToday;
+
+  /// No description provided for @statusWorking.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Working'**
+  String get statusWorking;
+
+  /// No description provided for @statusOnBreak.
+  ///
+  /// In en_US, this message translates to:
+  /// **'On break'**
+  String get statusOnBreak;
+
+  /// No description provided for @statusOffDuty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Off duty'**
+  String get statusOffDuty;
+
+  /// No description provided for @previousMonth.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Previous month'**
+  String get previousMonth;
+
+  /// No description provided for @nextMonth.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Next month'**
+  String get nextMonth;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @retry.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Try again'**
+  String get retry;
+
+  /// No description provided for @totalWorked.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Worked'**
+  String get totalWorked;
+
+  /// No description provided for @totalExpected.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Expected'**
+  String get totalExpected;
+
+  /// No description provided for @totalBalance.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Balance'**
+  String get totalBalance;
+
+  /// No description provided for @totalOvertime.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Overtime'**
+  String get totalOvertime;
+
+  /// No description provided for @totalAbsences.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Absences'**
+  String get totalAbsences;
+
+  /// No description provided for @noPunchesDay.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No punches'**
+  String get noPunchesDay;
+
+  /// No description provided for @timesheetEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No days in this month yet.'**
+  String get timesheetEmpty;
+
+  /// No description provided for @unassignedPunches.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count, plural, =1{1 punch still being processed} other{{count} punches still being processed}}'**
+  String unassignedPunches(int count);
+
+  /// No description provided for @flagAbsence.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Absence'**
+  String get flagAbsence;
+
+  /// No description provided for @flagMissingPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Missing punch'**
+  String get flagMissingPunch;
+
+  /// No description provided for @flagLate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Late'**
+  String get flagLate;
+
+  /// No description provided for @flagEarlyLeave.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Left early'**
+  String get flagEarlyLeave;
+
+  /// No description provided for @flagShortBreak.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Short break'**
+  String get flagShortBreak;
+
+  /// No description provided for @flagRestViolation.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Rest between shifts'**
+  String get flagRestViolation;
+
+  /// No description provided for @flagOvertimeLimit.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Overtime above limit'**
+  String get flagOvertimeLimit;
+
+  /// No description provided for @flagWorkedDayOff.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Worked on a day off'**
+  String get flagWorkedDayOff;
+
+  /// No description provided for @flagFlaggedPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Flagged punch'**
+  String get flagFlaggedPunch;
+
+  /// No description provided for @flagNoSchedule.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No schedule'**
+  String get flagNoSchedule;
 }
 
 class _AppLocalizationsDelegate

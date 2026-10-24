@@ -41,6 +41,7 @@ The client reads the public API base from deployment configuration and talks to 
 - `GET /api/v1/pulse/auth/me`, `POST /api/v1/pulse/auth/change-password`
 - `GET /api/v1/pulse/time` (official server time)
 - `POST /api/v1/pulse/punches`, `GET /api/v1/pulse/punches`
+- `GET /api/v1/pulse/today`, `GET /api/v1/pulse/timesheet?month=YYYY-MM`
 
 ## Session
 
@@ -64,6 +65,22 @@ ships with the store apps.
   (`lib/src/core/location_web.dart`); there is no background tracking.
 - The API owns the official time, the immutable ledger (NSR and SHA-256 per establishment) and the
   flags (offline, late sync, clock skew, sequence); the client never decides them.
+
+## Today and timesheet
+
+The signed-in app has two tabs in a bottom navigation bar: **Home** (the punch workspace) and
+**Timesheet**. Employees see results, never the rules behind them; the API computes every value.
+
+- `lib/src/timesheet/today_card.dart` adds a compact *Today* card under the official clock: the
+  expected shift (or day off, holiday, no schedule), the worked time (ticking every minute while
+  working) and the state (working, on break, off duty). It reads `/pulse/today` on open, after each
+  mark that reaches the API (also from the offline queue) and every 60 s while visible. Any failure
+  hides the card; punching never depends on it.
+- `lib/src/timesheet/timesheet_view.dart` shows one month (previous months available, never a
+  future one): totals (worked, expected, balance, overtime, absences) and the days newest first
+  with their marks (`LocalTime`, already in the policy time zone), worked time, balance and short
+  labels for anything to review. Marks not yet in a consolidated day appear as a note. Pull down
+  or use the refresh action to read it again.
 
 ## Runtime Configuration
 
