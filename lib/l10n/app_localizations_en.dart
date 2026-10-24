@@ -248,6 +248,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pendingSend => 'Waiting to be sent';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navTimesheet => 'Timesheet';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get workDay => 'Workday';
+
+  @override
+  String get dayOff => 'Day off';
+
+  @override
+  String get holiday => 'Holiday';
+
+  @override
+  String holidayNamed(String name) {
+    return 'Holiday: $name';
+  }
+
+  @override
+  String get noSchedule => 'No schedule set';
+
+  @override
+  String get workedToday => 'Worked today';
+
+  @override
+  String get statusWorking => 'Working';
+
+  @override
+  String get statusOnBreak => 'On break';
+
+  @override
+  String get statusOffDuty => 'Off duty';
+
+  @override
+  String get previousMonth => 'Previous month';
+
+  @override
+  String get nextMonth => 'Next month';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get retry => 'Try again';
+
+  @override
+  String get totalWorked => 'Worked';
+
+  @override
+  String get totalExpected => 'Expected';
+
+  @override
+  String get totalBalance => 'Balance';
+
+  @override
+  String get totalOvertime => 'Overtime';
+
+  @override
+  String get totalAbsences => 'Absences';
+
+  @override
+  String get noPunchesDay => 'No punches';
+
+  @override
+  String get timesheetEmpty => 'No days in this month yet.';
+
+  @override
+  String unassignedPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punches still being processed',
+      one: '1 punch still being processed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get flagAbsence => 'Absence';
+
+  @override
+  String get flagMissingPunch => 'Missing punch';
+
+  @override
+  String get flagLate => 'Late';
+
+  @override
+  String get flagEarlyLeave => 'Left early';
+
+  @override
+  String get flagShortBreak => 'Short break';
+
+  @override
+  String get flagRestViolation => 'Rest between shifts';
+
+  @override
+  String get flagOvertimeLimit => 'Overtime above limit';
+
+  @override
+  String get flagWorkedDayOff => 'Worked on a day off';
+
+  @override
+  String get flagFlaggedPunch => 'Flagged punch';
+
+  @override
+  String get flagNoSchedule => 'No schedule';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -494,4 +606,116 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get pendingSend => 'Waiting to be sent';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navTimesheet => 'Timesheet';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get workDay => 'Workday';
+
+  @override
+  String get dayOff => 'Day off';
+
+  @override
+  String get holiday => 'Holiday';
+
+  @override
+  String holidayNamed(String name) {
+    return 'Holiday: $name';
+  }
+
+  @override
+  String get noSchedule => 'No schedule set';
+
+  @override
+  String get workedToday => 'Worked today';
+
+  @override
+  String get statusWorking => 'Working';
+
+  @override
+  String get statusOnBreak => 'On break';
+
+  @override
+  String get statusOffDuty => 'Off duty';
+
+  @override
+  String get previousMonth => 'Previous month';
+
+  @override
+  String get nextMonth => 'Next month';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String get retry => 'Try again';
+
+  @override
+  String get totalWorked => 'Worked';
+
+  @override
+  String get totalExpected => 'Expected';
+
+  @override
+  String get totalBalance => 'Balance';
+
+  @override
+  String get totalOvertime => 'Overtime';
+
+  @override
+  String get totalAbsences => 'Absences';
+
+  @override
+  String get noPunchesDay => 'No punches';
+
+  @override
+  String get timesheetEmpty => 'No days in this month yet.';
+
+  @override
+  String unassignedPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punches still being processed',
+      one: '1 punch still being processed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get flagAbsence => 'Absence';
+
+  @override
+  String get flagMissingPunch => 'Missing punch';
+
+  @override
+  String get flagLate => 'Late';
+
+  @override
+  String get flagEarlyLeave => 'Left early';
+
+  @override
+  String get flagShortBreak => 'Short break';
+
+  @override
+  String get flagRestViolation => 'Rest between shifts';
+
+  @override
+  String get flagOvertimeLimit => 'Overtime above limit';
+
+  @override
+  String get flagWorkedDayOff => 'Worked on a day off';
+
+  @override
+  String get flagFlaggedPunch => 'Flagged punch';
+
+  @override
+  String get flagNoSchedule => 'No schedule';
 }

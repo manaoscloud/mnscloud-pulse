@@ -8,6 +8,7 @@ import 'src/core/pulse_api.dart';
 import 'src/core/punch_queue.dart';
 import 'src/core/server_clock.dart';
 import 'src/punch/punch_workspace.dart';
+import 'src/timesheet/timesheet_view.dart';
 import 'l10n/app_localizations.dart';
 import 'src/version/app_update_overlay.dart';
 
@@ -114,6 +115,10 @@ class _PulseShellState extends State<PulseShell> {
   bool _restoring = false;
   bool _loading = false;
   String? _message;
+
+  /// Signed-in tab: 0 home (punch), 1 timesheet. The timesheet is built on its first visit.
+  int _tab = 0;
+  bool _timesheetOpened = false;
 
   @override
   void initState() {
@@ -247,6 +252,8 @@ class _PulseShellState extends State<PulseShell> {
     if (!mounted) return;
     setState(() {
       _account = null;
+      _tab = 0;
+      _timesheetOpened = false;
       _passwordController.clear();
       _newPasswordController.clear();
       _confirmPasswordController.clear();
@@ -259,6 +266,8 @@ class _PulseShellState extends State<PulseShell> {
     if (!mounted) return;
     setState(() {
       _account = null;
+      _tab = 0;
+      _timesheetOpened = false;
       _message = code;
       _messageError = true;
     });
@@ -352,24 +361,68 @@ class _PulseShellState extends State<PulseShell> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  ?banner,
-                  PunchWorkspace(
-                    key: ValueKey(account.timeClockAccountUUID),
-                    api: _api,
-                    account: account,
-                    clock: _clock,
-                    onSessionEnded: _sessionEnded,
+            // Both tabs stay mounted (the punch queue keeps retrying); the hidden one has its
+            // tickers off, which pauses its periodic reads.
+            child: IndexedStack(
+              index: _tab,
+              sizing: StackFit.expand,
+              children: [
+                TickerMode(
+                  enabled: _tab == 0,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ?banner,
+                        PunchWorkspace(
+                          key: ValueKey(account.timeClockAccountUUID),
+                          api: _api,
+                          account: account,
+                          clock: _clock,
+                          onSessionEnded: _sessionEnded,
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                TickerMode(
+                  enabled: _tab == 1,
+                  child: _timesheetOpened
+                      ? TimesheetView(
+                          key: ValueKey(
+                            'timesheet-${account.timeClockAccountUUID}',
+                          ),
+                          api: _api,
+                          clock: _clock,
+                          onSessionEnded: _sessionEnded,
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ),
           ),
         ),
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _tab,
+        onDestinationSelected: (index) => setState(() {
+          _tab = index;
+          if (index == 1) _timesheetOpened = true;
+        }),
+        destinations: [
+          NavigationDestination(
+            key: const Key('navHome'),
+            icon: const Icon(Icons.fingerprint),
+            label: l.navHome,
+          ),
+          NavigationDestination(
+            key: const Key('navTimesheet'),
+            icon: const Icon(Icons.calendar_month_outlined),
+            selectedIcon: const Icon(Icons.calendar_month),
+            label: l.navTimesheet,
+          ),
+        ],
       ),
     );
   }

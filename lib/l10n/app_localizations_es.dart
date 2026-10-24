@@ -250,6 +250,118 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pendingSend => 'Pendiente de envío';
+
+  @override
+  String get navHome => 'Inicio';
+
+  @override
+  String get navTimesheet => 'Registro horario';
+
+  @override
+  String get today => 'Hoy';
+
+  @override
+  String get workDay => 'Día laborable';
+
+  @override
+  String get dayOff => 'Día libre';
+
+  @override
+  String get holiday => 'Festivo';
+
+  @override
+  String holidayNamed(String name) {
+    return 'Festivo: $name';
+  }
+
+  @override
+  String get noSchedule => 'Sin jornada definida';
+
+  @override
+  String get workedToday => 'Trabajado hoy';
+
+  @override
+  String get statusWorking => 'Trabajando';
+
+  @override
+  String get statusOnBreak => 'En pausa';
+
+  @override
+  String get statusOffDuty => 'Fuera de jornada';
+
+  @override
+  String get previousMonth => 'Mes anterior';
+
+  @override
+  String get nextMonth => 'Mes siguiente';
+
+  @override
+  String get refresh => 'Actualizar';
+
+  @override
+  String get retry => 'Reintentar';
+
+  @override
+  String get totalWorked => 'Trabajado';
+
+  @override
+  String get totalExpected => 'Previsto';
+
+  @override
+  String get totalBalance => 'Saldo';
+
+  @override
+  String get totalOvertime => 'Horas extra';
+
+  @override
+  String get totalAbsences => 'Ausencias';
+
+  @override
+  String get noPunchesDay => 'Sin marcaciones';
+
+  @override
+  String get timesheetEmpty => 'Aún no hay días en este mes.';
+
+  @override
+  String unassignedPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcaciones aún en procesamiento',
+      one: '1 marcación aún en procesamiento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get flagAbsence => 'Ausencia';
+
+  @override
+  String get flagMissingPunch => 'Marcación faltante';
+
+  @override
+  String get flagLate => 'Retraso';
+
+  @override
+  String get flagEarlyLeave => 'Salida anticipada';
+
+  @override
+  String get flagShortBreak => 'Pausa corta';
+
+  @override
+  String get flagRestViolation => 'Descanso entre jornadas';
+
+  @override
+  String get flagOvertimeLimit => 'Horas extra sobre el límite';
+
+  @override
+  String get flagWorkedDayOff => 'Trabajo en día libre';
+
+  @override
+  String get flagFlaggedPunch => 'Marcación señalada';
+
+  @override
+  String get flagNoSchedule => 'Sin jornada';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -498,4 +610,116 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get pendingSend => 'Pendiente de envío';
+
+  @override
+  String get navHome => 'Inicio';
+
+  @override
+  String get navTimesheet => 'Registro horario';
+
+  @override
+  String get today => 'Hoy';
+
+  @override
+  String get workDay => 'Día laborable';
+
+  @override
+  String get dayOff => 'Día libre';
+
+  @override
+  String get holiday => 'Festivo';
+
+  @override
+  String holidayNamed(String name) {
+    return 'Festivo: $name';
+  }
+
+  @override
+  String get noSchedule => 'Sin jornada definida';
+
+  @override
+  String get workedToday => 'Trabajado hoy';
+
+  @override
+  String get statusWorking => 'Trabajando';
+
+  @override
+  String get statusOnBreak => 'En pausa';
+
+  @override
+  String get statusOffDuty => 'Fuera de jornada';
+
+  @override
+  String get previousMonth => 'Mes anterior';
+
+  @override
+  String get nextMonth => 'Mes siguiente';
+
+  @override
+  String get refresh => 'Actualizar';
+
+  @override
+  String get retry => 'Reintentar';
+
+  @override
+  String get totalWorked => 'Trabajado';
+
+  @override
+  String get totalExpected => 'Previsto';
+
+  @override
+  String get totalBalance => 'Saldo';
+
+  @override
+  String get totalOvertime => 'Horas extra';
+
+  @override
+  String get totalAbsences => 'Ausencias';
+
+  @override
+  String get noPunchesDay => 'Sin marcaciones';
+
+  @override
+  String get timesheetEmpty => 'Aún no hay días en este mes.';
+
+  @override
+  String unassignedPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcaciones aún en procesamiento',
+      one: '1 marcación aún en procesamiento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get flagAbsence => 'Ausencia';
+
+  @override
+  String get flagMissingPunch => 'Marcación faltante';
+
+  @override
+  String get flagLate => 'Retraso';
+
+  @override
+  String get flagEarlyLeave => 'Salida anticipada';
+
+  @override
+  String get flagShortBreak => 'Pausa corta';
+
+  @override
+  String get flagRestViolation => 'Descanso entre jornadas';
+
+  @override
+  String get flagOvertimeLimit => 'Horas extra sobre el límite';
+
+  @override
+  String get flagWorkedDayOff => 'Trabajo en día libre';
+
+  @override
+  String get flagFlaggedPunch => 'Marcación señalada';
+
+  @override
+  String get flagNoSchedule => 'Sin jornada';
 }
