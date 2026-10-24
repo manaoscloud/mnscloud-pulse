@@ -53,6 +53,7 @@ void main() {
 
   testWidgets('title and header follow the brand', (tester) async {
     await tester.pumpWidget(const PulseApp());
+    await tester.pumpAndSettle();
     expect(find.text('MNSCloud Pulse'), findsOneWidget);
     pulseBrand.value = const Brand(title: 'Loja Centro Ponto');
     await tester.pumpAndSettle();

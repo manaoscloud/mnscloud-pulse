@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -157,6 +156,98 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updateHelp =>
       'A new version is ready. You will sign in again after updating.';
+
+  @override
+  String get officialTime => 'Official time';
+
+  @override
+  String get nextPunch => 'Next punch';
+
+  @override
+  String get otherPunch => 'Other punch';
+
+  @override
+  String get onlineStatus => 'Online';
+
+  @override
+  String get offlineStatus => 'Offline';
+
+  @override
+  String pendingPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punches waiting to be sent',
+      one: '1 punch waiting to be sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get punchQueued =>
+      'No connection: the punch was kept and will be sent automatically.';
+
+  @override
+  String get receipt => 'Last receipt';
+
+  @override
+  String nsrLabel(String nsr) {
+    return 'NSR $nsr';
+  }
+
+  @override
+  String get sessionEnded => 'Your session ended. Sign in again.';
+
+  @override
+  String get accountLocked =>
+      'Account temporarily locked. Try again in a few minutes.';
+
+  @override
+  String get temporaryPasswordExpired =>
+      'Your temporary password expired. Ask your company for a new one.';
+
+  @override
+  String get moduleUnavailable =>
+      'The time clock is not available for your company. Contact HR.';
+
+  @override
+  String get accessDenied => 'Your access is not active. Contact HR.';
+
+  @override
+  String get invalidPassword => 'Current password is invalid.';
+
+  @override
+  String get passwordUnchanged =>
+      'The new password must be different from the current one.';
+
+  @override
+  String get pendingSignOutTitle => 'Punches waiting to be sent';
+
+  @override
+  String get pendingSignOutHelp =>
+      'Some punches were not sent yet. They stay on this device and are sent when you sign in again here.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get signOutAnyway => 'Sign out';
+
+  @override
+  String get noPunchesYet => 'No punches yet.';
+
+  @override
+  String get loading => 'Loading…';
+
+  @override
+  String get locationNote =>
+      'Your location is recorded only at the moment of each punch, when allowed.';
+
+  @override
+  String get sentLater => 'Sent later';
+
+  @override
+  String get pendingSend => 'Waiting to be sent';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -311,4 +402,96 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   @override
   String get updateHelp =>
       'A new version is ready. You will sign in again after updating.';
+
+  @override
+  String get officialTime => 'Official time';
+
+  @override
+  String get nextPunch => 'Next punch';
+
+  @override
+  String get otherPunch => 'Other punch';
+
+  @override
+  String get onlineStatus => 'Online';
+
+  @override
+  String get offlineStatus => 'Offline';
+
+  @override
+  String pendingPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punches waiting to be sent',
+      one: '1 punch waiting to be sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get punchQueued =>
+      'No connection: the punch was kept and will be sent automatically.';
+
+  @override
+  String get receipt => 'Last receipt';
+
+  @override
+  String nsrLabel(String nsr) {
+    return 'NSR $nsr';
+  }
+
+  @override
+  String get sessionEnded => 'Your session ended. Sign in again.';
+
+  @override
+  String get accountLocked =>
+      'Account temporarily locked. Try again in a few minutes.';
+
+  @override
+  String get temporaryPasswordExpired =>
+      'Your temporary password expired. Ask your company for a new one.';
+
+  @override
+  String get moduleUnavailable =>
+      'The time clock is not available for your company. Contact HR.';
+
+  @override
+  String get accessDenied => 'Your access is not active. Contact HR.';
+
+  @override
+  String get invalidPassword => 'Current password is invalid.';
+
+  @override
+  String get passwordUnchanged =>
+      'The new password must be different from the current one.';
+
+  @override
+  String get pendingSignOutTitle => 'Punches waiting to be sent';
+
+  @override
+  String get pendingSignOutHelp =>
+      'Some punches were not sent yet. They stay on this device and are sent when you sign in again here.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get signOutAnyway => 'Sign out';
+
+  @override
+  String get noPunchesYet => 'No punches yet.';
+
+  @override
+  String get loading => 'Loading…';
+
+  @override
+  String get locationNote =>
+      'Your location is recorded only at the moment of each punch, when allowed.';
+
+  @override
+  String get sentLater => 'Sent later';
+
+  @override
+  String get pendingSend => 'Waiting to be sent';
 }

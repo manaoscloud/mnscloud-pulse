@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -50,7 +51,10 @@ void main() {
       await tester.tap(find.byKey(const Key('forgotPassword')));
       await tester.pumpAndSettle();
       expect(find.text('Recuperar senha'), findsOneWidget);
-      expect(find.text('Precisa de acesso? Fale com sua empresa'), findsWidgets);
+      expect(
+        find.text('Precisa de acesso? Fale com sua empresa'),
+        findsWidgets,
+      );
       await tester.tap(find.text('Fechar'));
       await tester.pumpAndSettle();
       expect(find.text('Recuperar senha'), findsNothing);
@@ -63,11 +67,20 @@ void main() {
       final paths = <String>[];
       final client = MockClient((request) async {
         paths.add(request.url.path);
+        if (request.url.path.endsWith('/refresh')) {
+          return http.Response(
+            jsonEncode({'code': 'PULSE_SESSION_INVALID'}),
+            401,
+          );
+        }
         return http.Response(
           jsonEncode({
             'data': {
-              'jwt': 'test-session',
+              'accessToken': 'test-session',
+              'refreshToken': null,
+              'serverTime': '2026-10-24T12:00:00.000Z',
               'account': {
+                'timeClockAccountUUID': 'account-1',
                 'mustChangePassword': true,
                 'employeeName': 'Test',
                 'loginCode': 'TEST',
@@ -91,7 +104,10 @@ void main() {
       await tester.ensureVisible(find.text('Sign in'));
       await tester.tap(find.text('Sign in'));
       await tester.pumpAndSettle();
-      expect(paths, ['/api/v1/pulse/auth/signin']);
+      expect(paths, [
+        '/api/v1/pulse/auth/refresh',
+        '/api/v1/pulse/auth/signin',
+      ]);
       expect(find.text('Create your new password'), findsOneWidget);
       expect(find.text('Save new password'), findsOneWidget);
       expect(tester.takeException(), isNull);

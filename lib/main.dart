@@ -1,11 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'src/brand/brand.dart';
 import 'src/access/access_shell.dart';
 import 'src/access/access_preferences.dart';
+import 'src/core/pulse_api.dart';
+import 'src/core/punch_queue.dart';
+import 'src/core/server_clock.dart';
+import 'src/punch/punch_workspace.dart';
 import 'l10n/app_localizations.dart';
 import 'src/version/app_update_overlay.dart';
 
@@ -82,23 +84,24 @@ class PulseApp extends StatelessWidget {
 }
 
 class PulseShell extends StatefulWidget {
-  const PulseShell({super.key, this.client});
+  const PulseShell({super.key, this.client, this.restoreSession = true});
   final http.Client? client;
+
+  /// Reopens the session kept by the refresh cookie when the page loads (web reload).
+  final bool restoreSession;
 
   @override
   State<PulseShell> createState() => _PulseShellState();
 }
 
 class _PulseShellState extends State<PulseShell> {
-  static const _apiBaseUrl = String.fromEnvironment(
-    'PULSE_PUBLIC_API_BASE_URL',
-    defaultValue: '/api/v1',
-  );
+  late final PulseApi _api = PulseApi(client: widget.client)
+    ..onServerTime = _clock.accept;
+  final _clock = ServerClock();
 
   final _loginCodeController = TextEditingController();
   final _passwordController = TextEditingController();
   final _newPasswordController = TextEditingController();
-
   final _confirmPasswordController = TextEditingController();
   final _loginForm = GlobalKey<FormState>();
   final _passwordForm = GlobalKey<FormState>();
@@ -107,9 +110,8 @@ class _PulseShellState extends State<PulseShell> {
   bool _showPassword = false;
   bool _messageError = false;
   AppLocalizations get l => AppLocalizations.of(context)!;
-  String? _token;
-  Map<String, dynamic>? _account;
-  List<Map<String, dynamic>> _punches = [];
+  PulseAccount? _account;
+  bool _restoring = false;
   bool _loading = false;
   String? _message;
 
@@ -117,6 +119,7 @@ class _PulseShellState extends State<PulseShell> {
   void initState() {
     super.initState();
     pulseBrand.addListener(_brandChanged);
+    if (widget.restoreSession) _restore();
   }
 
   void _brandChanged() {
@@ -132,50 +135,20 @@ class _PulseShellState extends State<PulseShell> {
     _loginCodeController.dispose();
     _passwordController.dispose();
     _newPasswordController.dispose();
+    _clock.dispose();
     super.dispose();
   }
 
-  Uri _uri(String path) {
-    final base = _apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
-    return Uri.parse('$base$path');
-  }
-
-  Map<String, String> get _jsonHeaders => {
-    'content-type': 'application/json',
-    if (_token != null) 'authorization': 'Bearer $_token',
-  };
-
-  Future<Map<String, dynamic>> _request(
-    String method,
-    String path, {
-    Map<String, dynamic>? body,
-  }) async {
-    final request = http.Request(method, _uri(path));
-    request.headers.addAll(_jsonHeaders);
-    if (body != null) request.body = jsonEncode(body);
-
-    final streamed = await (widget.client?.send(request) ?? request.send())
-        .timeout(const Duration(seconds: 20));
-    final response = await http.Response.fromStream(streamed);
-    final decoded = response.body.isEmpty
-        ? <String, dynamic>{}
-        : jsonDecode(response.body);
-    final data = decoded is Map<String, dynamic>
-        ? decoded
-        : <String, dynamic>{};
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw _AccessFailure(
-        response.statusCode == 429
-            ? 'rateLimited'
-            : data['code'] == 'PULSE_INVALID_CREDENTIALS' ||
-                  (path.endsWith('/signin') && response.statusCode == 401)
-            ? 'invalidCredentials'
-            : 'requestError',
-      );
-    }
-
-    return data;
+  Future<void> _restore() async {
+    setState(() => _restoring = true);
+    final account = await _api.restore();
+    if (!mounted) return;
+    setState(() {
+      _restoring = false;
+      // A session still waiting for the first password change is not reopened: the temporary
+      // password is needed again to change it.
+      _account = account?.mustChangePassword == true ? null : account;
+    });
   }
 
   Future<void> _run(Future<void> Function() task) async {
@@ -186,11 +159,18 @@ class _PulseShellState extends State<PulseShell> {
     });
     try {
       await task();
-    } catch (error) {
+    } on PulseFailure catch (failure) {
       if (mounted) {
         setState(() {
           _messageError = true;
-          _message = error is _AccessFailure ? error.code : 'networkError';
+          _message = failure.code;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _messageError = true;
+          _message = 'requestError';
         });
       }
     } finally {
@@ -209,38 +189,27 @@ class _PulseShellState extends State<PulseShell> {
       return;
     }
     await _run(() async {
-      final response = await _request(
-        'POST',
-        '/pulse/auth/signin',
-        body: {
-          'loginCode': _loginCodeController.text.trim(),
-          'password': _passwordController.text,
-        },
+      final account = await _api.signIn(
+        _loginCodeController.text.trim(),
+        _passwordController.text,
       );
-      final data = response['data'] as Map<String, dynamic>;
       setState(() {
-        _token = data['jwt'] as String?;
-        _account = data['account'] as Map<String, dynamic>?;
+        _account = account;
         _message = 'signedIn';
+        if (!account.mustChangePassword) _passwordController.clear();
       });
-      if (_account?['mustChangePassword'] != true) await _loadPunches();
     });
   }
 
   Future<void> _changePassword() async {
     if (_loading || !(_passwordForm.currentState?.validate() ?? false)) return;
     await _run(() async {
-      await _request(
-        'POST',
-        '/pulse/auth/change-password',
-        body: {
-          'currentPassword': _passwordController.text,
-          'newPassword': _newPasswordController.text,
-        },
+      await _api.changePassword(
+        _passwordController.text,
+        _newPasswordController.text,
       );
-      final profile = await _request('GET', '/pulse/auth/me');
       setState(() {
-        _account = profile['data']?['item'] as Map<String, dynamic>?;
+        _account = _account?.passwordChanged();
         _passwordController.clear();
         _newPasswordController.clear();
         _confirmPasswordController.clear();
@@ -249,68 +218,90 @@ class _PulseShellState extends State<PulseShell> {
     });
   }
 
-  Future<void> _recordPunch(String type) async {
-    await _run(() async {
-      final response = await _request(
-        'POST',
-        '/pulse/punches',
-        body: {
-          'type': type,
-          'idempotencyKey': '${DateTime.now().microsecondsSinceEpoch}-$type',
-          'occurredAt': DateTime.now().toUtc().toIso8601String(),
-          'source': 'mobile',
-        },
-      );
-      final item = response['data']?['item'] as Map<String, dynamic>?;
-      setState(
-        () => _message = item?['Duplicate'] == 1 ? 'punchSynced' : 'punchSaved',
-      );
-      await _loadPunches();
-    });
-  }
-
-  Future<void> _loadPunches() async {
-    final response = await _request('GET', '/pulse/punches?limit=20');
-    final items = response['data']?['items'];
+  Future<void> _signOut() async {
+    final account = _account;
+    if (account != null && !account.mustChangePassword) {
+      final pending = await PunchQueue(account.timeClockAccountUUID).load();
+      if (pending.isNotEmpty && mounted) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(l.pendingSignOutTitle),
+            content: Text(l.pendingSignOutHelp),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(l.cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: Text(l.signOutAnyway),
+              ),
+            ],
+          ),
+        );
+        if (confirmed != true) return;
+      }
+    }
+    await _api.signOut();
+    if (!mounted) return;
     setState(() {
-      _punches = items is List
-          ? items.whereType<Map<String, dynamic>>().toList()
-          : [];
-    });
-  }
-
-  void _signOut() {
-    setState(() {
-      _token = null;
       _account = null;
-      _punches = [];
       _passwordController.clear();
       _newPasswordController.clear();
+      _confirmPasswordController.clear();
       _message = 'signedOut';
+      _messageError = false;
+    });
+  }
+
+  void _sessionEnded(String code) {
+    if (!mounted) return;
+    setState(() {
+      _account = null;
+      _message = code;
+      _messageError = true;
     });
   }
 
   String message(String key) => switch (key) {
-    'invalidCredentials' => l.invalidCredentials,
-    'rateLimited' => l.rateLimited,
-    'requestError' => l.requestError,
+    'PULSE_INVALID_CREDENTIALS' || 'invalidCredentials' => l.invalidCredentials,
+    'PULSE_RATE_LIMITED' => l.rateLimited,
+    'PULSE_ACCOUNT_LOCKED' => l.accountLocked,
+    'PULSE_TEMPORARY_PASSWORD_EXPIRED' => l.temporaryPasswordExpired,
+    'PULSE_MODULE_UNAVAILABLE' => l.moduleUnavailable,
+    'PULSE_ACCESS_DENIED' => l.accessDenied,
+    'PULSE_SESSION_INVALID' => l.sessionEnded,
+    'PULSE_INVALID_PASSWORD' => l.invalidPassword,
+    'PULSE_PASSWORD_UNCHANGED' => l.passwordUnchanged,
+    'PULSE_PASSWORD_TOO_SHORT' => l.passwordLength,
     'networkError' => l.networkError,
     'signedIn' => l.signedIn,
     'signedOut' => l.signedOut,
     'passwordChanged' => l.passwordChanged,
-    'punchSaved' => l.punchSaved,
-    'punchSynced' => l.punchSynced,
     _ => l.requestError,
   };
 
   @override
   Widget build(BuildContext context) {
-    final access = _token == null || _account?['mustChangePassword'] == true;
-    final content = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_message != null)
-          Padding(
+    final account = _account;
+    if (_restoring) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(l.loading),
+            ],
+          ),
+        ),
+      );
+    }
+    final access = account == null || account.mustChangePassword;
+    final banner = _message != null && (access || _message != 'signedIn')
+        ? Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: Semantics(
               liveRegion: true,
@@ -323,19 +314,26 @@ class _PulseShellState extends State<PulseShell> {
                 ),
               ),
             ),
-          ),
-        if (_token == null) _buildLogin(context) else _buildWorkspace(context),
-        if (_loading)
-          const Padding(
-            padding: EdgeInsets.only(top: 20),
-            child: LinearProgressIndicator(),
-          ),
-      ],
-    );
+          )
+        : null;
     if (access) {
       return AccessShell(
-        onSignOut: _token == null || _loading ? null : _signOut,
-        child: content,
+        onSignOut: account == null || _loading ? null : _signOut,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ?banner,
+            if (account == null)
+              _buildLogin(context)
+            else
+              _buildFirstAccess(context, account),
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: LinearProgressIndicator(),
+              ),
+          ],
+        ),
       );
     }
     return Scaffold(
@@ -356,7 +354,19 @@ class _PulseShellState extends State<PulseShell> {
             constraints: const BoxConstraints(maxWidth: 560),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: content,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ?banner,
+                  PunchWorkspace(
+                    key: ValueKey(account.timeClockAccountUUID),
+                    api: _api,
+                    account: account,
+                    clock: _clock,
+                    onSessionEnded: _sessionEnded,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -454,140 +464,68 @@ class _PulseShellState extends State<PulseShell> {
     );
   }
 
-  Widget _buildWorkspace(BuildContext context) {
-    final account = _account ?? {};
-    final mustChange = account['mustChangePassword'] == true;
-
+  Widget _buildFirstAccess(BuildContext context, PulseAccount account) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          account['employeeName']?.toString() ?? l.employee,
-          style: Theme.of(context).textTheme.headlineSmall
-              ?.copyWith(fontWeight: FontWeight.w800),
+          account.employeeName ?? l.employee,
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
-        Text(account['loginCode']?.toString() ?? ''),
+        Text(account.loginCode),
         const SizedBox(height: 20),
-        if (mustChange) ...[
-          Text(l.firstAccess, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 12),
-          Text(l.firstAccessHelp),
-          const SizedBox(height: 24),
-          Form(
-            key: _passwordForm,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _newPasswordController,
-                  autofocus: true,
-                  obscureText: !_showPassword,
-                  autofillHints: const [AutofillHints.newPassword],
-                  decoration: InputDecoration(
-                    labelText: l.newPassword,
-                    helperText: l.passwordLength,
-                    suffixIcon: IconButton(
-                      tooltip: _showPassword ? l.hidePassword : l.showPassword,
-                      onPressed: () =>
-                          setState(() => _showPassword = !_showPassword),
-                      icon: Icon(
-                        _showPassword ? Icons.visibility_off : Icons.visibility,
-                      ),
+        Text(l.firstAccess, style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 12),
+        Text(l.firstAccessHelp),
+        const SizedBox(height: 24),
+        Form(
+          key: _passwordForm,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _newPasswordController,
+                autofocus: true,
+                obscureText: !_showPassword,
+                autofillHints: const [AutofillHints.newPassword],
+                decoration: InputDecoration(
+                  labelText: l.newPassword,
+                  helperText: l.passwordLength,
+                  suffixIcon: IconButton(
+                    tooltip: _showPassword ? l.hidePassword : l.showPassword,
+                    onPressed: () =>
+                        setState(() => _showPassword = !_showPassword),
+                    icon: Icon(
+                      _showPassword ? Icons.visibility_off : Icons.visibility,
                     ),
                   ),
-                  validator: (value) =>
-                      (value?.length ?? 0) < 10 ? l.passwordLength : null,
                 ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: !_showPassword,
-                  decoration: InputDecoration(labelText: l.confirmPassword),
-                  validator: (value) => value != _newPasswordController.text
-                      ? l.passwordMismatch
-                      : value == null || value.isEmpty
-                      ? l.required
-                      : null,
-                  onFieldSubmitted: (_) => _changePassword(),
-                ),
-                const SizedBox(height: 24),
-                FilledButton(
-                  onPressed: _loading ? null : _changePassword,
-                  child: Text(l.changePassword),
-                ),
-              ],
-            ),
-          ),
-        ] else ...[
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _PunchButton(
-                label: l.clockIn,
-                icon: Icons.login,
-                onPressed: () => _recordPunch('clock_in'),
+                validator: (value) =>
+                    (value?.length ?? 0) < 10 ? l.passwordLength : null,
               ),
-              _PunchButton(
-                label: l.breakStart,
-                icon: Icons.coffee,
-                onPressed: () => _recordPunch('break_start'),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: !_showPassword,
+                decoration: InputDecoration(labelText: l.confirmPassword),
+                validator: (value) => value != _newPasswordController.text
+                    ? l.passwordMismatch
+                    : value == null || value.isEmpty
+                    ? l.required
+                    : null,
+                onFieldSubmitted: (_) => _changePassword(),
               ),
-              _PunchButton(
-                label: l.breakEnd,
-                icon: Icons.work,
-                onPressed: () => _recordPunch('break_end'),
-              ),
-              _PunchButton(
-                label: l.clockOut,
-                icon: Icons.logout,
-                onPressed: () => _recordPunch('clock_out'),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _loading ? null : _changePassword,
+                child: Text(l.changePassword),
               ),
             ],
           ),
-          const SizedBox(height: 28),
-          Text(l.recentPunches, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          for (final punch in _punches)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.schedule),
-              title: Text(punch['Type']?.toString() ?? ''),
-              subtitle: Text(punch['OccurredAt']?.toString() ?? ''),
-              trailing: Text(punch['Status']?.toString() ?? ''),
-            ),
-        ],
+        ),
       ],
     );
   }
-}
-
-class _PunchButton extends StatelessWidget {
-  const _PunchButton({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 160,
-      height: 52,
-      child: FilledButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
-      ),
-    );
-  }
-}
-
-class _AccessFailure implements Exception {
-  const _AccessFailure(this.code);
-  final String code;
 }
