@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -159,6 +158,98 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get updateHelp =>
       'Hay una nueva versión. Deberás iniciar sesión después de actualizar.';
+
+  @override
+  String get officialTime => 'Hora oficial';
+
+  @override
+  String get nextPunch => 'Próximo registro';
+
+  @override
+  String get otherPunch => 'Otro registro';
+
+  @override
+  String get onlineStatus => 'Conectado';
+
+  @override
+  String get offlineStatus => 'Sin conexión';
+
+  @override
+  String pendingPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros pendientes de envío',
+      one: '1 registro pendiente de envío',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get punchQueued =>
+      'Sin conexión: el registro se guardó y se enviará automáticamente.';
+
+  @override
+  String get receipt => 'Último comprobante';
+
+  @override
+  String nsrLabel(String nsr) {
+    return 'NSR $nsr';
+  }
+
+  @override
+  String get sessionEnded => 'Tu sesión terminó. Inicia sesión de nuevo.';
+
+  @override
+  String get accountLocked =>
+      'Cuenta bloqueada temporalmente. Inténtalo de nuevo en unos minutos.';
+
+  @override
+  String get temporaryPasswordExpired =>
+      'Tu contraseña temporal caducó. Pide una nueva a tu empresa.';
+
+  @override
+  String get moduleUnavailable =>
+      'El control horario no está disponible para tu empresa. Habla con RR. HH.';
+
+  @override
+  String get accessDenied => 'Tu acceso no está activo. Habla con RR. HH.';
+
+  @override
+  String get invalidPassword => 'La contraseña actual no es válida.';
+
+  @override
+  String get passwordUnchanged =>
+      'La nueva contraseña debe ser diferente de la actual.';
+
+  @override
+  String get pendingSignOutTitle => 'Registros pendientes de envío';
+
+  @override
+  String get pendingSignOutHelp =>
+      'Algunos registros aún no se enviaron. Quedan en este dispositivo y se enviarán cuando vuelvas a iniciar sesión aquí.';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get signOutAnyway => 'Salir';
+
+  @override
+  String get noPunchesYet => 'Aún no hay registros.';
+
+  @override
+  String get loading => 'Cargando…';
+
+  @override
+  String get locationNote =>
+      'Tu ubicación se registra solo en el momento de cada registro, cuando lo permites.';
+
+  @override
+  String get sentLater => 'Enviado después';
+
+  @override
+  String get pendingSend => 'Pendiente de envío';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -315,4 +406,96 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   @override
   String get updateHelp =>
       'Hay una nueva versión. Deberás iniciar sesión después de actualizar.';
+
+  @override
+  String get officialTime => 'Hora oficial';
+
+  @override
+  String get nextPunch => 'Próximo registro';
+
+  @override
+  String get otherPunch => 'Otro registro';
+
+  @override
+  String get onlineStatus => 'Conectado';
+
+  @override
+  String get offlineStatus => 'Sin conexión';
+
+  @override
+  String pendingPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count registros pendientes de envío',
+      one: '1 registro pendiente de envío',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get punchQueued =>
+      'Sin conexión: el registro se guardó y se enviará automáticamente.';
+
+  @override
+  String get receipt => 'Último comprobante';
+
+  @override
+  String nsrLabel(String nsr) {
+    return 'NSR $nsr';
+  }
+
+  @override
+  String get sessionEnded => 'Tu sesión terminó. Inicia sesión de nuevo.';
+
+  @override
+  String get accountLocked =>
+      'Cuenta bloqueada temporalmente. Inténtalo de nuevo en unos minutos.';
+
+  @override
+  String get temporaryPasswordExpired =>
+      'Tu contraseña temporal caducó. Pide una nueva a tu empresa.';
+
+  @override
+  String get moduleUnavailable =>
+      'El control horario no está disponible para tu empresa. Habla con RR. HH.';
+
+  @override
+  String get accessDenied => 'Tu acceso no está activo. Habla con RR. HH.';
+
+  @override
+  String get invalidPassword => 'La contraseña actual no es válida.';
+
+  @override
+  String get passwordUnchanged =>
+      'La nueva contraseña debe ser diferente de la actual.';
+
+  @override
+  String get pendingSignOutTitle => 'Registros pendientes de envío';
+
+  @override
+  String get pendingSignOutHelp =>
+      'Algunos registros aún no se enviaron. Quedan en este dispositivo y se enviarán cuando vuelvas a iniciar sesión aquí.';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get signOutAnyway => 'Salir';
+
+  @override
+  String get noPunchesYet => 'Aún no hay registros.';
+
+  @override
+  String get loading => 'Cargando…';
+
+  @override
+  String get locationNote =>
+      'Tu ubicación se registra solo en el momento de cada registro, cuando lo permites.';
+
+  @override
+  String get sentLater => 'Enviado después';
+
+  @override
+  String get pendingSend => 'Pendiente de envío';
 }

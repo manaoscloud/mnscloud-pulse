@@ -390,6 +390,156 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'A new version is ready. You will sign in again after updating.'**
   String get updateHelp;
+
+  /// No description provided for @officialTime.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Official time'**
+  String get officialTime;
+
+  /// No description provided for @nextPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Next punch'**
+  String get nextPunch;
+
+  /// No description provided for @otherPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Other punch'**
+  String get otherPunch;
+
+  /// No description provided for @onlineStatus.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Online'**
+  String get onlineStatus;
+
+  /// No description provided for @offlineStatus.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Offline'**
+  String get offlineStatus;
+
+  /// No description provided for @pendingPunches.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count, plural, =1{1 punch waiting to be sent} other{{count} punches waiting to be sent}}'**
+  String pendingPunches(int count);
+
+  /// No description provided for @punchQueued.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No connection: the punch was kept and will be sent automatically.'**
+  String get punchQueued;
+
+  /// No description provided for @receipt.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Last receipt'**
+  String get receipt;
+
+  /// No description provided for @nsrLabel.
+  ///
+  /// In en_US, this message translates to:
+  /// **'NSR {nsr}'**
+  String nsrLabel(String nsr);
+
+  /// No description provided for @sessionEnded.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your session ended. Sign in again.'**
+  String get sessionEnded;
+
+  /// No description provided for @accountLocked.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Account temporarily locked. Try again in a few minutes.'**
+  String get accountLocked;
+
+  /// No description provided for @temporaryPasswordExpired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your temporary password expired. Ask your company for a new one.'**
+  String get temporaryPasswordExpired;
+
+  /// No description provided for @moduleUnavailable.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The time clock is not available for your company. Contact HR.'**
+  String get moduleUnavailable;
+
+  /// No description provided for @accessDenied.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your access is not active. Contact HR.'**
+  String get accessDenied;
+
+  /// No description provided for @invalidPassword.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Current password is invalid.'**
+  String get invalidPassword;
+
+  /// No description provided for @passwordUnchanged.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The new password must be different from the current one.'**
+  String get passwordUnchanged;
+
+  /// No description provided for @pendingSignOutTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Punches waiting to be sent'**
+  String get pendingSignOutTitle;
+
+  /// No description provided for @pendingSignOutHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Some punches were not sent yet. They stay on this device and are sent when you sign in again here.'**
+  String get pendingSignOutHelp;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @signOutAnyway.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Sign out'**
+  String get signOutAnyway;
+
+  /// No description provided for @noPunchesYet.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No punches yet.'**
+  String get noPunchesYet;
+
+  /// No description provided for @loading.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Loading…'**
+  String get loading;
+
+  /// No description provided for @locationNote.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your location is recorded only at the moment of each punch, when allowed.'**
+  String get locationNote;
+
+  /// No description provided for @sentLater.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Sent later'**
+  String get sentLater;
+
+  /// No description provided for @pendingSend.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Waiting to be sent'**
+  String get pendingSend;
 }
 
 class _AppLocalizationsDelegate

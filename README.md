@@ -37,14 +37,33 @@ flutter run -d web-server --web-port 8081 --dart-define PULSE_PUBLIC_API_BASE_UR
 
 The client reads the public API base from deployment configuration and talks to the public Pulse API:
 
-- `POST /api/v1/pulse/auth/signin`
-- `GET /api/v1/pulse/auth/me`
-- `POST /api/v1/pulse/auth/change-password`
-- `POST /api/v1/pulse/punches`
-- `GET /api/v1/pulse/punches`
+- `POST /api/v1/pulse/auth/signin`, `POST /api/v1/pulse/auth/refresh`, `POST /api/v1/pulse/auth/signout`
+- `GET /api/v1/pulse/auth/me`, `POST /api/v1/pulse/auth/change-password`
+- `GET /api/v1/pulse/time` (official server time)
+- `POST /api/v1/pulse/punches`, `GET /api/v1/pulse/punches`
 
-Punch creation uses a client-generated idempotency key so retries and future offline sync can be
-processed exactly once by the API.
+## Session
+
+Every sign-in is a revocable server session. The client keeps a 15-minute access token in memory;
+the rotating refresh token lives only in the HttpOnly cookie the API sets on the web (same origin),
+so a page reload reopens the session without the password and nothing about the session is stored
+by the app. HR can end the sessions of an account at any time (password reset, deactivation and
+termination also end them). Native builds keep the refresh token in memory until secure storage
+ships with the store apps.
+
+## Punches
+
+- `lib/src/punch/punch_workspace.dart` shows the official time (device clock corrected by the
+  offset measured against `/pulse/time`), the suggested next mark and every other mark (never
+  blocked), and the recent marks with the last receipt (NSR and hash).
+- Each tap creates one UUID idempotency key and the mark is saved in a per-account queue on the
+  device (`lib/src/core/punch_queue.dart`) before it is sent. Without connection it stays queued and
+  is sent later as `offline` with the corrected time of the tap; a retry after a lost answer is
+  recorded once by the API. Only marks are queued, never credentials or tokens.
+- The browser position is read once at the moment of the punch, when the employee allows it
+  (`lib/src/core/location_web.dart`); there is no background tracking.
+- The API owns the official time, the immutable ledger (NSR and SHA-256 per establishment) and the
+  flags (offline, late sync, clock skew, sequence); the client never decides them.
 
 ## Runtime Configuration
 
@@ -90,7 +109,8 @@ Pulse loads the domain's public brand and `LoginAppearance` from
 `GET /api/v1/public/theme/context?app=pulse`. Settings › Themes configures the brand and login
 presentation. Missing Pulse presentation inherits App layout/image/links, while access instructions
 use Pulse's own PT-BR, EN-US and ES-ES defaults. Language can follow the device or a saved preference;
-switching it does not clear the form. Only that preference is persisted, never the session or password.
+switching it does not clear the form. Only that preference and queued marks are persisted, never the
+session or password.
 
 The access shell adapts to desktop/mobile and light/dark/system. First access uses the same shell
 for the mandatory password change and never loads punches before that change. There is no public

@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -158,6 +157,98 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get updateHelp =>
       'Uma nova versão está pronta. Você entrará novamente após atualizar.';
+
+  @override
+  String get officialTime => 'Horário oficial';
+
+  @override
+  String get nextPunch => 'Próxima marcação';
+
+  @override
+  String get otherPunch => 'Outra marcação';
+
+  @override
+  String get onlineStatus => 'Conectado';
+
+  @override
+  String get offlineStatus => 'Sem conexão';
+
+  @override
+  String pendingPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcações aguardando envio',
+      one: '1 marcação aguardando envio',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get punchQueued =>
+      'Sem conexão: a marcação foi guardada e será enviada automaticamente.';
+
+  @override
+  String get receipt => 'Último comprovante';
+
+  @override
+  String nsrLabel(String nsr) {
+    return 'NSR $nsr';
+  }
+
+  @override
+  String get sessionEnded => 'Sua sessão terminou. Entre novamente.';
+
+  @override
+  String get accountLocked =>
+      'Conta bloqueada temporariamente. Tente novamente em alguns minutos.';
+
+  @override
+  String get temporaryPasswordExpired =>
+      'Sua senha temporária expirou. Peça uma nova à sua empresa.';
+
+  @override
+  String get moduleUnavailable =>
+      'O ponto não está disponível para sua empresa. Fale com o RH.';
+
+  @override
+  String get accessDenied => 'Seu acesso não está ativo. Fale com o RH.';
+
+  @override
+  String get invalidPassword => 'Senha atual inválida.';
+
+  @override
+  String get passwordUnchanged =>
+      'A nova senha precisa ser diferente da atual.';
+
+  @override
+  String get pendingSignOutTitle => 'Marcações aguardando envio';
+
+  @override
+  String get pendingSignOutHelp =>
+      'Algumas marcações ainda não foram enviadas. Elas ficam neste aparelho e serão enviadas quando você entrar novamente aqui.';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get signOutAnyway => 'Sair';
+
+  @override
+  String get noPunchesYet => 'Nenhuma marcação ainda.';
+
+  @override
+  String get loading => 'Carregando…';
+
+  @override
+  String get locationNote =>
+      'Sua localização é registrada somente no momento de cada marcação, quando permitido.';
+
+  @override
+  String get sentLater => 'Enviada depois';
+
+  @override
+  String get pendingSend => 'Aguardando envio';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -313,4 +404,96 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get updateHelp =>
       'Uma nova versão está pronta. Você entrará novamente após atualizar.';
+
+  @override
+  String get officialTime => 'Horário oficial';
+
+  @override
+  String get nextPunch => 'Próxima marcação';
+
+  @override
+  String get otherPunch => 'Outra marcação';
+
+  @override
+  String get onlineStatus => 'Conectado';
+
+  @override
+  String get offlineStatus => 'Sem conexão';
+
+  @override
+  String pendingPunches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcações aguardando envio',
+      one: '1 marcação aguardando envio',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get punchQueued =>
+      'Sem conexão: a marcação foi guardada e será enviada automaticamente.';
+
+  @override
+  String get receipt => 'Último comprovante';
+
+  @override
+  String nsrLabel(String nsr) {
+    return 'NSR $nsr';
+  }
+
+  @override
+  String get sessionEnded => 'Sua sessão terminou. Entre novamente.';
+
+  @override
+  String get accountLocked =>
+      'Conta bloqueada temporariamente. Tente novamente em alguns minutos.';
+
+  @override
+  String get temporaryPasswordExpired =>
+      'Sua senha temporária expirou. Peça uma nova à sua empresa.';
+
+  @override
+  String get moduleUnavailable =>
+      'O ponto não está disponível para sua empresa. Fale com o RH.';
+
+  @override
+  String get accessDenied => 'Seu acesso não está ativo. Fale com o RH.';
+
+  @override
+  String get invalidPassword => 'Senha atual inválida.';
+
+  @override
+  String get passwordUnchanged =>
+      'A nova senha precisa ser diferente da atual.';
+
+  @override
+  String get pendingSignOutTitle => 'Marcações aguardando envio';
+
+  @override
+  String get pendingSignOutHelp =>
+      'Algumas marcações ainda não foram enviadas. Elas ficam neste aparelho e serão enviadas quando você entrar novamente aqui.';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get signOutAnyway => 'Sair';
+
+  @override
+  String get noPunchesYet => 'Nenhuma marcação ainda.';
+
+  @override
+  String get loading => 'Carregando…';
+
+  @override
+  String get locationNote =>
+      'Sua localização é registrada somente no momento de cada marcação, quando permitido.';
+
+  @override
+  String get sentLater => 'Enviada depois';
+
+  @override
+  String get pendingSend => 'Aguardando envio';
 }
