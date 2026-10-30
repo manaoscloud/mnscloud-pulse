@@ -1,4 +1,6 @@
-export 'location_stub.dart' if (dart.library.js_interop) 'location_web.dart';
+export 'location_stub.dart'
+    if (dart.library.js_interop) 'location_web.dart'
+    if (dart.library.io) 'location_io.dart';
 
 /// Position captured at the moment of a punch (never tracked in the background).
 class PunchLocation {

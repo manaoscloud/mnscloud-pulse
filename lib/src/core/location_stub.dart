@@ -1,4 +1,4 @@
 import 'location.dart';
 
-/// Native builds capture the position once the store apps ship with their permission flow.
+/// Platforms without a location implementation record the punch without location.
 Future<PunchLocation?> currentPunchLocation() async => null;
