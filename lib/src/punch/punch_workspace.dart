@@ -238,6 +238,8 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         Text(
           [
             widget.account.companyName,
+            if (widget.account.hrAccountName != widget.account.companyName)
+              widget.account.hrAccountName,
             widget.account.loginCode,
           ].whereType<String>().where((part) => part.isNotEmpty).join(' · '),
           style: TextStyle(color: scheme.onSurfaceVariant),

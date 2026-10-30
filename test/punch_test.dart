@@ -8,6 +8,7 @@ import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
 import 'package:mnscloud_pulse/main.dart';
 import 'package:mnscloud_pulse/src/core/ids.dart';
+import 'package:mnscloud_pulse/src/core/pulse_api.dart';
 import 'package:mnscloud_pulse/src/core/punch_queue.dart';
 import 'package:mnscloud_pulse/src/core/server_clock.dart';
 import 'package:mnscloud_pulse/src/punch/punch_labels.dart';
@@ -236,5 +237,18 @@ void main() {
     await settle(tester);
     expect(find.text('Your access is not active. Contact HR.'), findsOneWidget);
     expect(find.text('Sign in'), findsOneWidget);
+  });
+
+  test('the customer HR account of the session survives the password change', () {
+    final account = PulseAccount.fromJson({
+      'timeClockAccountUUID': 'account-1',
+      'loginCode': 'ABCD-EFGH',
+      'mustChangePassword': true,
+      'companyName': 'Customer Company',
+      'hrAccountName': 'Customer HR',
+    });
+    expect(account.hrAccountName, 'Customer HR');
+    expect(account.passwordChanged().hrAccountName, 'Customer HR');
+    expect(PulseAccount.fromJson({'loginCode': 'X'}).hrAccountName, isNull);
   });
 }
