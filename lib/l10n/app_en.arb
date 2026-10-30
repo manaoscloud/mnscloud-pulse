@@ -106,5 +106,7 @@
   "flagOvertimeLimit": "Overtime above limit",
   "flagWorkedDayOff": "Worked on a day off",
   "flagFlaggedPunch": "Flagged punch",
-  "flagNoSchedule": "No schedule"
+  "flagNoSchedule": "No schedule",
+  "installApp": "Install app",
+  "installIosSteps": "In Safari, tap Share and then \"Add to Home Screen\"."
 }

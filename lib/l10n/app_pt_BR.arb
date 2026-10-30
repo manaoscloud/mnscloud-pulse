@@ -106,5 +106,7 @@
   "flagOvertimeLimit": "Hora extra acima do limite",
   "flagWorkedDayOff": "Trabalho em folga",
   "flagFlaggedPunch": "Batida sinalizada",
-  "flagNoSchedule": "Sem jornada"
+  "flagNoSchedule": "Sem jornada",
+  "installApp": "Instalar app",
+  "installIosSteps": "No Safari, toque em Compartilhar e depois em \"Adicionar à Tela de Início\"."
 }

@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/app_localizations.dart';
 import '../brand/brand.dart';
 import 'access_preferences.dart';
+import '../pwa/install_app_button.dart';
 
 String accessText(BuildContext context, String key, String fallback) {
   final locale = Localizations.localeOf(context);
@@ -175,6 +176,7 @@ class AccessShell extends StatelessWidget {
                               child: AccessBrand(),
                             ),
                           const AccessLanguageButton(),
+                          const InstallAppButton(labeled: true),
                           if (onSignOut != null)
                             IconButton(
                               tooltip: l.signOut,

@@ -21,7 +21,8 @@ jobs:
     uses: manaoscloud/mnscloud-runtime-kit/.github/workflows/flutter-client-ci.yml@main
     with:
       targets: "web,android,linux,windows,macos,ios"
-      web_mode: plain
+      web_mode: pwa
+      pwa_app: pulse
       native_check_args: >-
         --android-permission ACCESS_FINE_LOCATION --android-permission ACCESS_COARSE_LOCATION
         --ios-plist-key NSLocationWhenInUseUsageDescription

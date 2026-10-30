@@ -363,6 +363,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get flagNoSchedule => 'Sin jornada';
+
+  @override
+  String get installApp => 'Instalar app';
+
+  @override
+  String get installIosSteps =>
+      'En Safari, toca Compartir y luego \"Agregar a pantalla de inicio\".';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -723,4 +730,11 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get flagNoSchedule => 'Sin jornada';
+
+  @override
+  String get installApp => 'Instalar app';
+
+  @override
+  String get installIosSteps =>
+      'En Safari, toca Compartir y luego \"Agregar a pantalla de inicio\".';
 }

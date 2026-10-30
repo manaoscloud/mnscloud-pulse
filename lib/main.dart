@@ -8,6 +8,7 @@ import 'src/core/pulse_api.dart';
 import 'src/core/punch_queue.dart';
 import 'src/core/server_clock.dart';
 import 'src/punch/punch_workspace.dart';
+import 'src/pwa/install_app_button.dart';
 import 'src/timesheet/timesheet_view.dart';
 import 'l10n/app_localizations.dart';
 import 'src/version/app_update_overlay.dart';
@@ -350,6 +351,7 @@ class _PulseShellState extends State<PulseShell> {
         title: Text(pulseBrand.value?.title ?? 'MNSCloud Pulse'),
         actions: [
           const AccessLanguageButton(),
+          const InstallAppButton(),
           IconButton(
             tooltip: l.signOut,
             onPressed: _loading ? null : _signOut,

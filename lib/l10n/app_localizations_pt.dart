@@ -362,6 +362,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get flagNoSchedule => 'Sem jornada';
+
+  @override
+  String get installApp => 'Instalar app';
+
+  @override
+  String get installIosSteps =>
+      'No Safari, toque em Compartilhar e depois em \"Adicionar à Tela de Início\".';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -721,4 +728,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get flagNoSchedule => 'Sem jornada';
+
+  @override
+  String get installApp => 'Instalar app';
+
+  @override
+  String get installIosSteps =>
+      'No Safari, toque em Compartilhar e depois em \"Adicionar à Tela de Início\".';
 }
