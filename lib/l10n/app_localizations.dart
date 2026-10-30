@@ -744,6 +744,18 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'No schedule'**
   String get flagNoSchedule;
+
+  /// Button that installs the web app (PWA).
+  ///
+  /// In en_US, this message translates to:
+  /// **'Install app'**
+  String get installApp;
+
+  /// How to install on iPhone/iPad, where browsers have no install prompt.
+  ///
+  /// In en_US, this message translates to:
+  /// **'In Safari, tap Share and then \"Add to Home Screen\".'**
+  String get installIosSteps;
 }
 
 class _AppLocalizationsDelegate

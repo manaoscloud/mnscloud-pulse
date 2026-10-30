@@ -361,6 +361,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get flagNoSchedule => 'No schedule';
+
+  @override
+  String get installApp => 'Install app';
+
+  @override
+  String get installIosSteps =>
+      'In Safari, tap Share and then \"Add to Home Screen\".';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -719,4 +726,11 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get flagNoSchedule => 'No schedule';
+
+  @override
+  String get installApp => 'Install app';
+
+  @override
+  String get installIosSteps =>
+      'In Safari, tap Share and then \"Add to Home Screen\".';
 }

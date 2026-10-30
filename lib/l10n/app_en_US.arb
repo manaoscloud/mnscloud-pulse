@@ -134,5 +134,13 @@
         "type": "int"
       }
     }
+  },
+  "installApp": "Install app",
+  "installIosSteps": "In Safari, tap Share and then \"Add to Home Screen\".",
+  "@installApp": {
+    "description": "Button that installs the web app (PWA)."
+  },
+  "@installIosSteps": {
+    "description": "How to install on iPhone/iPad, where browsers have no install prompt."
   }
 }
