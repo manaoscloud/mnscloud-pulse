@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -44,6 +45,15 @@ Future<void> settle(WidgetTester tester) async {
 }
 
 void main() {
+  // Native test runs reach the geolocator plugin: answer "location services off" so a punch is
+  // recorded without location instead of waiting for a platform that does not exist here.
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('flutter.baseflow.com/geolocator'),
+      (call) async => call.method == 'isLocationServiceEnabled' ? false : null,
+    );
+  });
+
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test('next punch follows the last mark and ids are UUID v4', () {

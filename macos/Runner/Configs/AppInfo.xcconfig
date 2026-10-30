@@ -8,7 +8,7 @@
 PRODUCT_NAME = mnscloud_pulse
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = cloud.mns.mnscloudPulse
+PRODUCT_BUNDLE_IDENTIFIER = cloud.manaos.mnscloud.pulse
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 cloud.mns. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 MNSCloud. All rights reserved.

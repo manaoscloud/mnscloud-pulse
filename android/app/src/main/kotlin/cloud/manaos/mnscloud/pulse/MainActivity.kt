@@ -1,4 +1,4 @@
-package cloud.mns.mnscloud_pulse
+package cloud.manaos.mnscloud.pulse
 
 import io.flutter.embedding.android.FlutterActivity
 
