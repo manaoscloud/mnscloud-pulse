@@ -53,7 +53,9 @@ class _InstallAppButtonState extends State<InstallAppButton> {
     if (widget.labeled) {
       return OutlinedButton.icon(
         key: const Key('installApp'),
-        icon: const Icon(Icons.install_mobile),
+        // Same button in every MNSCloud client (docs/flutter-client-standard.md): never stretched.
+        style: OutlinedButton.styleFrom(minimumSize: const Size(0, 40)),
+        icon: const Icon(Icons.install_desktop),
         label: Text(label),
         onPressed: _install,
       );
@@ -61,7 +63,7 @@ class _InstallAppButtonState extends State<InstallAppButton> {
     return IconButton(
       key: const Key('installApp'),
       tooltip: label,
-      icon: const Icon(Icons.install_mobile),
+      icon: const Icon(Icons.install_desktop),
       onPressed: _install,
     );
   }
