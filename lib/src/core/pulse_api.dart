@@ -26,6 +26,7 @@ class PulseAccount {
     required this.mustChangePassword,
     this.employeeName,
     this.companyName,
+    this.hrAccountName,
   });
 
   factory PulseAccount.fromJson(Map<String, dynamic> json) => PulseAccount(
@@ -34,6 +35,7 @@ class PulseAccount {
     mustChangePassword: json['mustChangePassword'] == true,
     employeeName: json['employeeName']?.toString(),
     companyName: json['companyName']?.toString(),
+    hrAccountName: json['hrAccountName']?.toString(),
   );
 
   final String timeClockAccountUUID;
@@ -42,12 +44,16 @@ class PulseAccount {
   final String? employeeName;
   final String? companyName;
 
+  /// Customer HR account (resale) of the time clock account; null for the reseller's own HR.
+  final String? hrAccountName;
+
   PulseAccount passwordChanged() => PulseAccount(
     timeClockAccountUUID: timeClockAccountUUID,
     loginCode: loginCode,
     mustChangePassword: false,
     employeeName: employeeName,
     companyName: companyName,
+    hrAccountName: hrAccountName,
   );
 }
 
