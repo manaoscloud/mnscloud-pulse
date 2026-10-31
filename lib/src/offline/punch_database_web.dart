@@ -27,6 +27,13 @@ Future<CommonDatabase> openPunchDatabase() async {
   return sqlite.open(_path, vfs: 'multipleciphers-$_vfsName');
 }
 
+/// The IndexedDB file system writes in the background: a mark is on disk only after this, so a
+/// reload or a closed tab right after the tap keeps it.
+Future<void> persistPunchDatabase() async {
+  final (_, fileSystem) = await _open();
+  await fileSystem.flush();
+}
+
 /// Used only when the key in secure storage no longer opens the file (storage reset).
 Future<void> deletePunchDatabase() async {
   final (_, fileSystem) = await _open();

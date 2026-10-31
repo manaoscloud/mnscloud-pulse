@@ -178,6 +178,7 @@ class PunchQueue {
             store.add(accountUUID, QueuedPunch.fromJson(item));
           }
         }
+        await persistPunchDatabase();
         await prefs.remove(_legacyKey);
       }
     } catch (_) {
@@ -189,9 +190,13 @@ class PunchQueue {
   Future<List<QueuedPunch>> load() async =>
       (await _store()).pending(accountUUID);
 
-  Future<void> add(QueuedPunch punch) async =>
-      (await _store()).add(accountUUID, punch);
+  Future<void> add(QueuedPunch punch) async {
+    (await _store()).add(accountUUID, punch);
+    await persistPunchDatabase();
+  }
 
-  Future<void> remove(String idempotencyKey) async =>
-      (await _store()).remove(idempotencyKey);
+  Future<void> remove(String idempotencyKey) async {
+    (await _store()).remove(idempotencyKey);
+    await persistPunchDatabase();
+  }
 }
