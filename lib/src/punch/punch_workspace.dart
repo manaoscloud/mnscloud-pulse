@@ -9,6 +9,7 @@ import '../core/location.dart';
 import '../core/pulse_api.dart';
 import '../core/punch_queue.dart';
 import '../core/server_clock.dart';
+import '../offline/punch_sync.dart';
 import '../timesheet/today_card.dart';
 import 'punch_labels.dart';
 
@@ -20,11 +21,15 @@ class PunchWorkspace extends StatefulWidget {
     required this.api,
     required this.account,
     required this.clock,
+    required this.sync,
     required this.onSessionEnded,
     this.locate = currentPunchLocation,
   });
 
   final PulseApi api;
+
+  /// The single sender of queued marks (session, or the offline grant of this device).
+  final PunchSync sync;
   final PulseAccount account;
   final ServerClock clock;
   final void Function(String code) onSessionEnded;
@@ -57,11 +62,13 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   @override
   void initState() {
     super.initState();
+    widget.sync.addListener(_synced);
     unawaited(_start());
   }
 
   @override
   void dispose() {
+    widget.sync.removeListener(_synced);
     _retry?.cancel();
     _delivered.dispose();
     super.dispose();
@@ -103,38 +110,33 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     }
   }
 
-  /// Sends the queued marks oldest first; a network failure stops and retries later.
+  /// Marks delivered by another pass (tick, reconnection, foreground): refresh the state.
+  Future<void> _synced() async {
+    _pending = await _queue.load();
+    if (!mounted) return;
+    setState(() {});
+    _delivered.value++;
+    if (widget.api.signedIn) await _reload();
+  }
+
+  /// Sends the queued marks oldest first (with the session, or signed by this device when there
+  /// is none); a network failure stops and retries later.
   Future<void> _flush() async {
     if (_flushing) return;
     _flushing = true;
-    var sent = false;
     try {
-      for (final punch in List.of(_pending)) {
-        try {
-          await widget.api.createPunch(
-            punch.body(offline: true, source: _source),
-          );
-          await _queue.remove(punch.idempotencyKey);
-          sent = true;
-        } on PulseFailure catch (failure) {
-          if (_handleFailure(failure)) return;
-          if (failure.code == 'networkError' ||
-              failure.code == 'PULSE_RATE_LIMITED') {
-            if (mounted) {
-              setState(() => _online = failure.code != 'networkError');
-            }
-            break;
-          }
-          // The API refused the mark itself; it can never be recorded as it is.
-          await _queue.remove(punch.idempotencyKey);
-        }
+      final result = await widget.sync.flush(
+        widget.account.timeClockAccountUUID,
+      );
+      if (result.sessionEnded != null) {
+        widget.onSessionEnded(result.sessionEnded!);
+        return;
       }
       _pending = await _queue.load();
-      if (mounted) setState(() {});
+      if (mounted) setState(() => _online = !result.offline);
     } finally {
       _flushing = false;
       _scheduleRetry();
-      if (sent && mounted) _delivered.value++;
     }
   }
 
@@ -159,6 +161,20 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     await _queue.add(punch);
     String message = 'punchSaved';
     bool error = false;
+    if (!widget.api.signedIn) {
+      // Opened without a session (offline): the device grant sends it when there is connection.
+      await _flush();
+      _pending = await _queue.load();
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _message = _pending.any((p) => p.idempotencyKey == punch.idempotencyKey)
+            ? 'punchQueued'
+            : 'punchSaved';
+        _messageError = false;
+      });
+      return;
+    }
     try {
       final item = await widget.api.createPunch(
         punch.body(offline: false, source: _source),
@@ -231,9 +247,8 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       children: [
         Text(
           widget.account.employeeName ?? l.employee,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w800),
         ),
         Text(
           [
@@ -328,9 +343,8 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         const SizedBox(height: 8),
         Text(
           l.locationNote,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: scheme.onSurfaceVariant),
         ),
         if (receipt != null) ...[
           const SizedBox(height: 20),

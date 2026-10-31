@@ -228,7 +228,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pendingSignOutHelp =>
-      'Algunos registros aún no se enviaron. Quedan en este dispositivo y se enviarán cuando vuelvas a iniciar sesión aquí.';
+      'Algunos registros aún no se enviaron. Quedan protegidos en este dispositivo y se envían automáticamente en cuanto haya conexión (o cuando vuelvas a iniciar sesión aquí).';
+
+  @override
+  String get offlineEntry =>
+      'Modo sin conexión: tus registros quedan protegidos en este dispositivo y se envían automáticamente cuando vuelva la conexión.';
 
   @override
   String get cancel => 'Cancelar';
@@ -595,7 +599,11 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get pendingSignOutHelp =>
-      'Algunos registros aún no se enviaron. Quedan en este dispositivo y se enviarán cuando vuelvas a iniciar sesión aquí.';
+      'Algunos registros aún no se enviaron. Quedan protegidos en este dispositivo y se envían automáticamente en cuanto haya conexión (o cuando vuelvas a iniciar sesión aquí).';
+
+  @override
+  String get offlineEntry =>
+      'Modo sin conexión: tus registros quedan protegidos en este dispositivo y se envían automáticamente cuando vuelva la conexión.';
 
   @override
   String get cancel => 'Cancelar';

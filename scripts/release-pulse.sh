@@ -31,8 +31,9 @@ source "${RUNTIME_KIT_DIR}/lib/release.sh"
 # the default same-origin API base (/api/v1) and a portable root base href; the hosting runtime
 # rewrites <base href> to its own path.
 export MNSCLOUD_RUNTIME_KIT_DIR="$RUNTIME_KIT_DIR"
-# Installable PWA: MNSCloud app-shell service worker (runtime-kit), never the API or punches.
-pwa_generate='python3 "$MNSCLOUD_RUNTIME_KIT_DIR/scripts/flutter-pwa.py" generate --build-dir build/web --app pulse'
+# Installable PWA: MNSCloud app-shell service worker (runtime-kit), never the API or punches. The
+# encrypted punch queue engine (sqlite3mc.wasm) is precached so the app opens and punches offline.
+pwa_generate='python3 "$MNSCLOUD_RUNTIME_KIT_DIR/scripts/flutter-pwa.py" generate --build-dir build/web --app pulse --precache sqlite3mc.wasm'
 pwa_validate='python3 "$MNSCLOUD_RUNTIME_KIT_DIR/scripts/flutter-pwa.py" validate --build-dir build/web --base-href /'
 package_web_artifact='"$MNSCLOUD_RUNTIME_KIT_DIR/scripts/package-static-artifact.sh" --source-dir build/web --name "mnscloud-pulse-web-v$(tr -d "[:space:]" < VERSION).tar.gz"'
 
@@ -45,6 +46,7 @@ mrtk_release_prepare \
   --validate "grep -q '^version:' pubspec.yaml" \
   --validate "bash scripts/sync-app-build-info.sh" \
   --validate "flutter pub get" \
+  --validate "bash scripts/fetch-sqlite-wasm.sh --check" \
   --validate "flutter build web --release --base-href / --no-web-resources-cdn" \
   --validate "grep -qF '<base href=\"/\">' build/web/index.html" \
   --validate "$pwa_generate" \

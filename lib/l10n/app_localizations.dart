@@ -496,8 +496,14 @@ abstract class AppLocalizations {
   /// No description provided for @pendingSignOutHelp.
   ///
   /// In en_US, this message translates to:
-  /// **'Some punches were not sent yet. They stay on this device and are sent when you sign in again here.'**
+  /// **'Some punches were not sent yet. They stay protected on this device and are sent automatically as soon as there is a connection (or when you sign in here again).'**
   String get pendingSignOutHelp;
+
+  /// No description provided for @offlineEntry.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Offline mode: your punches stay protected on this device and are sent automatically when the connection is back.'**
+  String get offlineEntry;
 
   /// No description provided for @cancel.
   ///

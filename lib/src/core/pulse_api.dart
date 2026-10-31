@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,10 @@ class PulseFailure implements Exception {
   const PulseFailure(this.code, {this.status});
   final String code;
   final int? status;
+
+  /// The offline grant of this device no longer holds (revoked, expired, replayed, unknown):
+  /// queued marks wait for a session instead.
+  bool get deviceRefused => code.startsWith('PULSE_DEVICE_');
 
   bool get sessionEnded =>
       code == 'PULSE_SESSION_INVALID' ||
@@ -57,11 +62,18 @@ class PulseAccount {
   );
 }
 
+/// Keeps the native refresh token between launches (platform secure storage). The web never
+/// sees its refresh token: it is the HttpOnly cookie set by the API.
+abstract class RefreshTokenStore {
+  Future<String?> read();
+  Future<void> write(String? token);
+}
+
 /// Pulse API client. The session is a short-lived access token in memory plus a rotating refresh
 /// token: on the web it lives only in the HttpOnly cookie set by the API (same origin), on native
-/// builds it stays in memory until secure storage ships with the store apps.
+/// builds in the platform secure storage ([refreshStore]).
 class PulseApi {
-  PulseApi({this._client, String? baseUrl})
+  PulseApi({this._client, String? baseUrl, this.refreshStore})
     : _base = (baseUrl ?? _defaultBase).trim().replaceAll(RegExp(r'/+$'), '');
 
   static const _defaultBase = String.fromEnvironment(
@@ -78,8 +90,24 @@ class PulseApi {
   /// Called with the server time of every session answer, to measure the clock offset.
   void Function(DateTime serverTime)? onServerTime;
 
+  /// Called with the account of every session answer (sign-in, refresh, restore), so the offline
+  /// grant of this device is renewed whenever a session is live.
+  void Function(PulseAccount account)? onSession;
+
+  final RefreshTokenStore? refreshStore;
+
+  String? _accountUUID;
+
+  /// Account of the live session (null when signed out).
+  String? get accountUUID => _accessToken == null ? null : _accountUUID;
+
+  /// True when the last refresh failed for lack of connection (not because the session ended).
+  bool lastRefreshOffline = false;
+
   bool get signedIn => _accessToken != null;
   String get clientKind => kIsWeb ? 'web' : 'native';
+
+  String get platform => _platform;
 
   String get _platform => kIsWeb
       ? 'web'
@@ -96,14 +124,21 @@ class PulseApi {
     String method,
     String path, {
     Map<String, dynamic>? body,
+    String? rawBody,
+    Map<String, String>? headers,
     bool auth = true,
   }) async {
     final request = http.Request(method, Uri.parse('$_base$path'));
     request.headers['content-type'] = 'application/json';
+    if (headers != null) request.headers.addAll(headers);
     if (auth && _accessToken != null) {
       request.headers['authorization'] = 'Bearer $_accessToken';
     }
-    if (body != null) request.body = jsonEncode(body);
+    if (rawBody != null) {
+      request.body = rawBody;
+    } else if (body != null) {
+      request.body = jsonEncode(body);
+    }
     late http.Response response;
     try {
       final streamed = await (_client?.send(request) ?? request.send()).timeout(
@@ -153,13 +188,19 @@ class PulseApi {
     }
     _accessToken = data['accessToken'] as String;
     final refresh = data['refreshToken'];
-    if (refresh is String && refresh.isNotEmpty) _refreshToken = refresh;
+    if (refresh is String && refresh.isNotEmpty) {
+      _refreshToken = refresh;
+      unawaited(refreshStore?.write(refresh));
+    }
     final serverTime = DateTime.tryParse(data['serverTime']?.toString() ?? '');
     if (serverTime != null) onServerTime?.call(serverTime);
-    final account = data['account'];
-    return PulseAccount.fromJson(
-      account is Map<String, dynamic> ? account : const {},
+    final raw = data['account'];
+    final account = PulseAccount.fromJson(
+      raw is Map<String, dynamic> ? raw : const {},
     );
+    _accountUUID = account.timeClockAccountUUID;
+    onSession?.call(account);
+    return account;
   }
 
   Future<PulseAccount> signIn(String loginCode, String password) async =>
@@ -183,6 +224,8 @@ class PulseApi {
   Future<bool> refresh() {
     return _refreshing ??= () async {
       try {
+        if (!kIsWeb) _refreshToken ??= await refreshStore?.read();
+        lastRefreshOffline = false;
         _restored = _accept(
           await _send(
             'POST',
@@ -197,9 +240,12 @@ class PulseApi {
         );
         return true;
       } on PulseFailure catch (failure) {
-        if (failure.code != 'networkError') {
+        if (failure.code == 'networkError') {
+          lastRefreshOffline = true;
+        } else {
           _accessToken = null;
           _refreshToken = null;
+          unawaited(refreshStore?.write(null));
         }
         return false;
       } finally {
@@ -219,6 +265,8 @@ class PulseApi {
     } finally {
       _accessToken = null;
       _refreshToken = null;
+      _accountUUID = null;
+      unawaited(refreshStore?.write(null));
     }
   }
 
@@ -244,6 +292,31 @@ class PulseApi {
 
   Future<Map<String, dynamic>> createPunch(Map<String, dynamic> body) async {
     final data = await call('POST', '/pulse/punches', body: body);
+    final item = (data['data'] as Map<String, dynamic>?)?['item'];
+    return item is Map<String, dynamic> ? item : const {};
+  }
+
+  /// Registers or renews the offline grant of this device key (live session required).
+  Future<Map<String, dynamic>> registerDevice(Map<String, dynamic> body) async {
+    final data = await call('POST', '/pulse/devices', body: body);
+    final item = (data['data'] as Map<String, dynamic>?)?['item'];
+    if (item is! Map<String, dynamic>) throw const PulseFailure('requestError');
+    return item;
+  }
+
+  /// A queued mark signed by this device, sent without a session: [rawBody] is exactly the signed
+  /// body and [headers] carry the device, time, counter and signature.
+  Future<Map<String, dynamic>> createDevicePunch(
+    String rawBody,
+    Map<String, String> headers,
+  ) async {
+    final data = await _send(
+      'POST',
+      '/pulse/device/punches',
+      rawBody: rawBody,
+      headers: headers,
+      auth: false,
+    );
     final item = (data['data'] as Map<String, dynamic>?)?['item'];
     return item is Map<String, dynamic> ? item : const {};
   }

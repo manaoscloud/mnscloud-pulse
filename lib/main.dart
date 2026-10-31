@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -7,6 +11,11 @@ import 'src/access/access_preferences.dart';
 import 'src/core/pulse_api.dart';
 import 'src/core/punch_queue.dart';
 import 'src/core/server_clock.dart';
+import 'src/offline/device_grant.dart';
+import 'src/offline/device_lock.dart';
+import 'src/offline/punch_sync.dart';
+import 'src/offline/secret_vault.dart';
+import 'src/pwa/pwa.dart';
 import 'src/punch/punch_workspace.dart';
 import 'src/pwa/install_app_button.dart';
 import 'src/timesheet/timesheet_view.dart';
@@ -96,10 +105,47 @@ class PulseShell extends StatefulWidget {
   State<PulseShell> createState() => _PulseShellState();
 }
 
+/// Native refresh token in the platform secure storage (the web keeps it in the HttpOnly cookie).
+class _VaultRefreshStore implements RefreshTokenStore {
+  _VaultRefreshStore(this.vault);
+  final SecretVault vault;
+  static const _key = 'pulse.refresh';
+
+  @override
+  Future<String?> read() => vault.read(_key);
+
+  @override
+  Future<void> write(String? token) =>
+      token == null ? vault.delete(_key) : vault.write(_key, token);
+}
+
 class _PulseShellState extends State<PulseShell> {
-  late final PulseApi _api = PulseApi(client: widget.client)
-    ..onServerTime = _clock.accept;
+  final SecretVault _vault = SecretVault.instance;
+  late final PulseApi _api =
+      PulseApi(
+          client: widget.client,
+          refreshStore: kIsWeb ? null : _VaultRefreshStore(_vault),
+        )
+        ..onServerTime = _clock.accept
+        ..onSession = _sessionOpened;
   final _clock = ServerClock();
+  late final DeviceGrants _grants = DeviceGrants(
+    api: _api,
+    clock: _clock,
+    vault: _vault,
+  );
+  late final PunchSync _sync = PunchSync(
+    api: _api,
+    grants: _grants,
+    source: kIsWeb ? 'web' : 'mobile',
+  );
+  Timer? _syncTimer;
+  AppLifecycleListener? _lifecycle;
+
+  /// Opened without connection for the employee who did not sign out on this device: marks are
+  /// kept encrypted and sent by the device grant (or the session, once it is back).
+  bool _offlineEntry = false;
+  static const _profileKey = 'pulse.offline.profile';
 
   final _loginCodeController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -126,6 +172,62 @@ class _PulseShellState extends State<PulseShell> {
     super.initState();
     pulseBrand.addListener(_brandChanged);
     if (widget.restoreSession) _restore();
+    _syncTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => unawaited(_syncAll()),
+    );
+    _lifecycle = AppLifecycleListener(onResume: () => unawaited(_syncAll()));
+    onBrowserOnline(() => unawaited(_syncAll()));
+  }
+
+  /// Sends what every account of this device still has queued, and keeps the grant of the live
+  /// session renewed.
+  Future<void> _syncAll() async {
+    try {
+      final account = _api.accountUUID;
+      if (account != null) await _grants.ensure(account);
+      await _sync.flushAll();
+    } catch (_) {
+      // Storage or network unavailable: the next tick tries again.
+    }
+  }
+
+  void _sessionOpened(PulseAccount account) {
+    if (account.mustChangePassword) return;
+    unawaited(_grants.ensure(account.timeClockAccountUUID));
+    unawaited(
+      _vault.write(
+        _profileKey,
+        jsonEncode({
+          'timeClockAccountUUID': account.timeClockAccountUUID,
+          'loginCode': account.loginCode,
+          'employeeName': account.employeeName,
+          'companyName': account.companyName,
+          'hrAccountName': account.hrAccountName,
+        }),
+      ),
+    );
+    unawaited(pwaPersistStorage());
+    if (_offlineEntry && mounted) {
+      setState(() {
+        _offlineEntry = false;
+        _account = account;
+      });
+    }
+  }
+
+  /// The employee of this device who did not sign out (kept only in secure storage).
+  Future<PulseAccount?> _offlineProfile() async {
+    try {
+      final raw = await _vault.read(_profileKey);
+      if (raw == null) return null;
+      final account = PulseAccount.fromJson(
+        jsonDecode(raw) as Map<String, dynamic>,
+      );
+      return account.timeClockAccountUUID.isEmpty ? null : account;
+    } catch (_) {
+      return null;
+    }
   }
 
   void _brandChanged() {
@@ -135,6 +237,9 @@ class _PulseShellState extends State<PulseShell> {
   @override
   void dispose() {
     pulseBrand.removeListener(_brandChanged);
+    _syncTimer?.cancel();
+    _lifecycle?.dispose();
+    _sync.dispose();
     _confirmPasswordController.dispose();
     _codeFocus.dispose();
     _passwordFocus.dispose();
@@ -148,13 +253,20 @@ class _PulseShellState extends State<PulseShell> {
   Future<void> _restore() async {
     setState(() => _restoring = true);
     final account = await _api.restore();
+    final offline = account == null && _api.lastRefreshOffline
+        ? await _offlineProfile()
+        : null;
     if (!mounted) return;
     setState(() {
       _restoring = false;
       // A session still waiting for the first password change is not reopened: the temporary
       // password is needed again to change it.
-      _account = account?.mustChangePassword == true ? null : account;
+      _account = account?.mustChangePassword == true
+          ? null
+          : account ?? offline;
+      _offlineEntry = account == null && offline != null;
     });
+    unawaited(_syncAll());
   }
 
   Future<void> _run(Future<void> Function() task) async {
@@ -227,6 +339,8 @@ class _PulseShellState extends State<PulseShell> {
   Future<void> _signOut() async {
     final account = _account;
     if (account != null && !account.mustChangePassword) {
+      // Whatever can still go now goes before leaving.
+      await _sync.flush(account.timeClockAccountUUID);
       final pending = await PunchQueue(account.timeClockAccountUUID).load();
       if (pending.isNotEmpty && mounted) {
         final confirmed = await showDialog<bool>(
@@ -249,9 +363,11 @@ class _PulseShellState extends State<PulseShell> {
         if (confirmed != true) return;
       }
     }
+    await _vault.delete(_profileKey);
     await _api.signOut();
     if (!mounted) return;
     setState(() {
+      _offlineEntry = false;
       _account = null;
       _tab = 0;
       _timesheetOpened = false;
@@ -266,6 +382,7 @@ class _PulseShellState extends State<PulseShell> {
   void _sessionEnded(String code) {
     if (!mounted) return;
     setState(() {
+      _offlineEntry = false;
       _account = null;
       _tab = 0;
       _timesheetOpened = false;
@@ -377,11 +494,23 @@ class _PulseShellState extends State<PulseShell> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         ?banner,
+                        if (_offlineEntry)
+                          Padding(
+                            key: const Key('offlineEntry'),
+                            padding: const EdgeInsets.only(bottom: 20),
+                            child: Text(
+                              l.offlineEntry,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ),
                         PunchWorkspace(
                           key: ValueKey(account.timeClockAccountUUID),
                           api: _api,
                           account: account,
                           clock: _clock,
+                          sync: _sync,
                           onSessionEnded: _sessionEnded,
                         ),
                       ],
@@ -525,9 +654,8 @@ class _PulseShellState extends State<PulseShell> {
       children: [
         Text(
           account.employeeName ?? l.employee,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w800),
         ),
         Text(account.loginCode),
         const SizedBox(height: 20),
