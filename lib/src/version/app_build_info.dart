@@ -1,5 +1,5 @@
 /// Stamped from pubspec.yaml by scripts/release-pulse.sh on every release.
-const appBuildInfo = AppBuildInfo(product: "mnscloud-pulse", version: "1.0.14");
+const appBuildInfo = AppBuildInfo(product: "mnscloud-pulse", version: "1.0.25");
 
 class AppBuildInfo {
   const AppBuildInfo({required this.product, required this.version});
