@@ -26,6 +26,8 @@ jobs:
       # The encrypted punch queue engine is precached: the app opens and punches offline.
       pwa_generate_args: "--precache sqlite3mc.wasm"
       web_check: bash scripts/fetch-sqlite-wasm.sh --check
+      # flutter_secure_storage on Linux (device key, database key, refresh token).
+      linux_packages: "libsecret-1-dev libjsoncpp-dev"
       native_check_args: >-
         --android-permission ACCESS_FINE_LOCATION --android-permission ACCESS_COARSE_LOCATION
         --ios-plist-key NSLocationWhenInUseUsageDescription
