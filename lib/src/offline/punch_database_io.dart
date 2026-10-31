@@ -9,6 +9,9 @@ Future<String> _path() async =>
 
 Future<CommonDatabase> openPunchDatabase() async => sqlite3.open(await _path());
 
+/// Native SQLite writes the file synchronously.
+Future<void> persistPunchDatabase() async {}
+
 /// Used only when the key in secure storage no longer opens the file (storage reset).
 Future<void> deletePunchDatabase() async {
   final path = await _path();
