@@ -2,6 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mnscloud_pulse/src/offline/device_lock.dart';
+import 'package:mnscloud_pulse/src/offline/secret_vault.dart';
+import 'package:sqlite3/sqlite3.dart';
+import 'package:mnscloud_pulse/src/core/punch_queue.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
@@ -87,7 +91,12 @@ void phone(WidgetTester tester) {
 }
 
 void main() {
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    SecretVault.instance = MemoryVault();
+    PunchStore.use(PunchStore.memory(sqlite3.openInMemory()));
+    resetDeviceLock();
+  });
 
   test('minutes are HH:MM and balances carry their sign', () {
     expect(formatMinutes(0), '00:00');
