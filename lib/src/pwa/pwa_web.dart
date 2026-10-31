@@ -54,3 +54,14 @@ Future<void> pwaApplyUpdate() async {
     web.window.location.reload();
   }
 }
+
+/// Asks the browser to keep this origin's storage (the encrypted punch queue) under pressure.
+Future<void> pwaPersistStorage() async {
+  final bridge = _bridge;
+  if (bridge == null) return;
+  try {
+    await bridge.callMethod<JSPromise<JSAny?>>('persistStorage'.toJS).toDart;
+  } catch (_) {
+    // Best effort: the browser decides.
+  }
+}

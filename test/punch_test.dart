@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mnscloud_pulse/src/offline/device_lock.dart';
+import 'package:mnscloud_pulse/src/offline/secret_vault.dart';
+import 'package:sqlite3/sqlite3.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
@@ -11,6 +14,8 @@ import 'package:mnscloud_pulse/src/core/ids.dart';
 import 'package:mnscloud_pulse/src/core/pulse_api.dart';
 import 'package:mnscloud_pulse/src/core/punch_queue.dart';
 import 'package:mnscloud_pulse/src/core/server_clock.dart';
+import 'package:mnscloud_pulse/src/offline/device_grant.dart';
+import 'package:mnscloud_pulse/src/offline/p256.dart';
 import 'package:mnscloud_pulse/src/punch/punch_labels.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -49,13 +54,20 @@ void main() {
   // Native test runs reach the geolocator plugin: answer "location services off" so a punch is
   // recorded without location instead of waiting for a platform that does not exist here.
   setUp(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('flutter.baseflow.com/geolocator'),
-      (call) async => call.method == 'isLocationServiceEnabled' ? false : null,
-    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('flutter.baseflow.com/geolocator'),
+          (call) async =>
+              call.method == 'isLocationServiceEnabled' ? false : null,
+        );
   });
 
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    SecretVault.instance = MemoryVault();
+    PunchStore.use(PunchStore.memory(sqlite3.openInMemory()));
+    resetDeviceLock();
+  });
 
   test('next punch follows the last mark and ids are UUID v4', () {
     expect(nextPunchType(null), 'clock_in');
@@ -239,16 +251,83 @@ void main() {
     expect(find.text('Sign in'), findsOneWidget);
   });
 
-  test('the customer HR account of the session survives the password change', () {
-    final account = PulseAccount.fromJson({
-      'timeClockAccountUUID': 'account-1',
-      'loginCode': 'ABCD-EFGH',
-      'mustChangePassword': true,
-      'companyName': 'Customer Company',
-      'hrAccountName': 'Customer HR',
-    });
-    expect(account.hrAccountName, 'Customer HR');
-    expect(account.passwordChanged().hrAccountName, 'Customer HR');
-    expect(PulseAccount.fromJson({'loginCode': 'X'}).hrAccountName, isNull);
-  });
+  testWidgets(
+    'opened offline, the remembered employee punches and the device grant sends it',
+    (tester) async {
+      final key = P256Key.generate();
+      await SecretVault.instance.write(
+        'pulse.offline.profile',
+        jsonEncode({
+          'timeClockAccountUUID': 'account-1',
+          'loginCode': 'ABCD-EFGH',
+          'employeeName': 'Test Employee',
+        }),
+      );
+      await SecretVault.instance.write(
+        'pulse.device.account-1',
+        jsonEncode(
+          DeviceGrantState(
+            deviceUUID: 'device-1',
+            privateKey: key.privateBase64,
+            counter: 2,
+            expiresAt: DateTime.now().toUtc().add(const Duration(days: 5)),
+          ).toJson(),
+        ),
+      );
+      var online = false;
+      final signed = <http.Request>[];
+      final client = MockClient((request) async {
+        final path = request.url.path;
+        if (!online) throw http.ClientException('offline');
+        if (path.endsWith('/device/punches')) {
+          signed.add(request);
+          return json({
+            'data': {
+              'item': {'Duplicate': 0, 'Offline': true},
+            },
+          });
+        }
+        // The session itself is gone (signed out elsewhere, expired): only the grant sends.
+        return json({'code': 'PULSE_SESSION_INVALID'}, 401);
+      });
+      await tester.pumpWidget(app(client));
+      await settle(tester);
+      expect(find.byKey(const Key('offlineEntry')), findsOneWidget);
+      expect(find.text('Test Employee'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('nextPunch')));
+      await settle(tester);
+      expect(find.byKey(const Key('pendingPunches')), findsOneWidget);
+      final queued = await PunchQueue('account-1').load();
+      expect(queued, hasLength(1));
+      online = true;
+      await tester.pump(const Duration(seconds: 31));
+      await settle(tester);
+      expect(signed, hasLength(1));
+      // The attempt made while offline already used counter 3: a counter is never reused.
+      expect(signed.single.headers['X-Device-Counter'], '4');
+      expect(signed.single.headers['authorization'], isNull);
+      expect(
+        jsonDecode(signed.single.body)['idempotencyKey'],
+        queued.single.idempotencyKey,
+      );
+      expect(await PunchQueue('account-1').load(), isEmpty);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  test(
+    'the customer HR account of the session survives the password change',
+    () {
+      final account = PulseAccount.fromJson({
+        'timeClockAccountUUID': 'account-1',
+        'loginCode': 'ABCD-EFGH',
+        'mustChangePassword': true,
+        'companyName': 'Customer Company',
+        'hrAccountName': 'Customer HR',
+      });
+      expect(account.hrAccountName, 'Customer HR');
+      expect(account.passwordChanged().hrAccountName, 'Customer HR');
+      expect(PulseAccount.fromJson({'loginCode': 'X'}).hrAccountName, isNull);
+    },
+  );
 }

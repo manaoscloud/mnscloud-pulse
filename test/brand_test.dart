@@ -2,12 +2,24 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mnscloud_pulse/src/core/punch_queue.dart';
+import 'package:mnscloud_pulse/src/offline/device_lock.dart';
+import 'package:mnscloud_pulse/src/offline/secret_vault.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqlite3/sqlite3.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/main.dart';
 import 'package:mnscloud_pulse/src/brand/brand.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    SecretVault.instance = MemoryVault();
+    PunchStore.use(PunchStore.memory(sqlite3.openInMemory()));
+    resetDeviceLock();
+  });
+
   tearDown(() => pulseBrand.value = null);
 
   test('the Pulse brand comes from the theme context of the host', () async {

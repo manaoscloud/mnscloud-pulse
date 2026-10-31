@@ -227,7 +227,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get pendingSignOutHelp =>
-      'Algumas marcações ainda não foram enviadas. Elas ficam neste aparelho e serão enviadas quando você entrar novamente aqui.';
+      'Algumas marcações ainda não foram enviadas. Elas ficam protegidas neste aparelho e são enviadas automaticamente assim que houver conexão (ou quando você entrar novamente aqui).';
+
+  @override
+  String get offlineEntry =>
+      'Modo offline: suas marcações ficam protegidas neste aparelho e são enviadas automaticamente quando a conexão voltar.';
 
   @override
   String get cancel => 'Cancelar';
@@ -593,7 +597,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get pendingSignOutHelp =>
-      'Algumas marcações ainda não foram enviadas. Elas ficam neste aparelho e serão enviadas quando você entrar novamente aqui.';
+      'Algumas marcações ainda não foram enviadas. Elas ficam protegidas neste aparelho e são enviadas automaticamente assim que houver conexão (ou quando você entrar novamente aqui).';
+
+  @override
+  String get offlineEntry =>
+      'Modo offline: suas marcações ficam protegidas neste aparelho e são enviadas automaticamente quando a conexão voltar.';
 
   @override
   String get cancel => 'Cancelar';

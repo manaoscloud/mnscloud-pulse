@@ -137,3 +137,5 @@ Panel images and help/legal links are optional HTTPS URLs. Logo/favicon retain t
 upload contract. PWA installation name/icons remain the release defaults; the runtime favicon and
 page identity follow the theme. Native clients keep the default brand unless their configured API
 resolves a theme; organization discovery and store-icon branding are outside this web delivery.
+
+Offline punches (encrypted queue, device grant, sending without a session): `docs/offline.md`.

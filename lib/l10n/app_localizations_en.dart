@@ -226,7 +226,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pendingSignOutHelp =>
-      'Some punches were not sent yet. They stay on this device and are sent when you sign in again here.';
+      'Some punches were not sent yet. They stay protected on this device and are sent automatically as soon as there is a connection (or when you sign in here again).';
+
+  @override
+  String get offlineEntry =>
+      'Offline mode: your punches stay protected on this device and are sent automatically when the connection is back.';
 
   @override
   String get cancel => 'Cancel';
@@ -591,7 +595,11 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get pendingSignOutHelp =>
-      'Some punches were not sent yet. They stay on this device and are sent when you sign in again here.';
+      'Some punches were not sent yet. They stay protected on this device and are sent automatically as soon as there is a connection (or when you sign in here again).';
+
+  @override
+  String get offlineEntry =>
+      'Offline mode: your punches stay protected on this device and are sent automatically when the connection is back.';
 
   @override
   String get cancel => 'Cancel';
