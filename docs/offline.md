@@ -9,7 +9,9 @@ the official record (NSR, hash chain, receipt).
 - **Encrypted queue.** `PunchStore` (`lib/src/core/punch_queue.dart`) is one SQLite database
   encrypted with SQLite3MultipleCiphers: a native file on Android, iOS and desktop, IndexedDB through
   `web/sqlite3mc.wasm` in the browser (pinned by `scripts/fetch-sqlite-wasm.sh`, precached by the
-  service worker). The key is random per device and lives only in secure storage. Marks of earlier
+  service worker). On the web the database is opened on the cipher wrapper of the IndexedDB file
+  system (`vfs: 'multipleciphers-<name>'`): on the plain file system `PRAGMA key` fails with
+  "Encryption is not supported by the VFS". The key is random per device and lives only in secure storage. Marks of earlier
   versions (plain `shared_preferences`) move into it on the first read.
 - **Secure storage** (`lib/src/offline/secret_vault.dart`): the database key, the device key with its
   counter and grant, the native refresh token and the profile used to open offline. Never the

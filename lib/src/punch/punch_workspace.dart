@@ -142,6 +142,20 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
 
   Future<void> _record(String type) async {
     if (_busy) return;
+    try {
+      await _recordMark(type);
+    } catch (_) {
+      // The device store or the platform failed: the button never stays waiting.
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _message = 'requestError';
+        _messageError = true;
+      });
+    }
+  }
+
+  Future<void> _recordMark(String type) async {
     setState(() {
       _busy = true;
       _message = null;
