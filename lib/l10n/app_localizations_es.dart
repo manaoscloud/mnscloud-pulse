@@ -374,6 +374,145 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get installIosSteps =>
       'En Safari, toca Compartir y luego \"Agregar a pantalla de inicio\".';
+
+  @override
+  String get navRequests => 'Solicitudes';
+
+  @override
+  String get back => 'Volver';
+
+  @override
+  String get requestNew => 'Nueva solicitud';
+
+  @override
+  String get requestMissingPunch => 'Olvidé fichar';
+
+  @override
+  String get requestPunchContest => 'Impugnar fichaje';
+
+  @override
+  String get requestAbsence => 'Ausencia';
+
+  @override
+  String get absenceMedicalCertificate => 'Certificado médico';
+
+  @override
+  String get absenceJustified => 'Falta justificada';
+
+  @override
+  String get absenceDayOff => 'Día libre';
+
+  @override
+  String get absenceLeave => 'Licencia';
+
+  @override
+  String get requestPending => 'Pendiente';
+
+  @override
+  String get requestApproved => 'Aprobada';
+
+  @override
+  String get requestRejected => 'Rechazada';
+
+  @override
+  String get requestCancelled => 'Cancelada';
+
+  @override
+  String get requestEmpty =>
+      'Aún no tiene solicitudes. Use “Nueva solicitud” si olvidó fichar, necesita impugnar un fichaje o justificar una ausencia.';
+
+  @override
+  String get requestSent => 'Solicitud enviada. La respuesta aparecerá aquí.';
+
+  @override
+  String get requestCancelTitle => '¿Cancelar la solicitud?';
+
+  @override
+  String get requestCancelText => 'La solicitud sale de la cola de su gestor.';
+
+  @override
+  String get requestCancelAction => 'Cancelar solicitud';
+
+  @override
+  String get requestDate => 'Fecha';
+
+  @override
+  String get requestTime => 'Hora';
+
+  @override
+  String get requestMark => 'Fichaje';
+
+  @override
+  String get requestChoosePunch => 'Elija el fichaje a impugnar:';
+
+  @override
+  String get requestNoPunches => 'No hay fichajes recientes.';
+
+  @override
+  String get requestAbsenceType => 'Tipo de ausencia';
+
+  @override
+  String get requestStartDate => 'Primer día';
+
+  @override
+  String get requestEndDate => 'Último día';
+
+  @override
+  String get requestAttachCertificate => 'Adjuntar certificado (foto o PDF)';
+
+  @override
+  String get requestCertificateHint =>
+      'PNG, JPEG, WEBP o PDF hasta 10 MB. Solo RR. HH. y su gestor lo ven.';
+
+  @override
+  String get requestReason => 'Motivo';
+
+  @override
+  String get requestSend => 'Enviar solicitud';
+
+  @override
+  String get requestReasonRequired => 'Indique el motivo.';
+
+  @override
+  String get requestTimeRequired => 'Elija la hora del fichaje.';
+
+  @override
+  String get requestPunchRequired => 'Elija el fichaje a impugnar.';
+
+  @override
+  String get requestEndBeforeStart => 'El último día es anterior al primero.';
+
+  @override
+  String get requestFileInvalid =>
+      'Envíe una foto (PNG, JPEG, WEBP) o un PDF de hasta 10 MB.';
+
+  @override
+  String get requestDuplicate => 'Ya existe una solicitud pendiente para esto.';
+
+  @override
+  String get requestPeriodClosed =>
+      'Esa fecha es anterior al período abierto. Hable con RR. HH.';
+
+  @override
+  String get requestOverlap => 'Esos días ya tienen una ausencia.';
+
+  @override
+  String get requestAlreadyTreated => 'Ese fichaje ya fue descartado.';
+
+  @override
+  String get requestFutureTime => 'La hora no puede estar en el futuro.';
+
+  @override
+  String get requestAlreadyDecided => 'Esa solicitud ya fue respondida.';
+
+  @override
+  String get requestAttachmentUnavailable =>
+      'No es posible enviar certificados ahora. Envíe la solicitud sin él y entréguelo a RR. HH.';
+
+  @override
+  String requestAnswer(String note) {
+    return 'Respuesta: $note';
+  }
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -745,4 +884,143 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   @override
   String get installIosSteps =>
       'En Safari, toca Compartir y luego \"Agregar a pantalla de inicio\".';
+
+  @override
+  String get navRequests => 'Solicitudes';
+
+  @override
+  String get back => 'Volver';
+
+  @override
+  String get requestNew => 'Nueva solicitud';
+
+  @override
+  String get requestMissingPunch => 'Olvidé fichar';
+
+  @override
+  String get requestPunchContest => 'Impugnar fichaje';
+
+  @override
+  String get requestAbsence => 'Ausencia';
+
+  @override
+  String get absenceMedicalCertificate => 'Certificado médico';
+
+  @override
+  String get absenceJustified => 'Falta justificada';
+
+  @override
+  String get absenceDayOff => 'Día libre';
+
+  @override
+  String get absenceLeave => 'Licencia';
+
+  @override
+  String get requestPending => 'Pendiente';
+
+  @override
+  String get requestApproved => 'Aprobada';
+
+  @override
+  String get requestRejected => 'Rechazada';
+
+  @override
+  String get requestCancelled => 'Cancelada';
+
+  @override
+  String get requestEmpty =>
+      'Aún no tiene solicitudes. Use “Nueva solicitud” si olvidó fichar, necesita impugnar un fichaje o justificar una ausencia.';
+
+  @override
+  String get requestSent => 'Solicitud enviada. La respuesta aparecerá aquí.';
+
+  @override
+  String get requestCancelTitle => '¿Cancelar la solicitud?';
+
+  @override
+  String get requestCancelText => 'La solicitud sale de la cola de su gestor.';
+
+  @override
+  String get requestCancelAction => 'Cancelar solicitud';
+
+  @override
+  String get requestDate => 'Fecha';
+
+  @override
+  String get requestTime => 'Hora';
+
+  @override
+  String get requestMark => 'Fichaje';
+
+  @override
+  String get requestChoosePunch => 'Elija el fichaje a impugnar:';
+
+  @override
+  String get requestNoPunches => 'No hay fichajes recientes.';
+
+  @override
+  String get requestAbsenceType => 'Tipo de ausencia';
+
+  @override
+  String get requestStartDate => 'Primer día';
+
+  @override
+  String get requestEndDate => 'Último día';
+
+  @override
+  String get requestAttachCertificate => 'Adjuntar certificado (foto o PDF)';
+
+  @override
+  String get requestCertificateHint =>
+      'PNG, JPEG, WEBP o PDF hasta 10 MB. Solo RR. HH. y su gestor lo ven.';
+
+  @override
+  String get requestReason => 'Motivo';
+
+  @override
+  String get requestSend => 'Enviar solicitud';
+
+  @override
+  String get requestReasonRequired => 'Indique el motivo.';
+
+  @override
+  String get requestTimeRequired => 'Elija la hora del fichaje.';
+
+  @override
+  String get requestPunchRequired => 'Elija el fichaje a impugnar.';
+
+  @override
+  String get requestEndBeforeStart => 'El último día es anterior al primero.';
+
+  @override
+  String get requestFileInvalid =>
+      'Envíe una foto (PNG, JPEG, WEBP) o un PDF de hasta 10 MB.';
+
+  @override
+  String get requestDuplicate => 'Ya existe una solicitud pendiente para esto.';
+
+  @override
+  String get requestPeriodClosed =>
+      'Esa fecha es anterior al período abierto. Hable con RR. HH.';
+
+  @override
+  String get requestOverlap => 'Esos días ya tienen una ausencia.';
+
+  @override
+  String get requestAlreadyTreated => 'Ese fichaje ya fue descartado.';
+
+  @override
+  String get requestFutureTime => 'La hora no puede estar en el futuro.';
+
+  @override
+  String get requestAlreadyDecided => 'Esa solicitud ya fue respondida.';
+
+  @override
+  String get requestAttachmentUnavailable =>
+      'No es posible enviar certificados ahora. Envíe la solicitud sin él y entréguelo a RR. HH.';
+
+  @override
+  String requestAnswer(String note) {
+    return 'Respuesta: $note';
+  }
 }

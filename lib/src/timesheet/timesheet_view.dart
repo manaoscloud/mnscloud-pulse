@@ -230,9 +230,8 @@ class _Totals extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+                style: Theme.of(context).textTheme.labelMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant),
               ),
               Text(
                 value,
@@ -324,9 +323,8 @@ class _DayTile extends StatelessWidget {
                 children: [
                   Text(
                     dateText,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   Text(
                     dayKindLabel(l, day),

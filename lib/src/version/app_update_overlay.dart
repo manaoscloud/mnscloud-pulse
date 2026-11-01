@@ -1,4 +1,5 @@
 import '../../l10n/app_localizations.dart';
+
 import 'package:flutter/material.dart';
 
 import 'app_update_controller.dart';

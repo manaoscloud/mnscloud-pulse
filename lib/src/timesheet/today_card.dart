@@ -181,9 +181,8 @@ class _TodayCardState extends State<TodayCard> with WidgetsBindingObserver {
                         Text(
                           status,
                           key: const Key('todayStatus'),
-                          style: Theme.of(
-                            context,
-                          ).textTheme.labelLarge?.copyWith(color: color),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(color: color),
                         ),
                       ],
                     ),

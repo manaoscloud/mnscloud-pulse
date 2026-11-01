@@ -6,9 +6,18 @@ import 'package:http/http.dart' as http;
 
 /// Public failure of a Pulse call: the API code (`PULSE_*`), `networkError` or `requestError`.
 class PulseFailure implements Exception {
-  const PulseFailure(this.code, {this.status});
+  const PulseFailure(
+    this.code, {
+    this.status,
+    this.message,
+    this.fields = const [],
+  });
   final String code;
   final int? status;
+
+  /// Server text of a refused field (`VALIDATION_FAILED`), mapped to a translation by the view.
+  final String? message;
+  final List<String> fields;
 
   /// The offline grant of this device no longer holds (revoked, expired, replayed, unknown):
   /// queued marks wait for a session instead.
@@ -153,18 +162,69 @@ class PulseApi {
       final decoded = response.body.isEmpty ? null : jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) data = decoded;
     } catch (_) {}
-    if (response.statusCode < 200 || response.statusCode >= 300) {
+    return _checked(response.statusCode, data);
+  }
+
+  static Map<String, dynamic> _checked(int status, Map<String, dynamic> data) {
+    if (status < 200 || status >= 300) {
       final code = data['code'];
+      final fields = data['fields'];
       throw PulseFailure(
         code is String && code.isNotEmpty
             ? code
-            : response.statusCode == 429
+            : status == 429
             ? 'PULSE_RATE_LIMITED'
             : 'requestError',
-        status: response.statusCode,
+        status: status,
+        message: data['error']?.toString(),
+        fields: fields is List
+            ? fields.map((f) => f.toString()).toList()
+            : const [],
       );
     }
     return data;
+  }
+
+  /// One file field (multipart) with plain fields; refreshed and repeated once like [call].
+  Future<Map<String, dynamic>> _upload(
+    String path,
+    Map<String, String> fields,
+    List<int> bytes,
+    String fileName,
+  ) async {
+    Future<Map<String, dynamic>> send() async {
+      final request = http.MultipartRequest('POST', Uri.parse('$_base$path'));
+      if (_accessToken != null) {
+        request.headers['authorization'] = 'Bearer $_accessToken';
+      }
+      request.fields.addAll(fields);
+      request.files.add(
+        http.MultipartFile.fromBytes('file', bytes, filename: fileName),
+      );
+      late http.Response response;
+      try {
+        final streamed = await (_client?.send(request) ?? request.send())
+            .timeout(const Duration(seconds: 60));
+        response = await http.Response.fromStream(streamed);
+      } catch (_) {
+        throw const PulseFailure('networkError');
+      }
+      Map<String, dynamic> data = {};
+      try {
+        final decoded = response.body.isEmpty
+            ? null
+            : jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) data = decoded;
+      } catch (_) {}
+      return _checked(response.statusCode, data);
+    }
+
+    try {
+      return await send();
+    } on PulseFailure catch (failure) {
+      if (failure.code != 'PULSE_SESSION_INVALID' || !await refresh()) rethrow;
+      return await send();
+    }
   }
 
   /// Authenticated call; an expired access token is refreshed once and the call repeated.
@@ -346,5 +406,43 @@ class PulseApi {
     final body = data['data'];
     if (body is! Map<String, dynamic>) throw const PulseFailure('requestError');
     return body;
+  }
+
+  /// Own requests (missing mark, punch contest, absence) with their outcome, newest first.
+  Future<List<Map<String, dynamic>>> listRequests({int limit = 50}) async {
+    final data = await call('GET', '/pulse/requests?limit=$limit');
+    final items = (data['data'] as Map<String, dynamic>?)?['items'];
+    return items is List
+        ? items.whereType<Map<String, dynamic>>().toList()
+        : const [];
+  }
+
+  /// Sends a request; [body] carries the client `uuid`, so a retry returns the stored one.
+  Future<void> createRequest(Map<String, dynamic> body) async {
+    await call('POST', '/pulse/requests', body: body);
+  }
+
+  Future<void> cancelRequest(String uuid) async {
+    await call('POST', '/pulse/requests/$uuid/cancel');
+  }
+
+  /// Uploads a medical certificate before the absence request; returns its UUID.
+  Future<String> uploadAttachment(
+    String attachmentUUID,
+    List<int> bytes,
+    String fileName,
+  ) async {
+    final data = await _upload(
+      '/pulse/attachments',
+      {'attachmentUUID': attachmentUUID},
+      bytes,
+      fileName,
+    );
+    final item = (data['data'] as Map<String, dynamic>?)?['item'];
+    final uuid = item is Map<String, dynamic>
+        ? item['AttachmentUUID']?.toString()
+        : null;
+    if (uuid == null || uuid.isEmpty) throw const PulseFailure('requestError');
+    return uuid;
   }
 }
