@@ -37,6 +37,10 @@ String requestStatusLabel(AppLocalizations l, String status) =>
     };
 
 /// Translated reason of a refused request; the server text is English and never shown as is.
+/// The certificate could not be stored on the server side (storage not configured or down).
+bool attachmentStorageFailed(PulseFailure failure) =>
+    failure.status == 500 || failure.status == 503;
+
 String requestFailureText(AppLocalizations l, PulseFailure failure) {
   if (failure.code == 'networkError') return l.networkError;
   final message = failure.message ?? '';
@@ -512,7 +516,10 @@ class _RequestFormState extends State<RequestForm> {
       if (!mounted) return;
       setState(() {
         _sending = false;
-        _error = failure.status == 500 && _uploaded == null && _file != null
+        _error =
+            attachmentStorageFailed(failure) &&
+                _uploaded == null &&
+                _file != null
             ? l.requestAttachmentUnavailable
             : requestFailureText(l, failure);
       });

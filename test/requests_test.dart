@@ -219,4 +219,26 @@ void main() {
       expect(cancelled, [sent[1]['uuid']]);
     },
   );
+
+  test(
+    'certificate storage failures (500/503) are told apart from refused files',
+    () {
+      expect(
+        attachmentStorageFailed(
+          const PulseFailure('HR_STORAGE_NOT_CONFIGURED', status: 503),
+        ),
+        isTrue,
+      );
+      expect(
+        attachmentStorageFailed(const PulseFailure('serverError', status: 500)),
+        isTrue,
+      );
+      expect(
+        attachmentStorageFailed(
+          const PulseFailure('VALIDATION_FAILED', status: 400),
+        ),
+        isFalse,
+      );
+    },
+  );
 }
