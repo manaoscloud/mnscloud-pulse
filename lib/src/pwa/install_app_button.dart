@@ -35,7 +35,12 @@ class _InstallAppButtonState extends State<InstallAppButton> {
           icon: const Icon(Icons.ios_share),
           title: Text(l10n.installApp),
           content: Text(l10n.installIosSteps),
-          actions: [TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.close))],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.close),
+            ),
+          ],
         ),
       );
       return;

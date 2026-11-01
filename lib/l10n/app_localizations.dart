@@ -762,6 +762,270 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'In Safari, tap Share and then \"Add to Home Screen\".'**
   String get installIosSteps;
+
+  /// No description provided for @navRequests.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Requests'**
+  String get navRequests;
+
+  /// No description provided for @back.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// No description provided for @requestNew.
+  ///
+  /// In en_US, this message translates to:
+  /// **'New request'**
+  String get requestNew;
+
+  /// No description provided for @requestMissingPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Forgot a mark'**
+  String get requestMissingPunch;
+
+  /// No description provided for @requestPunchContest.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Contest a mark'**
+  String get requestPunchContest;
+
+  /// No description provided for @requestAbsence.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Absence'**
+  String get requestAbsence;
+
+  /// No description provided for @absenceMedicalCertificate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Medical certificate'**
+  String get absenceMedicalCertificate;
+
+  /// No description provided for @absenceJustified.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Justified absence'**
+  String get absenceJustified;
+
+  /// No description provided for @absenceDayOff.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Day off'**
+  String get absenceDayOff;
+
+  /// No description provided for @absenceLeave.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Leave'**
+  String get absenceLeave;
+
+  /// No description provided for @requestPending.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Pending'**
+  String get requestPending;
+
+  /// No description provided for @requestApproved.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Approved'**
+  String get requestApproved;
+
+  /// No description provided for @requestRejected.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Rejected'**
+  String get requestRejected;
+
+  /// No description provided for @requestCancelled.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Cancelled'**
+  String get requestCancelled;
+
+  /// No description provided for @requestEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You have no requests yet. Use “New request” if you forgot a mark, need to contest one or have to justify an absence.'**
+  String get requestEmpty;
+
+  /// No description provided for @requestSent.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Request sent. You will see the answer here.'**
+  String get requestSent;
+
+  /// No description provided for @requestCancelTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Cancel request?'**
+  String get requestCancelTitle;
+
+  /// No description provided for @requestCancelText.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The request leaves the queue of your manager.'**
+  String get requestCancelText;
+
+  /// No description provided for @requestCancelAction.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Cancel request'**
+  String get requestCancelAction;
+
+  /// No description provided for @requestDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Date'**
+  String get requestDate;
+
+  /// No description provided for @requestTime.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Time'**
+  String get requestTime;
+
+  /// No description provided for @requestMark.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Mark'**
+  String get requestMark;
+
+  /// No description provided for @requestChoosePunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Choose the mark to contest:'**
+  String get requestChoosePunch;
+
+  /// No description provided for @requestNoPunches.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No recent marks.'**
+  String get requestNoPunches;
+
+  /// No description provided for @requestAbsenceType.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Kind of absence'**
+  String get requestAbsenceType;
+
+  /// No description provided for @requestStartDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'First day'**
+  String get requestStartDate;
+
+  /// No description provided for @requestEndDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Last day'**
+  String get requestEndDate;
+
+  /// No description provided for @requestAttachCertificate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Attach certificate (photo or PDF)'**
+  String get requestAttachCertificate;
+
+  /// No description provided for @requestCertificateHint.
+  ///
+  /// In en_US, this message translates to:
+  /// **'PNG, JPEG, WEBP or PDF up to 10 MB. Only HR and your manager see it.'**
+  String get requestCertificateHint;
+
+  /// No description provided for @requestReason.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Reason'**
+  String get requestReason;
+
+  /// No description provided for @requestSend.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Send request'**
+  String get requestSend;
+
+  /// No description provided for @requestReasonRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Write the reason.'**
+  String get requestReasonRequired;
+
+  /// No description provided for @requestTimeRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Choose the time of the mark.'**
+  String get requestTimeRequired;
+
+  /// No description provided for @requestPunchRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Choose the mark to contest.'**
+  String get requestPunchRequired;
+
+  /// No description provided for @requestEndBeforeStart.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The last day is before the first day.'**
+  String get requestEndBeforeStart;
+
+  /// No description provided for @requestFileInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Send a photo (PNG, JPEG, WEBP) or a PDF up to 10 MB.'**
+  String get requestFileInvalid;
+
+  /// No description provided for @requestDuplicate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'There is already a pending request for this.'**
+  String get requestDuplicate;
+
+  /// No description provided for @requestPeriodClosed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This date is before the open period. Talk to HR.'**
+  String get requestPeriodClosed;
+
+  /// No description provided for @requestOverlap.
+  ///
+  /// In en_US, this message translates to:
+  /// **'These days already have an absence.'**
+  String get requestOverlap;
+
+  /// No description provided for @requestAlreadyTreated.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This mark was already disregarded.'**
+  String get requestAlreadyTreated;
+
+  /// No description provided for @requestFutureTime.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The time cannot be in the future.'**
+  String get requestFutureTime;
+
+  /// No description provided for @requestAlreadyDecided.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This request was already answered.'**
+  String get requestAlreadyDecided;
+
+  /// No description provided for @requestAttachmentUnavailable.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Certificates cannot be sent right now. Send the request without it and give it to HR.'**
+  String get requestAttachmentUnavailable;
+
+  /// No description provided for @requestAnswer.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Answer: {note}'**
+  String requestAnswer(String note);
 }
 
 class _AppLocalizationsDelegate

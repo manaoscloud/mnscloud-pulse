@@ -27,7 +27,9 @@ Future<bool> pwaPromptInstall() async {
   final bridge = _bridge;
   if (bridge == null) return false;
   try {
-    final outcome = await bridge.callMethod<JSPromise<JSString>>('promptInstall'.toJS).toDart;
+    final outcome = await bridge
+        .callMethod<JSPromise<JSString>>('promptInstall'.toJS)
+        .toDart;
     return outcome.toDart == 'accepted';
   } catch (_) {
     return false;
@@ -37,7 +39,10 @@ Future<bool> pwaPromptInstall() async {
 void pwaOnInstallChange(void Function() listener) {
   final bridge = _bridge;
   if (bridge == null) return;
-  bridge.callMethod<JSAny?>('onInstallChange'.toJS, ((JSString _) => listener()).toJS);
+  bridge.callMethod<JSAny?>(
+    'onInstallChange'.toJS,
+    ((JSString _) => listener()).toJS,
+  );
 }
 
 /// "Update now": activates the waiting service worker revision and reloads (plain reload when the

@@ -6,8 +6,8 @@ export 'pwa_stub.dart' if (dart.library.js_interop) 'pwa_web.dart';
 enum PwaInstallState { installed, available, ios, unavailable }
 
 PwaInstallState parsePwaInstallState(String? value) => switch (value) {
-      'installed' => PwaInstallState.installed,
-      'available' => PwaInstallState.available,
-      'ios' => PwaInstallState.ios,
-      _ => PwaInstallState.unavailable,
-    };
+  'installed' => PwaInstallState.installed,
+  'available' => PwaInstallState.available,
+  'ios' => PwaInstallState.ios,
+  _ => PwaInstallState.unavailable,
+};

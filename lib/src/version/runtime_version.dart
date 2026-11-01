@@ -17,9 +17,10 @@ bool isReleaseVersion(String value) =>
 /// Compares the numeric `major.minor.patch` part; suffixes are ignored.
 int compareSemver(String left, String right) {
   List<int> parts(String value) {
-    final core = normalizeVersion(
-      value,
-    ).split(RegExp(r'[+-]')).first.split('.');
+    final core = normalizeVersion(value)
+        .split(RegExp(r'[+-]'))
+        .first
+        .split('.');
     return List<int>.generate(
       3,
       (index) => index < core.length ? int.tryParse(core[index]) ?? 0 : 0,

@@ -373,6 +373,146 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get installIosSteps =>
       'No Safari, toque em Compartilhar e depois em \"Adicionar à Tela de Início\".';
+
+  @override
+  String get navRequests => 'Solicitações';
+
+  @override
+  String get back => 'Voltar';
+
+  @override
+  String get requestNew => 'Nova solicitação';
+
+  @override
+  String get requestMissingPunch => 'Esqueci de marcar';
+
+  @override
+  String get requestPunchContest => 'Contestar marcação';
+
+  @override
+  String get requestAbsence => 'Ausência';
+
+  @override
+  String get absenceMedicalCertificate => 'Atestado médico';
+
+  @override
+  String get absenceJustified => 'Falta justificada';
+
+  @override
+  String get absenceDayOff => 'Folga';
+
+  @override
+  String get absenceLeave => 'Licença';
+
+  @override
+  String get requestPending => 'Pendente';
+
+  @override
+  String get requestApproved => 'Aprovada';
+
+  @override
+  String get requestRejected => 'Recusada';
+
+  @override
+  String get requestCancelled => 'Cancelada';
+
+  @override
+  String get requestEmpty =>
+      'Você ainda não tem solicitações. Use “Nova solicitação” se esqueceu de marcar, precisa contestar uma marcação ou justificar uma ausência.';
+
+  @override
+  String get requestSent => 'Solicitação enviada. A resposta aparece aqui.';
+
+  @override
+  String get requestCancelTitle => 'Cancelar a solicitação?';
+
+  @override
+  String get requestCancelText => 'A solicitação sai da fila do seu gestor.';
+
+  @override
+  String get requestCancelAction => 'Cancelar solicitação';
+
+  @override
+  String get requestDate => 'Data';
+
+  @override
+  String get requestTime => 'Horário';
+
+  @override
+  String get requestMark => 'Marcação';
+
+  @override
+  String get requestChoosePunch => 'Escolha a marcação a contestar:';
+
+  @override
+  String get requestNoPunches => 'Nenhuma marcação recente.';
+
+  @override
+  String get requestAbsenceType => 'Tipo de ausência';
+
+  @override
+  String get requestStartDate => 'Primeiro dia';
+
+  @override
+  String get requestEndDate => 'Último dia';
+
+  @override
+  String get requestAttachCertificate => 'Anexar atestado (foto ou PDF)';
+
+  @override
+  String get requestCertificateHint =>
+      'PNG, JPEG, WEBP ou PDF até 10 MB. Só o RH e seu gestor veem.';
+
+  @override
+  String get requestReason => 'Motivo';
+
+  @override
+  String get requestSend => 'Enviar solicitação';
+
+  @override
+  String get requestReasonRequired => 'Informe o motivo.';
+
+  @override
+  String get requestTimeRequired => 'Escolha o horário da marcação.';
+
+  @override
+  String get requestPunchRequired => 'Escolha a marcação a contestar.';
+
+  @override
+  String get requestEndBeforeStart => 'O último dia é anterior ao primeiro.';
+
+  @override
+  String get requestFileInvalid =>
+      'Envie uma foto (PNG, JPEG, WEBP) ou um PDF de até 10 MB.';
+
+  @override
+  String get requestDuplicate =>
+      'Já existe uma solicitação pendente para isso.';
+
+  @override
+  String get requestPeriodClosed =>
+      'Essa data é anterior ao período aberto. Fale com o RH.';
+
+  @override
+  String get requestOverlap => 'Esses dias já têm uma ausência.';
+
+  @override
+  String get requestAlreadyTreated => 'Essa marcação já foi desconsiderada.';
+
+  @override
+  String get requestFutureTime => 'O horário não pode estar no futuro.';
+
+  @override
+  String get requestAlreadyDecided => 'Essa solicitação já foi respondida.';
+
+  @override
+  String get requestAttachmentUnavailable =>
+      'Não é possível enviar atestados agora. Envie a solicitação sem ele e entregue ao RH.';
+
+  @override
+  String requestAnswer(String note) {
+    return 'Resposta: $note';
+  }
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -743,4 +883,144 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get installIosSteps =>
       'No Safari, toque em Compartilhar e depois em \"Adicionar à Tela de Início\".';
+
+  @override
+  String get navRequests => 'Solicitações';
+
+  @override
+  String get back => 'Voltar';
+
+  @override
+  String get requestNew => 'Nova solicitação';
+
+  @override
+  String get requestMissingPunch => 'Esqueci de marcar';
+
+  @override
+  String get requestPunchContest => 'Contestar marcação';
+
+  @override
+  String get requestAbsence => 'Ausência';
+
+  @override
+  String get absenceMedicalCertificate => 'Atestado médico';
+
+  @override
+  String get absenceJustified => 'Falta justificada';
+
+  @override
+  String get absenceDayOff => 'Folga';
+
+  @override
+  String get absenceLeave => 'Licença';
+
+  @override
+  String get requestPending => 'Pendente';
+
+  @override
+  String get requestApproved => 'Aprovada';
+
+  @override
+  String get requestRejected => 'Recusada';
+
+  @override
+  String get requestCancelled => 'Cancelada';
+
+  @override
+  String get requestEmpty =>
+      'Você ainda não tem solicitações. Use “Nova solicitação” se esqueceu de marcar, precisa contestar uma marcação ou justificar uma ausência.';
+
+  @override
+  String get requestSent => 'Solicitação enviada. A resposta aparece aqui.';
+
+  @override
+  String get requestCancelTitle => 'Cancelar a solicitação?';
+
+  @override
+  String get requestCancelText => 'A solicitação sai da fila do seu gestor.';
+
+  @override
+  String get requestCancelAction => 'Cancelar solicitação';
+
+  @override
+  String get requestDate => 'Data';
+
+  @override
+  String get requestTime => 'Horário';
+
+  @override
+  String get requestMark => 'Marcação';
+
+  @override
+  String get requestChoosePunch => 'Escolha a marcação a contestar:';
+
+  @override
+  String get requestNoPunches => 'Nenhuma marcação recente.';
+
+  @override
+  String get requestAbsenceType => 'Tipo de ausência';
+
+  @override
+  String get requestStartDate => 'Primeiro dia';
+
+  @override
+  String get requestEndDate => 'Último dia';
+
+  @override
+  String get requestAttachCertificate => 'Anexar atestado (foto ou PDF)';
+
+  @override
+  String get requestCertificateHint =>
+      'PNG, JPEG, WEBP ou PDF até 10 MB. Só o RH e seu gestor veem.';
+
+  @override
+  String get requestReason => 'Motivo';
+
+  @override
+  String get requestSend => 'Enviar solicitação';
+
+  @override
+  String get requestReasonRequired => 'Informe o motivo.';
+
+  @override
+  String get requestTimeRequired => 'Escolha o horário da marcação.';
+
+  @override
+  String get requestPunchRequired => 'Escolha a marcação a contestar.';
+
+  @override
+  String get requestEndBeforeStart => 'O último dia é anterior ao primeiro.';
+
+  @override
+  String get requestFileInvalid =>
+      'Envie uma foto (PNG, JPEG, WEBP) ou um PDF de até 10 MB.';
+
+  @override
+  String get requestDuplicate =>
+      'Já existe uma solicitação pendente para isso.';
+
+  @override
+  String get requestPeriodClosed =>
+      'Essa data é anterior ao período aberto. Fale com o RH.';
+
+  @override
+  String get requestOverlap => 'Esses dias já têm uma ausência.';
+
+  @override
+  String get requestAlreadyTreated => 'Essa marcação já foi desconsiderada.';
+
+  @override
+  String get requestFutureTime => 'O horário não pode estar no futuro.';
+
+  @override
+  String get requestAlreadyDecided => 'Essa solicitação já foi respondida.';
+
+  @override
+  String get requestAttachmentUnavailable =>
+      'Não é possível enviar atestados agora. Envie a solicitação sem ele e entregue ao RH.';
+
+  @override
+  String requestAnswer(String note) {
+    return 'Resposta: $note';
+  }
 }

@@ -372,6 +372,146 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get installIosSteps =>
       'In Safari, tap Share and then \"Add to Home Screen\".';
+
+  @override
+  String get navRequests => 'Requests';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get requestNew => 'New request';
+
+  @override
+  String get requestMissingPunch => 'Forgot a mark';
+
+  @override
+  String get requestPunchContest => 'Contest a mark';
+
+  @override
+  String get requestAbsence => 'Absence';
+
+  @override
+  String get absenceMedicalCertificate => 'Medical certificate';
+
+  @override
+  String get absenceJustified => 'Justified absence';
+
+  @override
+  String get absenceDayOff => 'Day off';
+
+  @override
+  String get absenceLeave => 'Leave';
+
+  @override
+  String get requestPending => 'Pending';
+
+  @override
+  String get requestApproved => 'Approved';
+
+  @override
+  String get requestRejected => 'Rejected';
+
+  @override
+  String get requestCancelled => 'Cancelled';
+
+  @override
+  String get requestEmpty =>
+      'You have no requests yet. Use “New request” if you forgot a mark, need to contest one or have to justify an absence.';
+
+  @override
+  String get requestSent => 'Request sent. You will see the answer here.';
+
+  @override
+  String get requestCancelTitle => 'Cancel request?';
+
+  @override
+  String get requestCancelText =>
+      'The request leaves the queue of your manager.';
+
+  @override
+  String get requestCancelAction => 'Cancel request';
+
+  @override
+  String get requestDate => 'Date';
+
+  @override
+  String get requestTime => 'Time';
+
+  @override
+  String get requestMark => 'Mark';
+
+  @override
+  String get requestChoosePunch => 'Choose the mark to contest:';
+
+  @override
+  String get requestNoPunches => 'No recent marks.';
+
+  @override
+  String get requestAbsenceType => 'Kind of absence';
+
+  @override
+  String get requestStartDate => 'First day';
+
+  @override
+  String get requestEndDate => 'Last day';
+
+  @override
+  String get requestAttachCertificate => 'Attach certificate (photo or PDF)';
+
+  @override
+  String get requestCertificateHint =>
+      'PNG, JPEG, WEBP or PDF up to 10 MB. Only HR and your manager see it.';
+
+  @override
+  String get requestReason => 'Reason';
+
+  @override
+  String get requestSend => 'Send request';
+
+  @override
+  String get requestReasonRequired => 'Write the reason.';
+
+  @override
+  String get requestTimeRequired => 'Choose the time of the mark.';
+
+  @override
+  String get requestPunchRequired => 'Choose the mark to contest.';
+
+  @override
+  String get requestEndBeforeStart => 'The last day is before the first day.';
+
+  @override
+  String get requestFileInvalid =>
+      'Send a photo (PNG, JPEG, WEBP) or a PDF up to 10 MB.';
+
+  @override
+  String get requestDuplicate => 'There is already a pending request for this.';
+
+  @override
+  String get requestPeriodClosed =>
+      'This date is before the open period. Talk to HR.';
+
+  @override
+  String get requestOverlap => 'These days already have an absence.';
+
+  @override
+  String get requestAlreadyTreated => 'This mark was already disregarded.';
+
+  @override
+  String get requestFutureTime => 'The time cannot be in the future.';
+
+  @override
+  String get requestAlreadyDecided => 'This request was already answered.';
+
+  @override
+  String get requestAttachmentUnavailable =>
+      'Certificates cannot be sent right now. Send the request without it and give it to HR.';
+
+  @override
+  String requestAnswer(String note) {
+    return 'Answer: $note';
+  }
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -741,4 +881,144 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   @override
   String get installIosSteps =>
       'In Safari, tap Share and then \"Add to Home Screen\".';
+
+  @override
+  String get navRequests => 'Requests';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get requestNew => 'New request';
+
+  @override
+  String get requestMissingPunch => 'Forgot a mark';
+
+  @override
+  String get requestPunchContest => 'Contest a mark';
+
+  @override
+  String get requestAbsence => 'Absence';
+
+  @override
+  String get absenceMedicalCertificate => 'Medical certificate';
+
+  @override
+  String get absenceJustified => 'Justified absence';
+
+  @override
+  String get absenceDayOff => 'Day off';
+
+  @override
+  String get absenceLeave => 'Leave';
+
+  @override
+  String get requestPending => 'Pending';
+
+  @override
+  String get requestApproved => 'Approved';
+
+  @override
+  String get requestRejected => 'Rejected';
+
+  @override
+  String get requestCancelled => 'Cancelled';
+
+  @override
+  String get requestEmpty =>
+      'You have no requests yet. Use “New request” if you forgot a mark, need to contest one or have to justify an absence.';
+
+  @override
+  String get requestSent => 'Request sent. You will see the answer here.';
+
+  @override
+  String get requestCancelTitle => 'Cancel request?';
+
+  @override
+  String get requestCancelText =>
+      'The request leaves the queue of your manager.';
+
+  @override
+  String get requestCancelAction => 'Cancel request';
+
+  @override
+  String get requestDate => 'Date';
+
+  @override
+  String get requestTime => 'Time';
+
+  @override
+  String get requestMark => 'Mark';
+
+  @override
+  String get requestChoosePunch => 'Choose the mark to contest:';
+
+  @override
+  String get requestNoPunches => 'No recent marks.';
+
+  @override
+  String get requestAbsenceType => 'Kind of absence';
+
+  @override
+  String get requestStartDate => 'First day';
+
+  @override
+  String get requestEndDate => 'Last day';
+
+  @override
+  String get requestAttachCertificate => 'Attach certificate (photo or PDF)';
+
+  @override
+  String get requestCertificateHint =>
+      'PNG, JPEG, WEBP or PDF up to 10 MB. Only HR and your manager see it.';
+
+  @override
+  String get requestReason => 'Reason';
+
+  @override
+  String get requestSend => 'Send request';
+
+  @override
+  String get requestReasonRequired => 'Write the reason.';
+
+  @override
+  String get requestTimeRequired => 'Choose the time of the mark.';
+
+  @override
+  String get requestPunchRequired => 'Choose the mark to contest.';
+
+  @override
+  String get requestEndBeforeStart => 'The last day is before the first day.';
+
+  @override
+  String get requestFileInvalid =>
+      'Send a photo (PNG, JPEG, WEBP) or a PDF up to 10 MB.';
+
+  @override
+  String get requestDuplicate => 'There is already a pending request for this.';
+
+  @override
+  String get requestPeriodClosed =>
+      'This date is before the open period. Talk to HR.';
+
+  @override
+  String get requestOverlap => 'These days already have an absence.';
+
+  @override
+  String get requestAlreadyTreated => 'This mark was already disregarded.';
+
+  @override
+  String get requestFutureTime => 'The time cannot be in the future.';
+
+  @override
+  String get requestAlreadyDecided => 'This request was already answered.';
+
+  @override
+  String get requestAttachmentUnavailable =>
+      'Certificates cannot be sent right now. Send the request without it and give it to HR.';
+
+  @override
+  String requestAnswer(String note) {
+    return 'Answer: $note';
+  }
 }

@@ -23,7 +23,11 @@ Future<PunchLocation?> currentPunchLocation() async {
         timeLimit: Duration(seconds: 5),
       ),
     ).timeout(const Duration(seconds: 6));
-    return PunchLocation(position.latitude, position.longitude, position.accuracy);
+    return PunchLocation(
+      position.latitude,
+      position.longitude,
+      position.accuracy,
+    );
   } catch (_) {
     return null;
   }

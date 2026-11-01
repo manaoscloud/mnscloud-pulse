@@ -18,6 +18,7 @@ import 'src/offline/secret_vault.dart';
 import 'src/pwa/pwa.dart';
 import 'src/punch/punch_workspace.dart';
 import 'src/pwa/install_app_button.dart';
+import 'src/requests/requests_view.dart';
 import 'src/timesheet/timesheet_view.dart';
 import 'l10n/app_localizations.dart';
 import 'src/version/app_update_overlay.dart';
@@ -163,9 +164,10 @@ class _PulseShellState extends State<PulseShell> {
   bool _loading = false;
   String? _message;
 
-  /// Signed-in tab: 0 home (punch), 1 timesheet. The timesheet is built on its first visit.
+  /// Signed-in tab: 0 home (punch), 1 timesheet, 2 requests. Tabs are built on their first visit.
   int _tab = 0;
   bool _timesheetOpened = false;
+  bool _requestsOpened = false;
 
   @override
   void initState() {
@@ -530,6 +532,19 @@ class _PulseShellState extends State<PulseShell> {
                         )
                       : const SizedBox.shrink(),
                 ),
+                TickerMode(
+                  enabled: _tab == 2,
+                  child: _requestsOpened
+                      ? RequestsView(
+                          key: ValueKey(
+                            'requests-${account.timeClockAccountUUID}',
+                          ),
+                          api: _api,
+                          clock: _clock,
+                          onSessionEnded: _sessionEnded,
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ],
             ),
           ),
@@ -540,6 +555,7 @@ class _PulseShellState extends State<PulseShell> {
         onDestinationSelected: (index) => setState(() {
           _tab = index;
           if (index == 1) _timesheetOpened = true;
+          if (index == 2) _requestsOpened = true;
         }),
         destinations: [
           NavigationDestination(
@@ -552,6 +568,12 @@ class _PulseShellState extends State<PulseShell> {
             icon: const Icon(Icons.calendar_month_outlined),
             selectedIcon: const Icon(Icons.calendar_month),
             label: l.navTimesheet,
+          ),
+          NavigationDestination(
+            key: const Key('navRequests'),
+            icon: const Icon(Icons.assignment_outlined),
+            selectedIcon: const Icon(Icons.assignment),
+            label: l.navRequests,
           ),
         ],
       ),
