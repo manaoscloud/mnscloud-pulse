@@ -160,6 +160,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Uma nova versão está pronta. Você entrará novamente após atualizar.';
 
   @override
+  String get versionUnsupported =>
+      'Esta versão do app não é mais aceita. Atualize o app pela loja ou com o administrador para continuar.';
+
+  @override
   String get officialTime => 'Horário oficial';
 
   @override
@@ -668,6 +672,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get updateHelp =>
       'Uma nova versão está pronta. Você entrará novamente após atualizar.';
+
+  @override
+  String get versionUnsupported =>
+      'Esta versão do app não é mais aceita. Atualize o app pela loja ou com o administrador para continuar.';
 
   @override
   String get officialTime => 'Horário oficial';

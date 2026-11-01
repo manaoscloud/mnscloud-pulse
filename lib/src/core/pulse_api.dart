@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../version/client_identity.dart';
+
 /// Public failure of a Pulse call: the API code (`PULSE_*`), `networkError` or `requestError`.
 class PulseFailure implements Exception {
   const PulseFailure(
@@ -27,6 +29,10 @@ class PulseFailure implements Exception {
       code == 'PULSE_SESSION_INVALID' ||
       code == 'PULSE_ACCESS_DENIED' ||
       code == 'PULSE_MODULE_UNAVAILABLE';
+
+  /// This installed app version is no longer accepted (HTTP 426): nothing local is dropped, the
+  /// app waits for an update.
+  bool get versionUnsupported => code == clientVersionUnsupportedCode;
 
   @override
   String toString() => 'PulseFailure($code)';
@@ -83,12 +89,7 @@ abstract class RefreshTokenStore {
 /// builds in the platform secure storage ([refreshStore]).
 class PulseApi {
   PulseApi({this._client, String? baseUrl, this.refreshStore})
-    : _base = (baseUrl ?? _defaultBase).trim().replaceAll(RegExp(r'/+$'), '');
-
-  static const _defaultBase = String.fromEnvironment(
-    'PULSE_PUBLIC_API_BASE_URL',
-    defaultValue: '/api/v1',
-  );
+    : _base = normalizedApiBase(baseUrl);
 
   final http.Client? _client;
   final String _base;
@@ -118,16 +119,7 @@ class PulseApi {
 
   String get platform => _platform;
 
-  String get _platform => kIsWeb
-      ? 'web'
-      : switch (defaultTargetPlatform) {
-          TargetPlatform.android => 'android',
-          TargetPlatform.iOS => 'ios',
-          TargetPlatform.windows => 'windows',
-          TargetPlatform.macOS => 'macos',
-          TargetPlatform.linux => 'linux',
-          _ => 'web',
-        };
+  String get _platform => clientPlatformName();
 
   Future<Map<String, dynamic>> _send(
     String method,
@@ -139,6 +131,7 @@ class PulseApi {
   }) async {
     final request = http.Request(method, Uri.parse('$_base$path'));
     request.headers['content-type'] = 'application/json';
+    request.headers.addAll(clientHeaders(platform: _platform));
     if (headers != null) request.headers.addAll(headers);
     if (auth && _accessToken != null) {
       request.headers['authorization'] = 'Bearer $_accessToken';
@@ -168,6 +161,7 @@ class PulseApi {
   static Map<String, dynamic> _checked(int status, Map<String, dynamic> data) {
     if (status < 200 || status >= 300) {
       final code = data['code'];
+      noteClientVersionAnswer(status, code);
       final fields = data['fields'];
       throw PulseFailure(
         code is String && code.isNotEmpty
@@ -194,6 +188,7 @@ class PulseApi {
   ) async {
     Future<Map<String, dynamic>> send() async {
       final request = http.MultipartRequest('POST', Uri.parse('$_base$path'));
+      request.headers.addAll(clientHeaders(platform: _platform));
       if (_accessToken != null) {
         request.headers['authorization'] = 'Bearer $_accessToken';
       }
@@ -302,7 +297,8 @@ class PulseApi {
       } on PulseFailure catch (failure) {
         if (failure.code == 'networkError') {
           lastRefreshOffline = true;
-        } else {
+        } else if (!failure.versionUnsupported) {
+          // A refused app version keeps the session for after the update.
           _accessToken = null;
           _refreshToken = null;
           unawaited(refreshStore?.write(null));

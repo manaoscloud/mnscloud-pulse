@@ -202,6 +202,9 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       if (failure.code == 'networkError') {
         _online = false;
         message = 'punchQueued';
+      } else if (failure.versionUnsupported) {
+        // This app version is refused: the mark stays queued and goes after the update.
+        message = 'punchQueued';
       } else if (failure.code == 'PULSE_RATE_LIMITED') {
         message = 'rateLimited';
         error = true;

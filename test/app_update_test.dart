@@ -6,6 +6,12 @@ import 'package:mnscloud_pulse/src/version/app_update_controller.dart';
 import 'package:mnscloud_pulse/src/version/app_update_overlay.dart';
 import 'package:mnscloud_pulse/src/version/runtime_version.dart';
 
+/// The overlay starts the web checks (timers): unmount it and stop them before the test ends.
+Future<void> unmount(WidgetTester tester, AppUpdateController update) async {
+  await tester.pumpWidget(const SizedBox());
+  update.dispose();
+}
+
 void main() {
   final t0 = DateTime(2026, 10, 16, 12);
   late DateTime now;
@@ -14,6 +20,7 @@ void main() {
     reader: () async => null,
     runningVersion: '1.0.3',
     clock: () => now,
+    web: true,
   );
 
   setUp(() => now = t0);
@@ -43,7 +50,6 @@ void main() {
     tester,
   ) async {
     final update = controller();
-    addTearDown(update.dispose);
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -69,11 +75,11 @@ void main() {
     await tester.pump();
     expect(find.textContaining('New version available'), findsNothing);
     expect(find.text('content'), findsOneWidget);
+    await unmount(tester, update);
   });
 
   testWidgets('a critical release shows no "Later"', (tester) async {
     final update = controller();
-    addTearDown(update.dispose);
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -96,13 +102,13 @@ void main() {
     update.postpone();
     await tester.pump();
     expect(find.textContaining('Important update'), findsOneWidget);
+    await unmount(tester, update);
   });
   testWidgets(
     'hovering the close button above the Navigator shows its tooltip',
     (tester) async {
       // Mounted like lib/main.dart: MaterialApp.builder, outside the Navigator.
       final update = controller();
-      addTearDown(update.dispose);
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -120,7 +126,6 @@ void main() {
       await tester.pump();
 
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(mouse.removePointer);
       await mouse.addPointer(location: Offset.zero);
       await mouse.moveTo(tester.getCenter(find.byIcon(Icons.close)));
       await tester.pump(const Duration(seconds: 2));
@@ -130,6 +135,8 @@ void main() {
       expect(find.text('Later'), findsNWidgets(2));
       expect(find.text('Update now'), findsOneWidget);
       expect(find.text('content'), findsOneWidget);
+      await mouse.removePointer();
+      await unmount(tester, update);
     },
   );
 }

@@ -159,6 +159,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A new version is ready. You will sign in again after updating.';
 
   @override
+  String get versionUnsupported =>
+      'This app version is no longer supported. Update the app from the store or with your administrator to continue.';
+
+  @override
   String get officialTime => 'Official time';
 
   @override
@@ -666,6 +670,10 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   @override
   String get updateHelp =>
       'A new version is ready. You will sign in again after updating.';
+
+  @override
+  String get versionUnsupported =>
+      'This app version is no longer supported. Update the app from the store or with your administrator to continue.';
 
   @override
   String get officialTime => 'Official time';
