@@ -512,6 +512,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String requestAnswer(String note) {
     return 'Answer: $note';
   }
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsReadAll => 'Mark all as read';
+
+  @override
+  String get notificationsEmpty => 'No notifications yet.';
+
+  @override
+  String get notificationsError => 'Notifications could not be loaded.';
+
+  @override
+  String get notificationApproved => 'Request approved';
+
+  @override
+  String get notificationRejected => 'Request rejected';
+
+  @override
+  String get notificationMessage => 'New message on a request';
+
+  @override
+  String get pushTitle => 'Notifications on this device';
+
+  @override
+  String get pushText => 'Get answers and reminders even when Pulse is closed.';
+
+  @override
+  String get pushDenied =>
+      'Notifications are blocked in the browser. Allow them in the site settings.';
+
+  @override
+  String get pushUnavailable =>
+      'Notifications could not be turned on right now.';
+
+  @override
+  String get pushUnsupported =>
+      'This browser does not receive notifications. On iPhone, add Pulse to the Home Screen.';
+
+  @override
+  String get remindersTitle => 'Mark reminders';
+
+  @override
+  String get remindersText =>
+      'A reminder when your clock-in or clock-out time passes without a mark.';
+
+  @override
+  String get remindersOff => 'Your company has not turned on mark reminders.';
+
+  @override
+  String requestConversation(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+      zero: 'Conversation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conversationEmpty => 'Write to your manager about this request.';
+
+  @override
+  String get conversationEmptyClosed => 'No messages.';
+
+  @override
+  String get conversationError =>
+      'The conversation could not be sent or loaded.';
+
+  @override
+  String get conversationHint => 'Message';
+
+  @override
+  String get conversationSend => 'Send';
+
+  @override
+  String get conversationClosed =>
+      'The conversation is available only while the request is pending.';
+
+  @override
+  String get conversationYou => 'You';
+
+  @override
+  String get conversationManager => 'Manager';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -1021,4 +1108,91 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   String requestAnswer(String note) {
     return 'Answer: $note';
   }
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get notificationsReadAll => 'Mark all as read';
+
+  @override
+  String get notificationsEmpty => 'No notifications yet.';
+
+  @override
+  String get notificationsError => 'Notifications could not be loaded.';
+
+  @override
+  String get notificationApproved => 'Request approved';
+
+  @override
+  String get notificationRejected => 'Request rejected';
+
+  @override
+  String get notificationMessage => 'New message on a request';
+
+  @override
+  String get pushTitle => 'Notifications on this device';
+
+  @override
+  String get pushText => 'Get answers and reminders even when Pulse is closed.';
+
+  @override
+  String get pushDenied =>
+      'Notifications are blocked in the browser. Allow them in the site settings.';
+
+  @override
+  String get pushUnavailable =>
+      'Notifications could not be turned on right now.';
+
+  @override
+  String get pushUnsupported =>
+      'This browser does not receive notifications. On iPhone, add Pulse to the Home Screen.';
+
+  @override
+  String get remindersTitle => 'Mark reminders';
+
+  @override
+  String get remindersText =>
+      'A reminder when your clock-in or clock-out time passes without a mark.';
+
+  @override
+  String get remindersOff => 'Your company has not turned on mark reminders.';
+
+  @override
+  String requestConversation(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+      zero: 'Conversation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conversationEmpty => 'Write to your manager about this request.';
+
+  @override
+  String get conversationEmptyClosed => 'No messages.';
+
+  @override
+  String get conversationError =>
+      'The conversation could not be sent or loaded.';
+
+  @override
+  String get conversationHint => 'Message';
+
+  @override
+  String get conversationSend => 'Send';
+
+  @override
+  String get conversationClosed =>
+      'The conversation is available only while the request is pending.';
+
+  @override
+  String get conversationYou => 'You';
+
+  @override
+  String get conversationManager => 'Manager';
 }

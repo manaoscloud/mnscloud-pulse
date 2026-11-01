@@ -18,6 +18,7 @@ import 'src/offline/secret_vault.dart';
 import 'src/pwa/pwa.dart';
 import 'src/punch/punch_workspace.dart';
 import 'src/pwa/install_app_button.dart';
+import 'src/notifications/notifications_view.dart';
 import 'src/requests/requests_view.dart';
 import 'src/timesheet/timesheet_view.dart';
 import 'l10n/app_localizations.dart';
@@ -169,6 +170,19 @@ class _PulseShellState extends State<PulseShell> {
   bool _timesheetOpened = false;
   bool _requestsOpened = false;
 
+  /// Request whose conversation a notification asked to open.
+  final _focusRequest = ValueNotifier<String?>(null);
+
+  /// Requests tab, optionally opening one request (notification, push click, `?tab=requests`).
+  void _openRequests([String? requestUUID]) {
+    if (!mounted) return;
+    setState(() {
+      _tab = 2;
+      _requestsOpened = true;
+    });
+    if (requestUUID != null) _focusRequest.value = requestUUID;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -179,6 +193,14 @@ class _PulseShellState extends State<PulseShell> {
       (_) => unawaited(_syncAll()),
     );
     _lifecycle = AppLifecycleListener(onResume: () => unawaited(_syncAll()));
+    // A push notification of a request opens the requests tab (link or click with the app open).
+    if (Uri.base.queryParameters['tab'] == 'requests') {
+      _tab = 2;
+      _requestsOpened = true;
+    }
+    pwaOnNotificationClick((url) {
+      if (url.contains('tab=requests')) _openRequests();
+    });
     onBrowserOnline(() => unawaited(_syncAll()));
   }
 
@@ -249,6 +271,7 @@ class _PulseShellState extends State<PulseShell> {
     _passwordController.dispose();
     _newPasswordController.dispose();
     _clock.dispose();
+    _focusRequest.dispose();
     super.dispose();
   }
 
@@ -469,6 +492,12 @@ class _PulseShellState extends State<PulseShell> {
       appBar: AppBar(
         title: Text(pulseBrand.value?.title ?? 'MNSCloud Pulse'),
         actions: [
+          NotificationsButton(
+            key: ValueKey('bell-${account.timeClockAccountUUID}'),
+            api: _api,
+            onOpenRequest: _openRequests,
+            onSessionEnded: _sessionEnded,
+          ),
           const AccessLanguageButton(),
           const InstallAppButton(),
           IconButton(
@@ -542,6 +571,7 @@ class _PulseShellState extends State<PulseShell> {
                           api: _api,
                           clock: _clock,
                           onSessionEnded: _sessionEnded,
+                          focus: _focusRequest,
                         )
                       : const SizedBox.shrink(),
                 ),

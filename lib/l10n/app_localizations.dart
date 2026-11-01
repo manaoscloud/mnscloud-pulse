@@ -1026,6 +1026,150 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Answer: {note}'**
   String requestAnswer(String note);
+
+  /// No description provided for @notificationsTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Notifications'**
+  String get notificationsTitle;
+
+  /// No description provided for @notificationsReadAll.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Mark all as read'**
+  String get notificationsReadAll;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No notifications yet.'**
+  String get notificationsEmpty;
+
+  /// No description provided for @notificationsError.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Notifications could not be loaded.'**
+  String get notificationsError;
+
+  /// No description provided for @notificationApproved.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Request approved'**
+  String get notificationApproved;
+
+  /// No description provided for @notificationRejected.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Request rejected'**
+  String get notificationRejected;
+
+  /// No description provided for @notificationMessage.
+  ///
+  /// In en_US, this message translates to:
+  /// **'New message on a request'**
+  String get notificationMessage;
+
+  /// No description provided for @pushTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Notifications on this device'**
+  String get pushTitle;
+
+  /// No description provided for @pushText.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Get answers and reminders even when Pulse is closed.'**
+  String get pushText;
+
+  /// No description provided for @pushDenied.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Notifications are blocked in the browser. Allow them in the site settings.'**
+  String get pushDenied;
+
+  /// No description provided for @pushUnavailable.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Notifications could not be turned on right now.'**
+  String get pushUnavailable;
+
+  /// No description provided for @pushUnsupported.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This browser does not receive notifications. On iPhone, add Pulse to the Home Screen.'**
+  String get pushUnsupported;
+
+  /// No description provided for @remindersTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Mark reminders'**
+  String get remindersTitle;
+
+  /// No description provided for @remindersText.
+  ///
+  /// In en_US, this message translates to:
+  /// **'A reminder when your clock-in or clock-out time passes without a mark.'**
+  String get remindersText;
+
+  /// No description provided for @remindersOff.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your company has not turned on mark reminders.'**
+  String get remindersOff;
+
+  /// No description provided for @requestConversation.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count, plural, =0{Conversation} =1{1 message} other{{count} messages}}'**
+  String requestConversation(int count);
+
+  /// No description provided for @conversationEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Write to your manager about this request.'**
+  String get conversationEmpty;
+
+  /// No description provided for @conversationEmptyClosed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No messages.'**
+  String get conversationEmptyClosed;
+
+  /// No description provided for @conversationError.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The conversation could not be sent or loaded.'**
+  String get conversationError;
+
+  /// No description provided for @conversationHint.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Message'**
+  String get conversationHint;
+
+  /// No description provided for @conversationSend.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Send'**
+  String get conversationSend;
+
+  /// No description provided for @conversationClosed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The conversation is available only while the request is pending.'**
+  String get conversationClosed;
+
+  /// No description provided for @conversationYou.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You'**
+  String get conversationYou;
+
+  /// No description provided for @conversationManager.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Manager'**
+  String get conversationManager;
 }
 
 class _AppLocalizationsDelegate

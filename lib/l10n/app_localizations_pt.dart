@@ -513,6 +513,95 @@ class AppLocalizationsPt extends AppLocalizations {
   String requestAnswer(String note) {
     return 'Resposta: $note';
   }
+
+  @override
+  String get notificationsTitle => 'Avisos';
+
+  @override
+  String get notificationsReadAll => 'Marcar todos como lidos';
+
+  @override
+  String get notificationsEmpty => 'Nenhum aviso por enquanto.';
+
+  @override
+  String get notificationsError => 'Não foi possível carregar os avisos.';
+
+  @override
+  String get notificationApproved => 'Solicitação aprovada';
+
+  @override
+  String get notificationRejected => 'Solicitação recusada';
+
+  @override
+  String get notificationMessage => 'Nova mensagem na solicitação';
+
+  @override
+  String get pushTitle => 'Notificações neste aparelho';
+
+  @override
+  String get pushText =>
+      'Receba respostas e lembretes mesmo com o Pulse fechado.';
+
+  @override
+  String get pushDenied =>
+      'As notificações estão bloqueadas no navegador. Libere nas configurações do site.';
+
+  @override
+  String get pushUnavailable =>
+      'Não foi possível ativar as notificações agora.';
+
+  @override
+  String get pushUnsupported =>
+      'Este navegador não recebe notificações. No iPhone, instale o Pulse na tela de início.';
+
+  @override
+  String get remindersTitle => 'Lembretes de marcação';
+
+  @override
+  String get remindersText =>
+      'Aviso quando passar do horário de entrada ou de saída sem marcação.';
+
+  @override
+  String get remindersOff => 'Sua empresa não ativou os lembretes de marcação.';
+
+  @override
+  String requestConversation(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mensagens',
+      one: '1 mensagem',
+      zero: 'Conversa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conversationEmpty =>
+      'Escreva para o seu gestor sobre esta solicitação.';
+
+  @override
+  String get conversationEmptyClosed => 'Nenhuma mensagem.';
+
+  @override
+  String get conversationError =>
+      'Não foi possível enviar ou carregar a conversa.';
+
+  @override
+  String get conversationHint => 'Mensagem';
+
+  @override
+  String get conversationSend => 'Enviar';
+
+  @override
+  String get conversationClosed =>
+      'A conversa fica disponível só enquanto a solicitação está pendente.';
+
+  @override
+  String get conversationYou => 'Você';
+
+  @override
+  String get conversationManager => 'Gestor';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1023,4 +1112,93 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String requestAnswer(String note) {
     return 'Resposta: $note';
   }
+
+  @override
+  String get notificationsTitle => 'Avisos';
+
+  @override
+  String get notificationsReadAll => 'Marcar todos como lidos';
+
+  @override
+  String get notificationsEmpty => 'Nenhum aviso por enquanto.';
+
+  @override
+  String get notificationsError => 'Não foi possível carregar os avisos.';
+
+  @override
+  String get notificationApproved => 'Solicitação aprovada';
+
+  @override
+  String get notificationRejected => 'Solicitação recusada';
+
+  @override
+  String get notificationMessage => 'Nova mensagem na solicitação';
+
+  @override
+  String get pushTitle => 'Notificações neste aparelho';
+
+  @override
+  String get pushText =>
+      'Receba respostas e lembretes mesmo com o Pulse fechado.';
+
+  @override
+  String get pushDenied =>
+      'As notificações estão bloqueadas no navegador. Libere nas configurações do site.';
+
+  @override
+  String get pushUnavailable =>
+      'Não foi possível ativar as notificações agora.';
+
+  @override
+  String get pushUnsupported =>
+      'Este navegador não recebe notificações. No iPhone, instale o Pulse na tela de início.';
+
+  @override
+  String get remindersTitle => 'Lembretes de marcação';
+
+  @override
+  String get remindersText =>
+      'Aviso quando passar do horário de entrada ou de saída sem marcação.';
+
+  @override
+  String get remindersOff => 'Sua empresa não ativou os lembretes de marcação.';
+
+  @override
+  String requestConversation(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mensagens',
+      one: '1 mensagem',
+      zero: 'Conversa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get conversationEmpty =>
+      'Escreva para o seu gestor sobre esta solicitação.';
+
+  @override
+  String get conversationEmptyClosed => 'Nenhuma mensagem.';
+
+  @override
+  String get conversationError =>
+      'Não foi possível enviar ou carregar a conversa.';
+
+  @override
+  String get conversationHint => 'Mensagem';
+
+  @override
+  String get conversationSend => 'Enviar';
+
+  @override
+  String get conversationClosed =>
+      'A conversa fica disponível só enquanto a solicitação está pendente.';
+
+  @override
+  String get conversationYou => 'Você';
+
+  @override
+  String get conversationManager => 'Gestor';
 }
