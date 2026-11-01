@@ -48,6 +48,7 @@
   "updateNow": "Update now",
   "later": "Later",
   "updateHelp": "A new version is ready. You will sign in again after updating.",
+  "versionUnsupported": "This app version is no longer supported. Update the app from the store or with your administrator to continue.",
   "officialTime": "Official time",
   "nextPunch": "Next punch",
   "otherPunch": "Other punch",

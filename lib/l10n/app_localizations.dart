@@ -391,6 +391,12 @@ abstract class AppLocalizations {
   /// **'A new version is ready. You will sign in again after updating.'**
   String get updateHelp;
 
+  /// No description provided for @versionUnsupported.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This app version is no longer supported. Update the app from the store or with your administrator to continue.'**
+  String get versionUnsupported;
+
   /// No description provided for @officialTime.
   ///
   /// In en_US, this message translates to:

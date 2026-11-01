@@ -48,6 +48,7 @@
   "updateNow": "Actualizar ahora",
   "later": "Más tarde",
   "updateHelp": "Hay una nueva versión. Deberás iniciar sesión después de actualizar.",
+  "versionUnsupported": "Esta versión de la app ya no es compatible. Actualice la app desde la tienda o con su administrador para continuar.",
   "officialTime": "Hora oficial",
   "nextPunch": "Próximo registro",
   "otherPunch": "Otro registro",

@@ -161,6 +161,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Hay una nueva versión. Deberás iniciar sesión después de actualizar.';
 
   @override
+  String get versionUnsupported =>
+      'Esta versión de la app ya no es compatible. Actualice la app desde la tienda o con su administrador para continuar.';
+
+  @override
   String get officialTime => 'Hora oficial';
 
   @override
@@ -669,6 +673,10 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   @override
   String get updateHelp =>
       'Hay una nueva versión. Deberás iniciar sesión después de actualizar.';
+
+  @override
+  String get versionUnsupported =>
+      'Esta versión de la app ya no es compatible. Actualice la app desde la tienda o con su administrador para continuar.';
 
   @override
   String get officialTime => 'Hora oficial';
