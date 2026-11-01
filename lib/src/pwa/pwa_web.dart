@@ -70,3 +70,47 @@ Future<void> pwaPersistStorage() async {
     // Best effort: the browser decides.
   }
 }
+
+/// unsupported | default | granted | denied.
+String pwaPushPermission() {
+  final bridge = _bridge;
+  if (bridge == null || !bridge.has('pushPermission')) return 'unsupported';
+  try {
+    return bridge.callMethod<JSString>('pushPermission'.toJS).toDart;
+  } catch (_) {
+    return 'unsupported';
+  }
+}
+
+Future<String?> _pushCall(String method, [JSAny? argument]) async {
+  final bridge = _bridge;
+  if (bridge == null || !bridge.has(method)) return null;
+  try {
+    final result = await bridge
+        .callMethod<JSPromise<JSString?>>(method.toJS, argument)
+        .toDart;
+    return result?.toDart;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Asks permission (call it from a tap) and resolves the `PushSubscription` JSON, or null.
+Future<String?> pwaSubscribePush(String publicKey) =>
+    _pushCall('subscribePush', publicKey.toJS);
+
+/// The `PushSubscription` JSON of this browser, or null.
+Future<String?> pwaCurrentPush() => _pushCall('currentPush');
+
+/// Unsubscribes this browser; resolves the removed endpoint, or null.
+Future<String?> pwaUnsubscribePush() => _pushCall('unsubscribePush');
+
+/// [listener] receives the target URL of a notification clicked while the app is open.
+void pwaOnNotificationClick(void Function(String url) listener) {
+  final bridge = _bridge;
+  if (bridge == null || !bridge.has('onNotificationClick')) return;
+  bridge.callMethod<JSAny?>(
+    'onNotificationClick'.toJS,
+    ((JSString url) => listener(url.toDart)).toJS,
+  );
+}

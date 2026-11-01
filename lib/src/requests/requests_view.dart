@@ -81,11 +81,15 @@ class RequestsView extends StatefulWidget {
     required this.api,
     required this.clock,
     required this.onSessionEnded,
+    this.focus,
   });
 
   final PulseApi api;
   final ServerClock clock;
   final void Function(String code) onSessionEnded;
+
+  /// Request to open (from a notification); its conversation opens once the list has it.
+  final ValueNotifier<String?>? focus;
 
   @override
   State<RequestsView> createState() => _RequestsViewState();
@@ -99,6 +103,53 @@ class _RequestsViewState extends State<RequestsView> {
   int _request = 0;
 
   AppLocalizations get l => AppLocalizations.of(context)!;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focus?.addListener(_focusChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.focus?.removeListener(_focusChanged);
+    super.dispose();
+  }
+
+  void _focusChanged() {
+    if (widget.focus?.value != null && mounted) unawaited(_load());
+  }
+
+  /// Opens the conversation of the focused request once it is in the list.
+  void _openFocused() {
+    final uuid = widget.focus?.value?.replaceAll('-', '').toUpperCase();
+    if (uuid == null) return;
+    for (final item in _items ?? const <Map<String, dynamic>>[]) {
+      final id = item['RequestUUID']
+          ?.toString()
+          .replaceAll('-', '')
+          .toUpperCase();
+      if (id == uuid) {
+        widget.focus!.value = null;
+        unawaited(_conversation(item));
+        return;
+      }
+    }
+  }
+
+  Future<void> _conversation(Map<String, dynamic> item) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => RequestConversation(
+        api: widget.api,
+        request: item,
+        onSessionEnded: widget.onSessionEnded,
+      ),
+    );
+    if (mounted) unawaited(_load());
+  }
 
   @override
   void didChangeDependencies() {
@@ -131,6 +182,7 @@ class _RequestsViewState extends State<RequestsView> {
         _items = items;
         _loading = false;
       });
+      _openFocused();
     } on PulseFailure catch (failure) {
       if (_ended(failure) || !mounted || request != _request) return;
       setState(() {
@@ -307,14 +359,34 @@ class _RequestsViewState extends State<RequestsView> {
                           style: const TextStyle(fontStyle: FontStyle.italic),
                         ),
                       ),
-                    if (item['Status'] == 'pending')
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () => _cancel(item),
-                          child: Text(l.requestCancelAction),
-                        ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        children: [
+                          TextButton.icon(
+                            key: ValueKey(
+                              'conversation-${item['RequestUUID']}',
+                            ),
+                            onPressed: () => _conversation(item),
+                            icon: const Icon(
+                              Icons.chat_bubble_outline,
+                              size: 18,
+                            ),
+                            label: Text(
+                              l.requestConversation(
+                                (item['MessageCount'] as num?)?.toInt() ?? 0,
+                              ),
+                            ),
+                          ),
+                          if (item['Status'] == 'pending')
+                            TextButton(
+                              onPressed: () => _cancel(item),
+                              child: Text(l.requestCancelAction),
+                            ),
+                        ],
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -706,6 +778,229 @@ class _RequestFormState extends State<RequestForm> {
                     )
                   : Text(l.requestSend),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Conversation of a request (PU10): the employee and whoever decides, while it is pending.
+class RequestConversation extends StatefulWidget {
+  const RequestConversation({
+    super.key,
+    required this.api,
+    required this.request,
+    required this.onSessionEnded,
+  });
+
+  final PulseApi api;
+  final Map<String, dynamic> request;
+  final void Function(String code) onSessionEnded;
+
+  @override
+  State<RequestConversation> createState() => _RequestConversationState();
+}
+
+class _RequestConversationState extends State<RequestConversation> {
+  final _text = TextEditingController();
+  List<Map<String, dynamic>>? _messages;
+  String? _error;
+  bool _sending = false;
+  // One identifier per message typed: a retry after a network failure is not sent twice.
+  String _messageUUID = uuidV4();
+
+  AppLocalizations get l => AppLocalizations.of(context)!;
+  String get _uuid => widget.request['RequestUUID']?.toString() ?? '';
+  bool get _open => widget.request['Status'] == 'pending';
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  bool _ended(PulseFailure failure) {
+    if (!failure.sessionEnded) return false;
+    Navigator.of(context).pop();
+    widget.onSessionEnded(failure.code);
+    return true;
+  }
+
+  Future<void> _load() async {
+    try {
+      final messages = await widget.api.requestMessages(_uuid);
+      if (mounted) setState(() => _messages = messages);
+    } on PulseFailure catch (failure) {
+      if (_ended(failure) || !mounted) return;
+      setState(() => _error = failure.code);
+    }
+  }
+
+  Future<void> _send() async {
+    final body = _text.text.trim();
+    if (body.isEmpty || _sending) return;
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    try {
+      await widget.api.sendRequestMessage(_uuid, _messageUUID, body);
+      _text.clear();
+      _messageUUID = uuidV4();
+      await _load();
+    } on PulseFailure catch (failure) {
+      if (_ended(failure) || !mounted) return;
+      setState(() => _error = failure.code);
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final messages = _messages;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+            child: Text(
+              requestTypeLabel(l, widget.request['Type']?.toString() ?? ''),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              widget.request['Reason']?.toString() ?? '',
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
+          ),
+          const Divider(height: 24),
+          Flexible(
+            child: messages == null && _error == null
+                ? const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: LinearProgressIndicator(),
+                  )
+                : ListView(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      if (messages != null && messages.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            _open
+                                ? l.conversationEmpty
+                                : l.conversationEmptyClosed,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      for (final message in messages ?? const [])
+                        _Bubble(message: message),
+                    ],
+                  ),
+          ),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(
+                _error == 'networkError' ? l.networkError : l.conversationError,
+                style: TextStyle(color: scheme.error),
+              ),
+            ),
+          if (_open)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      key: const Key('conversationInput'),
+                      controller: _text,
+                      minLines: 1,
+                      maxLines: 4,
+                      maxLength: 2000,
+                      textInputAction: TextInputAction.newline,
+                      decoration: InputDecoration(
+                        hintText: l.conversationHint,
+                        counterText: '',
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('conversationSend'),
+                    tooltip: l.conversationSend,
+                    onPressed: _sending ? null : _send,
+                    icon: const Icon(Icons.send),
+                  ),
+                ],
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                l.conversationClosed,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: scheme.onSurfaceVariant),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Bubble extends StatelessWidget {
+  const _Bubble({required this.message});
+  final Map<String, dynamic> message;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final mine = message['Mine'] == true;
+    final when = DateTime.tryParse(message['DateCreated']?.toString() ?? '');
+    final time = when == null
+        ? ''
+        : '${MaterialLocalizations.of(context).formatShortDate(when.toLocal())} '
+              '${TimeOfDay.fromDateTime(when.toLocal()).format(context)}';
+    return Align(
+      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.all(10),
+        constraints: const BoxConstraints(maxWidth: 420),
+        decoration: BoxDecoration(
+          color: mine
+              ? scheme.primaryContainer
+              : scheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              mine ? l.conversationYou : l.conversationManager,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+            const SizedBox(height: 2),
+            Text(message['Body']?.toString() ?? ''),
+            if (time.isNotEmpty)
+              Text(time, style: Theme.of(context).textTheme.labelSmall),
           ],
         ),
       ),

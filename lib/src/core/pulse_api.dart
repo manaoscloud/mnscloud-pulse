@@ -426,6 +426,89 @@ class PulseApi {
     await call('POST', '/pulse/requests/$uuid/cancel');
   }
 
+  /// Conversation of an own request; decider names are never sent to Pulse.
+  Future<List<Map<String, dynamic>>> requestMessages(String uuid) async {
+    final data = await call('GET', '/pulse/requests/$uuid/messages');
+    final items = (data['data'] as Map<String, dynamic>?)?['items'];
+    return items is List
+        ? items.whereType<Map<String, dynamic>>().toList()
+        : const [];
+  }
+
+  /// [messageUUID] is generated once per message: a retry returns the stored one.
+  Future<void> sendRequestMessage(
+    String uuid,
+    String messageUUID,
+    String body,
+  ) async {
+    await call(
+      'POST',
+      '/pulse/requests/$uuid/messages',
+      body: {'uuid': messageUUID, 'body': body},
+    );
+  }
+
+  /// Inbox page: `items` and `unread`.
+  Future<Map<String, dynamic>> notifications({int limit = 50}) async {
+    final data = await call('GET', '/pulse/notifications?limit=$limit');
+    return (data['data'] as Map<String, dynamic>?) ?? const {};
+  }
+
+  /// Marks one notification, or every one without [uuid], as read.
+  Future<void> readNotifications([String? uuid]) async {
+    await call(
+      'POST',
+      '/pulse/notifications/read',
+      body: {'notificationUUID': ?uuid},
+    );
+  }
+
+  /// `MarkReminders`, `RemindersAvailable` and `PushDevices`.
+  Future<Map<String, dynamic>> preferences() async {
+    final data = await call('GET', '/pulse/preferences');
+    return (data['data'] as Map<String, dynamic>?) ?? const {};
+  }
+
+  Future<Map<String, dynamic>> setReminders(bool enabled) async {
+    final data = await call(
+      'PUT',
+      '/pulse/preferences',
+      body: {'markReminders': enabled},
+    );
+    return (data['data'] as Map<String, dynamic>?) ?? const {};
+  }
+
+  /// VAPID public key (base64url) for the browser push subscription.
+  Future<String> pushKey() async {
+    final data = await call('GET', '/pulse/push/key');
+    return (data['data'] as Map<String, dynamic>?)?['publicKey']?.toString() ??
+        '';
+  }
+
+  /// Registers the browser `PushSubscription` JSON; notifications use [locale].
+  Future<void> subscribePush(
+    Map<String, dynamic> subscription,
+    String locale,
+  ) async {
+    await call(
+      'POST',
+      '/pulse/push/subscriptions',
+      body: {
+        'endpoint': subscription['endpoint'],
+        'keys': subscription['keys'],
+        'locale': locale,
+      },
+    );
+  }
+
+  Future<void> unsubscribePush(String endpoint) async {
+    await call(
+      'POST',
+      '/pulse/push/subscriptions/remove',
+      body: {'endpoint': endpoint},
+    );
+  }
+
   /// Uploads a medical certificate before the absence request; returns its UUID.
   Future<String> uploadAttachment(
     String attachmentUUID,
