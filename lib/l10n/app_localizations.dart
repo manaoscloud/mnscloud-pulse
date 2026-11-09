@@ -1032,6 +1032,66 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Answer: {note}'**
   String requestAnswer(String note);
+
+  /// No description provided for @confirmPunchTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm {punch}?'**
+  String confirmPunchTitle(String punch);
+
+  /// No description provided for @confirmPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm'**
+  String get confirmPunch;
+
+  /// No description provided for @retakePhoto.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Take again'**
+  String get retakePhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @punchPhotoNote.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your company asks for a photo at each punch. It is kept for 90 days and seen only by HR.'**
+  String get punchPhotoNote;
+
+  /// No description provided for @punchPhotoMissing.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No photo: the punch is recorded and flagged for HR.'**
+  String get punchPhotoMissing;
+
+  /// No description provided for @punchPhotoFailed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Punch saved, but the photo could not be sent.'**
+  String get punchPhotoFailed;
+
+  /// No description provided for @punchPhotoOffline.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No connection: the punch was kept; the photo is only sent with connection.'**
+  String get punchPhotoOffline;
+
+  /// No description provided for @punchPhotoSaved.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Punch saved with photo.'**
+  String get punchPhotoSaved;
+
+  /// No description provided for @withPhoto.
+  ///
+  /// In en_US, this message translates to:
+  /// **'With photo'**
+  String get withPhoto;
 }
 
 class _AppLocalizationsDelegate

@@ -393,7 +393,27 @@ class PulseApi {
     if (body is! Map<String, dynamic> || body['date'] is! String) {
       throw const PulseFailure('requestError');
     }
+    final mode = body['punchPhotoMode'];
+    if (mode is String) punchPhotoMode = mode;
     return body;
+  }
+
+  /// Photo at punch of the employee policy (`off`, `optional`, `required`), as the last read of
+  /// [today] reported it; `null` until then.
+  String? punchPhotoMode;
+
+  /// Sends the photo taken at an own punch, right after it; a retry with [photoUUID] is harmless.
+  Future<void> uploadPunchPhoto(
+    String punchUUID,
+    String photoUUID,
+    List<int> bytes,
+  ) async {
+    await _upload(
+      '/pulse/punches/$punchUUID/photo',
+      {'photoUUID': photoUUID},
+      bytes,
+      'photo.jpg',
+    );
   }
 
   /// Monthly timesheet (`month` is YYYY-MM): consolidated days with their marks and the totals.

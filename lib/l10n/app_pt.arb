@@ -154,5 +154,15 @@
   "requestFutureTime": "O horário não pode estar no futuro.",
   "requestAlreadyDecided": "Essa solicitação já foi respondida.",
   "requestAttachmentUnavailable": "Não é possível enviar atestados agora. Envie a solicitação sem ele e entregue ao RH.",
-  "requestAnswer": "Resposta: {note}"
+  "requestAnswer": "Resposta: {note}",
+  "confirmPunchTitle": "Confirmar {punch}?",
+  "confirmPunch": "Confirmar",
+  "retakePhoto": "Tirar outra",
+  "takePhoto": "Tirar foto",
+  "punchPhotoNote": "Sua empresa pede uma foto em cada marcação. Ela fica guardada por 90 dias e só o RH vê.",
+  "punchPhotoMissing": "Sem foto: a marcação é registrada e sinalizada para o RH.",
+  "punchPhotoFailed": "Ponto registrado, mas a foto não foi enviada.",
+  "punchPhotoOffline": "Sem conexão: a marcação foi guardada; a foto só é enviada com conexão.",
+  "punchPhotoSaved": "Ponto registrado com foto.",
+  "withPhoto": "Com foto"
 }

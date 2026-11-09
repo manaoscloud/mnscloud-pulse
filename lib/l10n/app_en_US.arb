@@ -195,5 +195,22 @@
         "type": "String"
       }
     }
+  },
+  "confirmPunchTitle": "Confirm {punch}?",
+  "confirmPunch": "Confirm",
+  "retakePhoto": "Take again",
+  "takePhoto": "Take photo",
+  "punchPhotoNote": "Your company asks for a photo at each punch. It is kept for 90 days and seen only by HR.",
+  "punchPhotoMissing": "No photo: the punch is recorded and flagged for HR.",
+  "punchPhotoFailed": "Punch saved, but the photo could not be sent.",
+  "punchPhotoOffline": "No connection: the punch was kept; the photo is only sent with connection.",
+  "punchPhotoSaved": "Punch saved with photo.",
+  "withPhoto": "With photo",
+  "@confirmPunchTitle": {
+    "placeholders": {
+      "punch": {
+        "type": "String"
+      }
+    }
   }
 }
