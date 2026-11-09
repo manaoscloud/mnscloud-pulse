@@ -552,6 +552,196 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get withPhoto => 'With photo';
+
+  @override
+  String get navDocuments => 'Documents';
+
+  @override
+  String get docsTabDocuments => 'Documents';
+
+  @override
+  String get docsTabPayslips => 'Payslips';
+
+  @override
+  String get docsTabNotices => 'Notices';
+
+  @override
+  String get docsTabVacation => 'Vacation';
+
+  @override
+  String get docKindDocument => 'Document';
+
+  @override
+  String get docKindWarning => 'Warning';
+
+  @override
+  String get docKindPayslip => 'Payslip';
+
+  @override
+  String get docKindEmployee => 'Sent by you';
+
+  @override
+  String get docStatePending => 'Acknowledgement pending';
+
+  @override
+  String docStateAcknowledged(String date) {
+    return 'Acknowledged on $date';
+  }
+
+  @override
+  String get docStateSent => 'New';
+
+  @override
+  String get docStateViewed => 'Viewed';
+
+  @override
+  String get docStateReceived => 'Sent to HR';
+
+  @override
+  String get docStateReviewed => 'Checked by HR';
+
+  @override
+  String get docOpen => 'Open';
+
+  @override
+  String get docAcknowledge => 'Acknowledge';
+
+  @override
+  String get docAckTitle => 'Confirm acknowledgement';
+
+  @override
+  String get docAckStatement =>
+      'I declare that I read this document and acknowledge it.';
+
+  @override
+  String get docAckDone => 'Acknowledgement recorded.';
+
+  @override
+  String get docOpenFirst => 'Open the document before acknowledging it.';
+
+  @override
+  String get docsEmpty => 'No documents yet.';
+
+  @override
+  String get payslipsEmpty => 'No payslips yet.';
+
+  @override
+  String get docSend => 'Send a document to HR';
+
+  @override
+  String get docSendTitle => 'What is this document?';
+
+  @override
+  String get docSendTitleHint => 'E.g. proof of address';
+
+  @override
+  String get docSendNote => 'Note (optional)';
+
+  @override
+  String get docPickFile => 'Choose file (PDF or image up to 10 MB)';
+
+  @override
+  String get docSent => 'Document sent to HR.';
+
+  @override
+  String get docFileInvalid => 'Send a PDF or an image up to 10 MB.';
+
+  @override
+  String get docStorageUnavailable =>
+      'Files are not available right now. Talk to HR.';
+
+  @override
+  String get docError => 'It could not be done. Try again.';
+
+  @override
+  String get docOpenFailed => 'The file could not be opened.';
+
+  @override
+  String docCompetence(String month) {
+    return 'Competence $month';
+  }
+
+  @override
+  String get noticesEmpty => 'No notices right now.';
+
+  @override
+  String get noticeNew => 'New';
+
+  @override
+  String get noticeRead => 'Read';
+
+  @override
+  String get noticeAckRequired => 'This notice asks for your acknowledgement.';
+
+  @override
+  String get vacationAvailable => 'Days available';
+
+  @override
+  String get vacationPendingDays => 'In requests';
+
+  @override
+  String get vacationAccruing => 'Accruing in the current period';
+
+  @override
+  String vacationDeadline(String date) {
+    return 'Take by $date';
+  }
+
+  @override
+  String get vacationNoHireDate =>
+      'Your hire date is not registered. Talk to HR.';
+
+  @override
+  String get vacationPeriods => 'Acquisition periods';
+
+  @override
+  String vacationPeriodRange(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String vacationPeriodUsage(int taken, int entitled) {
+    return '$taken of $entitled days taken';
+  }
+
+  @override
+  String get vacationAccruingStatus => 'Accruing';
+
+  @override
+  String get vacationAvailableStatus => 'Available';
+
+  @override
+  String get vacationUsedStatus => 'Taken';
+
+  @override
+  String get vacationOverdueStatus => 'Overdue';
+
+  @override
+  String get vacationRequest => 'Request vacation';
+
+  @override
+  String get vacationPickDates => 'Choose the dates';
+
+  @override
+  String vacationDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get vacationReason => 'Note to HR';
+
+  @override
+  String get vacationSent => 'Vacation request sent. Follow it in Requests.';
+
+  @override
+  String get vacationExceeds =>
+      'The chosen days go beyond your available balance.';
+
+  @override
+  String get vacationNothing => 'You have no vacation days to request yet.';
+
+  @override
+  String get absenceVacation => 'Vacation';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -1101,4 +1291,194 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get withPhoto => 'With photo';
+
+  @override
+  String get navDocuments => 'Documents';
+
+  @override
+  String get docsTabDocuments => 'Documents';
+
+  @override
+  String get docsTabPayslips => 'Payslips';
+
+  @override
+  String get docsTabNotices => 'Notices';
+
+  @override
+  String get docsTabVacation => 'Vacation';
+
+  @override
+  String get docKindDocument => 'Document';
+
+  @override
+  String get docKindWarning => 'Warning';
+
+  @override
+  String get docKindPayslip => 'Payslip';
+
+  @override
+  String get docKindEmployee => 'Sent by you';
+
+  @override
+  String get docStatePending => 'Acknowledgement pending';
+
+  @override
+  String docStateAcknowledged(String date) {
+    return 'Acknowledged on $date';
+  }
+
+  @override
+  String get docStateSent => 'New';
+
+  @override
+  String get docStateViewed => 'Viewed';
+
+  @override
+  String get docStateReceived => 'Sent to HR';
+
+  @override
+  String get docStateReviewed => 'Checked by HR';
+
+  @override
+  String get docOpen => 'Open';
+
+  @override
+  String get docAcknowledge => 'Acknowledge';
+
+  @override
+  String get docAckTitle => 'Confirm acknowledgement';
+
+  @override
+  String get docAckStatement =>
+      'I declare that I read this document and acknowledge it.';
+
+  @override
+  String get docAckDone => 'Acknowledgement recorded.';
+
+  @override
+  String get docOpenFirst => 'Open the document before acknowledging it.';
+
+  @override
+  String get docsEmpty => 'No documents yet.';
+
+  @override
+  String get payslipsEmpty => 'No payslips yet.';
+
+  @override
+  String get docSend => 'Send a document to HR';
+
+  @override
+  String get docSendTitle => 'What is this document?';
+
+  @override
+  String get docSendTitleHint => 'E.g. proof of address';
+
+  @override
+  String get docSendNote => 'Note (optional)';
+
+  @override
+  String get docPickFile => 'Choose file (PDF or image up to 10 MB)';
+
+  @override
+  String get docSent => 'Document sent to HR.';
+
+  @override
+  String get docFileInvalid => 'Send a PDF or an image up to 10 MB.';
+
+  @override
+  String get docStorageUnavailable =>
+      'Files are not available right now. Talk to HR.';
+
+  @override
+  String get docError => 'It could not be done. Try again.';
+
+  @override
+  String get docOpenFailed => 'The file could not be opened.';
+
+  @override
+  String docCompetence(String month) {
+    return 'Competence $month';
+  }
+
+  @override
+  String get noticesEmpty => 'No notices right now.';
+
+  @override
+  String get noticeNew => 'New';
+
+  @override
+  String get noticeRead => 'Read';
+
+  @override
+  String get noticeAckRequired => 'This notice asks for your acknowledgement.';
+
+  @override
+  String get vacationAvailable => 'Days available';
+
+  @override
+  String get vacationPendingDays => 'In requests';
+
+  @override
+  String get vacationAccruing => 'Accruing in the current period';
+
+  @override
+  String vacationDeadline(String date) {
+    return 'Take by $date';
+  }
+
+  @override
+  String get vacationNoHireDate =>
+      'Your hire date is not registered. Talk to HR.';
+
+  @override
+  String get vacationPeriods => 'Acquisition periods';
+
+  @override
+  String vacationPeriodRange(String start, String end) {
+    return '$start to $end';
+  }
+
+  @override
+  String vacationPeriodUsage(int taken, int entitled) {
+    return '$taken of $entitled days taken';
+  }
+
+  @override
+  String get vacationAccruingStatus => 'Accruing';
+
+  @override
+  String get vacationAvailableStatus => 'Available';
+
+  @override
+  String get vacationUsedStatus => 'Taken';
+
+  @override
+  String get vacationOverdueStatus => 'Overdue';
+
+  @override
+  String get vacationRequest => 'Request vacation';
+
+  @override
+  String get vacationPickDates => 'Choose the dates';
+
+  @override
+  String vacationDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get vacationReason => 'Note to HR';
+
+  @override
+  String get vacationSent => 'Vacation request sent. Follow it in Requests.';
+
+  @override
+  String get vacationExceeds =>
+      'The chosen days go beyond your available balance.';
+
+  @override
+  String get vacationNothing => 'You have no vacation days to request yet.';
+
+  @override
+  String get absenceVacation => 'Vacation';
 }
