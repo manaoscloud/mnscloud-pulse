@@ -24,6 +24,7 @@ String absenceTypeLabel(AppLocalizations l, String type) => switch (type) {
   'justified' => l.absenceJustified,
   'day_off' => l.absenceDayOff,
   'leave' => l.absenceLeave,
+  'vacation' => l.absenceVacation,
   _ => type,
 };
 
