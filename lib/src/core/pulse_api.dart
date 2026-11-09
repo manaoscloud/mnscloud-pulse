@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../version/client_identity.dart';
+
 /// Public failure of a Pulse call: the API code (`PULSE_*`), `networkError` or `requestError`.
 class PulseFailure implements Exception {
   const PulseFailure(
@@ -27,6 +29,10 @@ class PulseFailure implements Exception {
       code == 'PULSE_SESSION_INVALID' ||
       code == 'PULSE_ACCESS_DENIED' ||
       code == 'PULSE_MODULE_UNAVAILABLE';
+
+  /// This installed app version is no longer accepted (HTTP 426): nothing local is dropped, the
+  /// app waits for an update.
+  bool get versionUnsupported => code == clientVersionUnsupportedCode;
 
   @override
   String toString() => 'PulseFailure($code)';
@@ -83,12 +89,7 @@ abstract class RefreshTokenStore {
 /// builds in the platform secure storage ([refreshStore]).
 class PulseApi {
   PulseApi({this._client, String? baseUrl, this.refreshStore})
-    : _base = (baseUrl ?? _defaultBase).trim().replaceAll(RegExp(r'/+$'), '');
-
-  static const _defaultBase = String.fromEnvironment(
-    'PULSE_PUBLIC_API_BASE_URL',
-    defaultValue: '/api/v1',
-  );
+    : _base = normalizedApiBase(baseUrl);
 
   final http.Client? _client;
   final String _base;
@@ -118,16 +119,7 @@ class PulseApi {
 
   String get platform => _platform;
 
-  String get _platform => kIsWeb
-      ? 'web'
-      : switch (defaultTargetPlatform) {
-          TargetPlatform.android => 'android',
-          TargetPlatform.iOS => 'ios',
-          TargetPlatform.windows => 'windows',
-          TargetPlatform.macOS => 'macos',
-          TargetPlatform.linux => 'linux',
-          _ => 'web',
-        };
+  String get _platform => clientPlatformName();
 
   Future<Map<String, dynamic>> _send(
     String method,
@@ -139,6 +131,7 @@ class PulseApi {
   }) async {
     final request = http.Request(method, Uri.parse('$_base$path'));
     request.headers['content-type'] = 'application/json';
+    request.headers.addAll(clientHeaders(platform: _platform));
     if (headers != null) request.headers.addAll(headers);
     if (auth && _accessToken != null) {
       request.headers['authorization'] = 'Bearer $_accessToken';
@@ -168,6 +161,7 @@ class PulseApi {
   static Map<String, dynamic> _checked(int status, Map<String, dynamic> data) {
     if (status < 200 || status >= 300) {
       final code = data['code'];
+      noteClientVersionAnswer(status, code);
       final fields = data['fields'];
       throw PulseFailure(
         code is String && code.isNotEmpty
@@ -194,6 +188,7 @@ class PulseApi {
   ) async {
     Future<Map<String, dynamic>> send() async {
       final request = http.MultipartRequest('POST', Uri.parse('$_base$path'));
+      request.headers.addAll(clientHeaders(platform: _platform));
       if (_accessToken != null) {
         request.headers['authorization'] = 'Bearer $_accessToken';
       }
@@ -302,7 +297,8 @@ class PulseApi {
       } on PulseFailure catch (failure) {
         if (failure.code == 'networkError') {
           lastRefreshOffline = true;
-        } else {
+        } else if (!failure.versionUnsupported) {
+          // A refused app version keeps the session for after the update.
           _accessToken = null;
           _refreshToken = null;
           unawaited(refreshStore?.write(null));
@@ -397,7 +393,27 @@ class PulseApi {
     if (body is! Map<String, dynamic> || body['date'] is! String) {
       throw const PulseFailure('requestError');
     }
+    final mode = body['punchPhotoMode'];
+    if (mode is String) punchPhotoMode = mode;
     return body;
+  }
+
+  /// Photo at punch of the employee policy (`off`, `optional`, `required`), as the last read of
+  /// [today] reported it; `null` until then.
+  String? punchPhotoMode;
+
+  /// Sends the photo taken at an own punch, right after it; a retry with [photoUUID] is harmless.
+  Future<void> uploadPunchPhoto(
+    String punchUUID,
+    String photoUUID,
+    List<int> bytes,
+  ) async {
+    await _upload(
+      '/pulse/punches/$punchUUID/photo',
+      {'photoUUID': photoUUID},
+      bytes,
+      'photo.jpg',
+    );
   }
 
   /// Monthly timesheet (`month` is YYYY-MM): consolidated days with their marks and the totals.
@@ -527,5 +543,114 @@ class PulseApi {
         : null;
     if (uuid == null || uuid.isEmpty) throw const PulseFailure('requestError');
     return uuid;
+  }
+
+  /// Raw authenticated GET of a private file; refreshed and repeated once like [call].
+  Future<(List<int>, String)> _download(String path) async {
+    Future<(List<int>, String)> send() async {
+      final request = http.Request('GET', Uri.parse('$_base$path'));
+      request.headers.addAll(clientHeaders(platform: _platform));
+      if (_accessToken != null) {
+        request.headers['authorization'] = 'Bearer $_accessToken';
+      }
+      late http.Response response;
+      try {
+        final streamed = await (_client?.send(request) ?? request.send())
+            .timeout(const Duration(seconds: 60));
+        response = await http.Response.fromStream(streamed);
+      } catch (_) {
+        throw const PulseFailure('networkError');
+      }
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        Map<String, dynamic> data = {};
+        try {
+          final decoded = jsonDecode(response.body);
+          if (decoded is Map<String, dynamic>) data = decoded;
+        } catch (_) {}
+        _checked(response.statusCode, data);
+      }
+      return (
+        response.bodyBytes.toList(),
+        response.headers['content-type'] ?? 'application/octet-stream',
+      );
+    }
+
+    try {
+      return await send();
+    } on PulseFailure catch (failure) {
+      if (failure.code != 'PULSE_SESSION_INVALID' || !await refresh()) rethrow;
+      return await send();
+    }
+  }
+
+  List<Map<String, dynamic>> _items(Map<String, dynamic> data) {
+    final items = (data['data'] as Map<String, dynamic>?)?['items'];
+    return items is List
+        ? items.whereType<Map<String, dynamic>>().toList()
+        : const [];
+  }
+
+  /// Own documents, warnings and payslips from HR and the documents sent to HR (pending first).
+  Future<List<Map<String, dynamic>>> listDocuments({
+    String? kind,
+    int limit = 100,
+  }) async => _items(
+    await call(
+      'GET',
+      '/pulse/documents?limit=$limit${kind == null ? '' : '&kind=$kind'}',
+    ),
+  );
+
+  /// File of an own document; the first open is what the acknowledgement requires.
+  Future<(List<int>, String)> downloadDocument(String uuid) =>
+      _download('/pulse/documents/$uuid/file');
+
+  Future<void> acknowledgeDocument(String uuid) async {
+    await call('POST', '/pulse/documents/$uuid/acknowledge');
+  }
+
+  /// Sends a document to HR; a retry with [documentUUID] returns the stored one.
+  Future<void> sendDocument(
+    String documentUUID,
+    String title,
+    String? note,
+    List<int> bytes,
+    String fileName,
+  ) async {
+    await _upload(
+      '/pulse/documents',
+      {
+        'documentUUID': documentUUID,
+        'title': title,
+        if (note != null && note.isNotEmpty) 'note': note,
+      },
+      bytes,
+      fileName,
+    );
+  }
+
+  /// Company notices published for the employee (unread first).
+  Future<List<Map<String, dynamic>>> listNotices({int limit = 100}) async =>
+      _items(await call('GET', '/pulse/notices?limit=$limit'));
+
+  Future<Map<String, dynamic>> markNotice(
+    String uuid, {
+    bool acknowledge = false,
+  }) async {
+    final data = await call(
+      'POST',
+      '/pulse/notices/$uuid/read',
+      body: {'acknowledge': acknowledge},
+    );
+    final body = data['data'];
+    return body is Map<String, dynamic> ? body : const {};
+  }
+
+  /// Vacation balance: acquisition periods, available, pending and accruing days.
+  Future<Map<String, dynamic>> vacation() async {
+    final data = await call('GET', '/pulse/vacation');
+    final body = data['data'];
+    if (body is! Map<String, dynamic>) throw const PulseFailure('requestError');
+    return body;
   }
 }

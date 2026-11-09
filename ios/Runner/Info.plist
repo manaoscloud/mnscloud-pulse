@@ -4,6 +4,8 @@
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Pulse records your location only at the moment you punch the clock.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Pulse takes a photo only when your company asks for one at the moment you punch the clock.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

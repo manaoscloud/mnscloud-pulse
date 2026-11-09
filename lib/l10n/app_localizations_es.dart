@@ -161,6 +161,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Hay una nueva versión. Deberás iniciar sesión después de actualizar.';
 
   @override
+  String get versionUnsupported =>
+      'Esta versión de la app ya no es compatible. Actualice la app desde la tienda o con su administrador para continuar.';
+
+  @override
   String get officialTime => 'Hora oficial';
 
   @override
@@ -513,6 +517,233 @@ class AppLocalizationsEs extends AppLocalizations {
   String requestAnswer(String note) {
     return 'Respuesta: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return '¿Confirmar $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirmar';
+
+  @override
+  String get retakePhoto => 'Tomar otra';
+
+  @override
+  String get takePhoto => 'Tomar foto';
+
+  @override
+  String get punchPhotoNote =>
+      'Tu empresa pide una foto en cada registro. Se guarda 90 días y solo RR. HH. la ve.';
+
+  @override
+  String get punchPhotoMissing =>
+      'Sin foto: el registro se guarda y se señala para RR. HH.';
+
+  @override
+  String get punchPhotoFailed => 'Registro guardado, pero la foto no se envió.';
+
+  @override
+  String get punchPhotoOffline =>
+      'Sin conexión: el registro se guardó; la foto solo se envía con conexión.';
+
+  @override
+  String get punchPhotoSaved => 'Registro guardado con foto.';
+
+  @override
+  String get withPhoto => 'Con foto';
+
+  @override
+  String get navDocuments => 'Documentos';
+
+  @override
+  String get docsTabDocuments => 'Documentos';
+
+  @override
+  String get docsTabPayslips => 'Nóminas';
+
+  @override
+  String get docsTabNotices => 'Avisos';
+
+  @override
+  String get docsTabVacation => 'Vacaciones';
+
+  @override
+  String get docKindDocument => 'Documento';
+
+  @override
+  String get docKindWarning => 'Amonestación';
+
+  @override
+  String get docKindPayslip => 'Nómina';
+
+  @override
+  String get docKindEmployee => 'Enviado por ti';
+
+  @override
+  String get docStatePending => 'Acuse pendiente';
+
+  @override
+  String docStateAcknowledged(String date) {
+    return 'Recibido el $date';
+  }
+
+  @override
+  String get docStateSent => 'Nuevo';
+
+  @override
+  String get docStateViewed => 'Visto';
+
+  @override
+  String get docStateReceived => 'Enviado a RR. HH.';
+
+  @override
+  String get docStateReviewed => 'Revisado por RR. HH.';
+
+  @override
+  String get docOpen => 'Abrir';
+
+  @override
+  String get docAcknowledge => 'Acusar recibo';
+
+  @override
+  String get docAckTitle => 'Confirmar acuse de recibo';
+
+  @override
+  String get docAckStatement =>
+      'Declaro que leí este documento y tomo conocimiento de su contenido.';
+
+  @override
+  String get docAckDone => 'Acuse de recibo registrado.';
+
+  @override
+  String get docOpenFirst => 'Abre el documento antes de acusar recibo.';
+
+  @override
+  String get docsEmpty => 'Todavía no hay documentos.';
+
+  @override
+  String get payslipsEmpty => 'Todavía no hay nóminas.';
+
+  @override
+  String get docSend => 'Enviar documento a RR. HH.';
+
+  @override
+  String get docSendTitle => '¿Qué documento es?';
+
+  @override
+  String get docSendTitleHint => 'Ej.: comprobante de domicilio';
+
+  @override
+  String get docSendNote => 'Observación (opcional)';
+
+  @override
+  String get docPickFile => 'Elegir archivo (PDF o imagen hasta 10 MB)';
+
+  @override
+  String get docSent => 'Documento enviado a RR. HH.';
+
+  @override
+  String get docFileInvalid => 'Envía un PDF o una imagen de hasta 10 MB.';
+
+  @override
+  String get docStorageUnavailable =>
+      'Los archivos no están disponibles ahora. Habla con RR. HH.';
+
+  @override
+  String get docError => 'No se pudo completar. Inténtalo de nuevo.';
+
+  @override
+  String get docOpenFailed => 'No se pudo abrir el archivo.';
+
+  @override
+  String docCompetence(String month) {
+    return 'Período $month';
+  }
+
+  @override
+  String get noticesEmpty => 'No hay avisos por ahora.';
+
+  @override
+  String get noticeNew => 'Nuevo';
+
+  @override
+  String get noticeRead => 'Leído';
+
+  @override
+  String get noticeAckRequired => 'Este aviso pide tu acuse de recibo.';
+
+  @override
+  String get vacationAvailable => 'Días disponibles';
+
+  @override
+  String get vacationPendingDays => 'En solicitudes';
+
+  @override
+  String get vacationAccruing => 'Proporcionales del período actual';
+
+  @override
+  String vacationDeadline(String date) {
+    return 'Plazo para disfrutar: $date';
+  }
+
+  @override
+  String get vacationNoHireDate =>
+      'Tu fecha de ingreso no está registrada. Habla con RR. HH.';
+
+  @override
+  String get vacationPeriods => 'Períodos de adquisición';
+
+  @override
+  String vacationPeriodRange(String start, String end) {
+    return '$start a $end';
+  }
+
+  @override
+  String vacationPeriodUsage(int taken, int entitled) {
+    return '$taken de $entitled días usados';
+  }
+
+  @override
+  String get vacationAccruingStatus => 'En adquisición';
+
+  @override
+  String get vacationAvailableStatus => 'Disponible';
+
+  @override
+  String get vacationUsedStatus => 'Disfrutado';
+
+  @override
+  String get vacationOverdueStatus => 'Vencido';
+
+  @override
+  String get vacationRequest => 'Solicitar vacaciones';
+
+  @override
+  String get vacationPickDates => 'Elegir las fechas';
+
+  @override
+  String vacationDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String get vacationReason => 'Observación para RR. HH.';
+
+  @override
+  String get vacationSent =>
+      'Solicitud de vacaciones enviada. Síguela en Solicitudes.';
+
+  @override
+  String get vacationExceeds =>
+      'Los días elegidos superan tu saldo disponible.';
+
+  @override
+  String get vacationNothing =>
+      'Todavía no tienes días de vacaciones para solicitar.';
+
+  @override
+  String get absenceVacation => 'Vacaciones';
 
   @override
   String get notificationsTitle => 'Avisos';
@@ -759,6 +990,10 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
       'Hay una nueva versión. Deberás iniciar sesión después de actualizar.';
 
   @override
+  String get versionUnsupported =>
+      'Esta versión de la app ya no es compatible. Actualice la app desde la tienda o con su administrador para continuar.';
+
+  @override
   String get officialTime => 'Hora oficial';
 
   @override
@@ -1111,6 +1346,233 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   String requestAnswer(String note) {
     return 'Respuesta: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return '¿Confirmar $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirmar';
+
+  @override
+  String get retakePhoto => 'Tomar otra';
+
+  @override
+  String get takePhoto => 'Tomar foto';
+
+  @override
+  String get punchPhotoNote =>
+      'Tu empresa pide una foto en cada registro. Se guarda 90 días y solo RR. HH. la ve.';
+
+  @override
+  String get punchPhotoMissing =>
+      'Sin foto: el registro se guarda y se señala para RR. HH.';
+
+  @override
+  String get punchPhotoFailed => 'Registro guardado, pero la foto no se envió.';
+
+  @override
+  String get punchPhotoOffline =>
+      'Sin conexión: el registro se guardó; la foto solo se envía con conexión.';
+
+  @override
+  String get punchPhotoSaved => 'Registro guardado con foto.';
+
+  @override
+  String get withPhoto => 'Con foto';
+
+  @override
+  String get navDocuments => 'Documentos';
+
+  @override
+  String get docsTabDocuments => 'Documentos';
+
+  @override
+  String get docsTabPayslips => 'Nóminas';
+
+  @override
+  String get docsTabNotices => 'Avisos';
+
+  @override
+  String get docsTabVacation => 'Vacaciones';
+
+  @override
+  String get docKindDocument => 'Documento';
+
+  @override
+  String get docKindWarning => 'Amonestación';
+
+  @override
+  String get docKindPayslip => 'Nómina';
+
+  @override
+  String get docKindEmployee => 'Enviado por ti';
+
+  @override
+  String get docStatePending => 'Acuse pendiente';
+
+  @override
+  String docStateAcknowledged(String date) {
+    return 'Recibido el $date';
+  }
+
+  @override
+  String get docStateSent => 'Nuevo';
+
+  @override
+  String get docStateViewed => 'Visto';
+
+  @override
+  String get docStateReceived => 'Enviado a RR. HH.';
+
+  @override
+  String get docStateReviewed => 'Revisado por RR. HH.';
+
+  @override
+  String get docOpen => 'Abrir';
+
+  @override
+  String get docAcknowledge => 'Acusar recibo';
+
+  @override
+  String get docAckTitle => 'Confirmar acuse de recibo';
+
+  @override
+  String get docAckStatement =>
+      'Declaro que leí este documento y tomo conocimiento de su contenido.';
+
+  @override
+  String get docAckDone => 'Acuse de recibo registrado.';
+
+  @override
+  String get docOpenFirst => 'Abre el documento antes de acusar recibo.';
+
+  @override
+  String get docsEmpty => 'Todavía no hay documentos.';
+
+  @override
+  String get payslipsEmpty => 'Todavía no hay nóminas.';
+
+  @override
+  String get docSend => 'Enviar documento a RR. HH.';
+
+  @override
+  String get docSendTitle => '¿Qué documento es?';
+
+  @override
+  String get docSendTitleHint => 'Ej.: comprobante de domicilio';
+
+  @override
+  String get docSendNote => 'Observación (opcional)';
+
+  @override
+  String get docPickFile => 'Elegir archivo (PDF o imagen hasta 10 MB)';
+
+  @override
+  String get docSent => 'Documento enviado a RR. HH.';
+
+  @override
+  String get docFileInvalid => 'Envía un PDF o una imagen de hasta 10 MB.';
+
+  @override
+  String get docStorageUnavailable =>
+      'Los archivos no están disponibles ahora. Habla con RR. HH.';
+
+  @override
+  String get docError => 'No se pudo completar. Inténtalo de nuevo.';
+
+  @override
+  String get docOpenFailed => 'No se pudo abrir el archivo.';
+
+  @override
+  String docCompetence(String month) {
+    return 'Período $month';
+  }
+
+  @override
+  String get noticesEmpty => 'No hay avisos por ahora.';
+
+  @override
+  String get noticeNew => 'Nuevo';
+
+  @override
+  String get noticeRead => 'Leído';
+
+  @override
+  String get noticeAckRequired => 'Este aviso pide tu acuse de recibo.';
+
+  @override
+  String get vacationAvailable => 'Días disponibles';
+
+  @override
+  String get vacationPendingDays => 'En solicitudes';
+
+  @override
+  String get vacationAccruing => 'Proporcionales del período actual';
+
+  @override
+  String vacationDeadline(String date) {
+    return 'Plazo para disfrutar: $date';
+  }
+
+  @override
+  String get vacationNoHireDate =>
+      'Tu fecha de ingreso no está registrada. Habla con RR. HH.';
+
+  @override
+  String get vacationPeriods => 'Períodos de adquisición';
+
+  @override
+  String vacationPeriodRange(String start, String end) {
+    return '$start a $end';
+  }
+
+  @override
+  String vacationPeriodUsage(int taken, int entitled) {
+    return '$taken de $entitled días usados';
+  }
+
+  @override
+  String get vacationAccruingStatus => 'En adquisición';
+
+  @override
+  String get vacationAvailableStatus => 'Disponible';
+
+  @override
+  String get vacationUsedStatus => 'Disfrutado';
+
+  @override
+  String get vacationOverdueStatus => 'Vencido';
+
+  @override
+  String get vacationRequest => 'Solicitar vacaciones';
+
+  @override
+  String get vacationPickDates => 'Elegir las fechas';
+
+  @override
+  String vacationDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String get vacationReason => 'Observación para RR. HH.';
+
+  @override
+  String get vacationSent =>
+      'Solicitud de vacaciones enviada. Síguela en Solicitudes.';
+
+  @override
+  String get vacationExceeds =>
+      'Los días elegidos superan tu saldo disponible.';
+
+  @override
+  String get vacationNothing =>
+      'Todavía no tienes días de vacaciones para solicitar.';
+
+  @override
+  String get absenceVacation => 'Vacaciones';
 
   @override
   String get notificationsTitle => 'Avisos';

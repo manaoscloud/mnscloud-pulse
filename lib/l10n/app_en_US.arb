@@ -48,6 +48,7 @@
   "updateNow": "Update now",
   "later": "Later",
   "updateHelp": "A new version is ready. You will sign in again after updating.",
+  "versionUnsupported": "This app version is no longer supported. Update the app from the store or with your administrator to continue.",
   "officialTime": "Official time",
   "nextPunch": "Next punch",
   "otherPunch": "Other punch",
@@ -195,6 +196,129 @@
       }
     }
   },
+  "confirmPunchTitle": "Confirm {punch}?",
+  "confirmPunch": "Confirm",
+  "retakePhoto": "Take again",
+  "takePhoto": "Take photo",
+  "punchPhotoNote": "Your company asks for a photo at each punch. It is kept for 90 days and seen only by HR.",
+  "punchPhotoMissing": "No photo: the punch is recorded and flagged for HR.",
+  "punchPhotoFailed": "Punch saved, but the photo could not be sent.",
+  "punchPhotoOffline": "No connection: the punch was kept; the photo is only sent with connection.",
+  "punchPhotoSaved": "Punch saved with photo.",
+  "withPhoto": "With photo",
+  "@confirmPunchTitle": {
+    "placeholders": {
+      "punch": {
+        "type": "String"
+      }
+    }
+  },
+  "navDocuments": "Documents",
+  "docsTabDocuments": "Documents",
+  "docsTabPayslips": "Payslips",
+  "docsTabNotices": "Notices",
+  "docsTabVacation": "Vacation",
+  "docKindDocument": "Document",
+  "docKindWarning": "Warning",
+  "docKindPayslip": "Payslip",
+  "docKindEmployee": "Sent by you",
+  "docStatePending": "Acknowledgement pending",
+  "docStateAcknowledged": "Acknowledged on {date}",
+  "@docStateAcknowledged": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "docStateSent": "New",
+  "docStateViewed": "Viewed",
+  "docStateReceived": "Sent to HR",
+  "docStateReviewed": "Checked by HR",
+  "docOpen": "Open",
+  "docAcknowledge": "Acknowledge",
+  "docAckTitle": "Confirm acknowledgement",
+  "docAckStatement": "I declare that I read this document and acknowledge it.",
+  "docAckDone": "Acknowledgement recorded.",
+  "docOpenFirst": "Open the document before acknowledging it.",
+  "docsEmpty": "No documents yet.",
+  "payslipsEmpty": "No payslips yet.",
+  "docSend": "Send a document to HR",
+  "docSendTitle": "What is this document?",
+  "docSendTitleHint": "E.g. proof of address",
+  "docSendNote": "Note (optional)",
+  "docPickFile": "Choose file (PDF or image up to 10 MB)",
+  "docSent": "Document sent to HR.",
+  "docFileInvalid": "Send a PDF or an image up to 10 MB.",
+  "docStorageUnavailable": "Files are not available right now. Talk to HR.",
+  "docError": "It could not be done. Try again.",
+  "docOpenFailed": "The file could not be opened.",
+  "docCompetence": "Competence {month}",
+  "@docCompetence": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "noticesEmpty": "No notices right now.",
+  "noticeNew": "New",
+  "noticeRead": "Read",
+  "noticeAckRequired": "This notice asks for your acknowledgement.",
+  "vacationAvailable": "Days available",
+  "vacationPendingDays": "In requests",
+  "vacationAccruing": "Accruing in the current period",
+  "vacationDeadline": "Take by {date}",
+  "@vacationDeadline": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "vacationNoHireDate": "Your hire date is not registered. Talk to HR.",
+  "vacationPeriods": "Acquisition periods",
+  "vacationPeriodRange": "{start} to {end}",
+  "@vacationPeriodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "vacationPeriodUsage": "{taken} of {entitled} days taken",
+  "@vacationPeriodUsage": {
+    "placeholders": {
+      "taken": {
+        "type": "int"
+      },
+      "entitled": {
+        "type": "int"
+      }
+    }
+  },
+  "vacationAccruingStatus": "Accruing",
+  "vacationAvailableStatus": "Available",
+  "vacationUsedStatus": "Taken",
+  "vacationOverdueStatus": "Overdue",
+  "vacationRequest": "Request vacation",
+  "vacationPickDates": "Choose the dates",
+  "vacationDays": "{days} days",
+  "@vacationDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "vacationReason": "Note to HR",
+  "vacationSent": "Vacation request sent. Follow it in Requests.",
+  "vacationExceeds": "The chosen days go beyond your available balance.",
+  "vacationNothing": "You have no vacation days to request yet.",
+  "absenceVacation": "Vacation",
   "notificationsTitle": "Notifications",
   "notificationsReadAll": "Mark all as read",
   "notificationsEmpty": "No notifications yet.",

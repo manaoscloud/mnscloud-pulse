@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../version/client_identity.dart';
 import 'brand_dom.dart';
 
 /// Brand of the host for Pulse (Settings › Themes › Pulse tab of the tenant domain); every field
@@ -77,18 +78,16 @@ class Brand {
 /// Brand of the current host; null keeps the MNSCloud Pulse defaults.
 final ValueNotifier<Brand?> pulseBrand = ValueNotifier<Brand?>(null);
 
-const _apiBaseUrl = String.fromEnvironment(
-  'PULSE_PUBLIC_API_BASE_URL',
-  defaultValue: '/api/v1',
-);
-
 /// Loads the Pulse brand of the domain. Never blocks or fails Pulse.
 Future<void> loadPulseBrand({http.Client? client}) async {
-  final base = _apiBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+  final base = normalizedApiBase();
   final http.Client http0 = client ?? http.Client();
   try {
     final response = await http0
-        .get(Uri.parse('$base/public/theme/context?app=pulse'))
+        .get(
+          Uri.parse('$base/public/theme/context?app=pulse'),
+          headers: clientHeaders(),
+        )
         .timeout(const Duration(seconds: 5));
     if (response.statusCode != 200) return;
     final brand = Brand.fromResponse(jsonDecode(response.body));

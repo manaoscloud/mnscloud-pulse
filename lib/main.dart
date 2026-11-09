@@ -18,6 +18,7 @@ import 'src/offline/secret_vault.dart';
 import 'src/pwa/pwa.dart';
 import 'src/punch/punch_workspace.dart';
 import 'src/pwa/install_app_button.dart';
+import 'src/documents/documents_view.dart';
 import 'src/notifications/notifications_view.dart';
 import 'src/requests/requests_view.dart';
 import 'src/timesheet/timesheet_view.dart';
@@ -169,6 +170,7 @@ class _PulseShellState extends State<PulseShell> {
   int _tab = 0;
   bool _timesheetOpened = false;
   bool _requestsOpened = false;
+  bool _documentsOpened = false;
 
   /// Request whose conversation a notification asked to open.
   final _focusRequest = ValueNotifier<String?>(null);
@@ -575,6 +577,18 @@ class _PulseShellState extends State<PulseShell> {
                         )
                       : const SizedBox.shrink(),
                 ),
+                TickerMode(
+                  enabled: _tab == 3,
+                  child: _documentsOpened
+                      ? DocumentsView(
+                          key: ValueKey(
+                            'documents-${account.timeClockAccountUUID}',
+                          ),
+                          api: _api,
+                          onSessionEnded: _sessionEnded,
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ],
             ),
           ),
@@ -586,6 +600,7 @@ class _PulseShellState extends State<PulseShell> {
           _tab = index;
           if (index == 1) _timesheetOpened = true;
           if (index == 2) _requestsOpened = true;
+          if (index == 3) _documentsOpened = true;
         }),
         destinations: [
           NavigationDestination(
@@ -604,6 +619,12 @@ class _PulseShellState extends State<PulseShell> {
             icon: const Icon(Icons.assignment_outlined),
             selectedIcon: const Icon(Icons.assignment),
             label: l.navRequests,
+          ),
+          NavigationDestination(
+            key: const Key('navDocuments'),
+            icon: const Icon(Icons.folder_outlined),
+            selectedIcon: const Icon(Icons.folder),
+            label: l.navDocuments,
           ),
         ],
       ),

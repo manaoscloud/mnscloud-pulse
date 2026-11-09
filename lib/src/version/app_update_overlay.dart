@@ -88,6 +88,8 @@ class _AppUpdateNotice extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final version = controller.deployed?.version;
     final critical = controller.critical;
+    // Installed apps update through their store: only the critical notice, no buttons.
+    final native = !controller.isWeb;
 
     return Semantics(
       liveRegion: true,
@@ -142,7 +144,15 @@ class _AppUpdateNotice extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    if (critical)
+                    if (native)
+                      Text(
+                        l.versionUnsupported,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      )
+                    else if (critical)
                       Text(
                         l.updateHelp,
                         style: textTheme.bodySmall?.copyWith(
@@ -158,24 +168,26 @@ class _AppUpdateNotice extends StatelessWidget {
                           height: 1.4,
                         ),
                       ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      alignment: WrapAlignment.end,
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        if (!critical)
-                          TextButton(
-                            onPressed: controller.postpone,
-                            child: Text(l.later),
+                    if (!native) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          if (!critical)
+                            TextButton(
+                              onPressed: controller.postpone,
+                              child: Text(l.later),
+                            ),
+                          FilledButton.icon(
+                            onPressed: controller.reloadNow,
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: Text(l.updateNow),
                           ),
-                        FilledButton.icon(
-                          onPressed: controller.reloadNow,
-                          icon: const Icon(Icons.refresh, size: 18),
-                          label: Text(l.updateNow),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

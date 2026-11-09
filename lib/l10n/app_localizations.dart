@@ -391,6 +391,12 @@ abstract class AppLocalizations {
   /// **'A new version is ready. You will sign in again after updating.'**
   String get updateHelp;
 
+  /// No description provided for @versionUnsupported.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This app version is no longer supported. Update the app from the store or with your administrator to continue.'**
+  String get versionUnsupported;
+
   /// No description provided for @officialTime.
   ///
   /// In en_US, this message translates to:
@@ -1026,6 +1032,414 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Answer: {note}'**
   String requestAnswer(String note);
+
+  /// No description provided for @confirmPunchTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm {punch}?'**
+  String confirmPunchTitle(String punch);
+
+  /// No description provided for @confirmPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm'**
+  String get confirmPunch;
+
+  /// No description provided for @retakePhoto.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Take again'**
+  String get retakePhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @punchPhotoNote.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your company asks for a photo at each punch. It is kept for 90 days and seen only by HR.'**
+  String get punchPhotoNote;
+
+  /// No description provided for @punchPhotoMissing.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No photo: the punch is recorded and flagged for HR.'**
+  String get punchPhotoMissing;
+
+  /// No description provided for @punchPhotoFailed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Punch saved, but the photo could not be sent.'**
+  String get punchPhotoFailed;
+
+  /// No description provided for @punchPhotoOffline.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No connection: the punch was kept; the photo is only sent with connection.'**
+  String get punchPhotoOffline;
+
+  /// No description provided for @punchPhotoSaved.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Punch saved with photo.'**
+  String get punchPhotoSaved;
+
+  /// No description provided for @withPhoto.
+  ///
+  /// In en_US, this message translates to:
+  /// **'With photo'**
+  String get withPhoto;
+
+  /// No description provided for @navDocuments.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Documents'**
+  String get navDocuments;
+
+  /// No description provided for @docsTabDocuments.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Documents'**
+  String get docsTabDocuments;
+
+  /// No description provided for @docsTabPayslips.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Payslips'**
+  String get docsTabPayslips;
+
+  /// No description provided for @docsTabNotices.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Notices'**
+  String get docsTabNotices;
+
+  /// No description provided for @docsTabVacation.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Vacation'**
+  String get docsTabVacation;
+
+  /// No description provided for @docKindDocument.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Document'**
+  String get docKindDocument;
+
+  /// No description provided for @docKindWarning.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Warning'**
+  String get docKindWarning;
+
+  /// No description provided for @docKindPayslip.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Payslip'**
+  String get docKindPayslip;
+
+  /// No description provided for @docKindEmployee.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Sent by you'**
+  String get docKindEmployee;
+
+  /// No description provided for @docStatePending.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acknowledgement pending'**
+  String get docStatePending;
+
+  /// No description provided for @docStateAcknowledged.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acknowledged on {date}'**
+  String docStateAcknowledged(String date);
+
+  /// No description provided for @docStateSent.
+  ///
+  /// In en_US, this message translates to:
+  /// **'New'**
+  String get docStateSent;
+
+  /// No description provided for @docStateViewed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Viewed'**
+  String get docStateViewed;
+
+  /// No description provided for @docStateReceived.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Sent to HR'**
+  String get docStateReceived;
+
+  /// No description provided for @docStateReviewed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Checked by HR'**
+  String get docStateReviewed;
+
+  /// No description provided for @docOpen.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Open'**
+  String get docOpen;
+
+  /// No description provided for @docAcknowledge.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acknowledge'**
+  String get docAcknowledge;
+
+  /// No description provided for @docAckTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm acknowledgement'**
+  String get docAckTitle;
+
+  /// No description provided for @docAckStatement.
+  ///
+  /// In en_US, this message translates to:
+  /// **'I declare that I read this document and acknowledge it.'**
+  String get docAckStatement;
+
+  /// No description provided for @docAckDone.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acknowledgement recorded.'**
+  String get docAckDone;
+
+  /// No description provided for @docOpenFirst.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Open the document before acknowledging it.'**
+  String get docOpenFirst;
+
+  /// No description provided for @docsEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No documents yet.'**
+  String get docsEmpty;
+
+  /// No description provided for @payslipsEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No payslips yet.'**
+  String get payslipsEmpty;
+
+  /// No description provided for @docSend.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Send a document to HR'**
+  String get docSend;
+
+  /// No description provided for @docSendTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'What is this document?'**
+  String get docSendTitle;
+
+  /// No description provided for @docSendTitleHint.
+  ///
+  /// In en_US, this message translates to:
+  /// **'E.g. proof of address'**
+  String get docSendTitleHint;
+
+  /// No description provided for @docSendNote.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Note (optional)'**
+  String get docSendNote;
+
+  /// No description provided for @docPickFile.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Choose file (PDF or image up to 10 MB)'**
+  String get docPickFile;
+
+  /// No description provided for @docSent.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Document sent to HR.'**
+  String get docSent;
+
+  /// No description provided for @docFileInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Send a PDF or an image up to 10 MB.'**
+  String get docFileInvalid;
+
+  /// No description provided for @docStorageUnavailable.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Files are not available right now. Talk to HR.'**
+  String get docStorageUnavailable;
+
+  /// No description provided for @docError.
+  ///
+  /// In en_US, this message translates to:
+  /// **'It could not be done. Try again.'**
+  String get docError;
+
+  /// No description provided for @docOpenFailed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The file could not be opened.'**
+  String get docOpenFailed;
+
+  /// No description provided for @docCompetence.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Competence {month}'**
+  String docCompetence(String month);
+
+  /// No description provided for @noticesEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No notices right now.'**
+  String get noticesEmpty;
+
+  /// No description provided for @noticeNew.
+  ///
+  /// In en_US, this message translates to:
+  /// **'New'**
+  String get noticeNew;
+
+  /// No description provided for @noticeRead.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Read'**
+  String get noticeRead;
+
+  /// No description provided for @noticeAckRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This notice asks for your acknowledgement.'**
+  String get noticeAckRequired;
+
+  /// No description provided for @vacationAvailable.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Days available'**
+  String get vacationAvailable;
+
+  /// No description provided for @vacationPendingDays.
+  ///
+  /// In en_US, this message translates to:
+  /// **'In requests'**
+  String get vacationPendingDays;
+
+  /// No description provided for @vacationAccruing.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Accruing in the current period'**
+  String get vacationAccruing;
+
+  /// No description provided for @vacationDeadline.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Take by {date}'**
+  String vacationDeadline(String date);
+
+  /// No description provided for @vacationNoHireDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your hire date is not registered. Talk to HR.'**
+  String get vacationNoHireDate;
+
+  /// No description provided for @vacationPeriods.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acquisition periods'**
+  String get vacationPeriods;
+
+  /// No description provided for @vacationPeriodRange.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{start} to {end}'**
+  String vacationPeriodRange(String start, String end);
+
+  /// No description provided for @vacationPeriodUsage.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{taken} of {entitled} days taken'**
+  String vacationPeriodUsage(int taken, int entitled);
+
+  /// No description provided for @vacationAccruingStatus.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Accruing'**
+  String get vacationAccruingStatus;
+
+  /// No description provided for @vacationAvailableStatus.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Available'**
+  String get vacationAvailableStatus;
+
+  /// No description provided for @vacationUsedStatus.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Taken'**
+  String get vacationUsedStatus;
+
+  /// No description provided for @vacationOverdueStatus.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Overdue'**
+  String get vacationOverdueStatus;
+
+  /// No description provided for @vacationRequest.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Request vacation'**
+  String get vacationRequest;
+
+  /// No description provided for @vacationPickDates.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Choose the dates'**
+  String get vacationPickDates;
+
+  /// No description provided for @vacationDays.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{days} days'**
+  String vacationDays(int days);
+
+  /// No description provided for @vacationReason.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Note to HR'**
+  String get vacationReason;
+
+  /// No description provided for @vacationSent.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Vacation request sent. Follow it in Requests.'**
+  String get vacationSent;
+
+  /// No description provided for @vacationExceeds.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The chosen days go beyond your available balance.'**
+  String get vacationExceeds;
+
+  /// No description provided for @vacationNothing.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You have no vacation days to request yet.'**
+  String get vacationNothing;
+
+  /// No description provided for @absenceVacation.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Vacation'**
+  String get absenceVacation;
 
   /// No description provided for @notificationsTitle.
   ///
