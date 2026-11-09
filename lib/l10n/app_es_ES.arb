@@ -154,5 +154,15 @@
   "requestFutureTime": "La hora no puede estar en el futuro.",
   "requestAlreadyDecided": "Esa solicitud ya fue respondida.",
   "requestAttachmentUnavailable": "No es posible enviar certificados ahora. Envíe la solicitud sin él y entréguelo a RR. HH.",
-  "requestAnswer": "Respuesta: {note}"
+  "requestAnswer": "Respuesta: {note}",
+  "confirmPunchTitle": "¿Confirmar {punch}?",
+  "confirmPunch": "Confirmar",
+  "retakePhoto": "Tomar otra",
+  "takePhoto": "Tomar foto",
+  "punchPhotoNote": "Tu empresa pide una foto en cada registro. Se guarda 90 días y solo RR. HH. la ve.",
+  "punchPhotoMissing": "Sin foto: el registro se guarda y se señala para RR. HH.",
+  "punchPhotoFailed": "Registro guardado, pero la foto no se envió.",
+  "punchPhotoOffline": "Sin conexión: el registro se guardó; la foto solo se envía con conexión.",
+  "punchPhotoSaved": "Registro guardado con foto.",
+  "withPhoto": "Con foto"
 }

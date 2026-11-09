@@ -11,6 +11,7 @@ import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
 import 'package:mnscloud_pulse/main.dart';
 import 'package:mnscloud_pulse/src/core/ids.dart';
+import 'package:mnscloud_pulse/src/core/punch_camera.dart';
 import 'package:mnscloud_pulse/src/core/pulse_api.dart';
 import 'package:mnscloud_pulse/src/core/punch_queue.dart';
 import 'package:mnscloud_pulse/src/core/server_clock.dart';
@@ -115,71 +116,213 @@ void main() {
     expect(await queue.load(), isEmpty);
   });
 
-  testWidgets('a reload reopens the session and the next mark is one tap', (
-    tester,
-  ) async {
-    final punches = <Map<String, dynamic>>[];
-    final client = MockClient((request) async {
-      final path = request.url.path;
-      if (path.endsWith('/auth/refresh')) return json(session());
-      if (path.endsWith('/time')) {
-        return json({
-          'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
-        });
-      }
-      if (path.endsWith('/punches') && request.method == 'POST') {
-        expect(request.headers['authorization'], 'Bearer access-token');
-        final body = jsonDecode(request.body) as Map<String, dynamic>;
-        punches.add(body);
-        return json({
-          'data': {
-            'item': {
-              'Type': body['type'],
-              'OccurredAt': DateTime.now().toUtc().toIso8601String(),
-              'NSR': punches.length,
-              'Hash': 'a' * 64,
-              'Flags': <String>[],
-              'Duplicate': 0,
+  testWidgets(
+    'a reload reopens the session and the next mark is confirmed before it goes',
+    (tester) async {
+      final punches = <Map<String, dynamic>>[];
+      final client = MockClient((request) async {
+        final path = request.url.path;
+        if (path.endsWith('/auth/refresh')) return json(session());
+        if (path.endsWith('/time')) {
+          return json({
+            'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
+          });
+        }
+        if (path.endsWith('/punches') && request.method == 'POST') {
+          expect(request.headers['authorization'], 'Bearer access-token');
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          punches.add(body);
+          return json({
+            'data': {
+              'item': {
+                'Type': body['type'],
+                'OccurredAt': DateTime.now().toUtc().toIso8601String(),
+                'NSR': punches.length,
+                'Hash': 'a' * 64,
+                'Flags': <String>[],
+                'Duplicate': 0,
+              },
             },
+          });
+        }
+        if (path.endsWith('/punches')) {
+          return json({
+            'data': {
+              'items': [
+                for (final (i, p) in punches.indexed)
+                  {
+                    'Type': p['type'],
+                    'OccurredAt': DateTime.now().toUtc().toIso8601String(),
+                    'NSR': i + 1,
+                    'Hash': 'b' * 64,
+                    'Flags': <String>[],
+                  },
+              ].reversed.toList(),
+            },
+          });
+        }
+        return json({'code': 'requestError'}, 400);
+      });
+      await tester.pumpWidget(app(client));
+      await settle(tester);
+      expect(find.text('Test Employee'), findsOneWidget);
+      expect(find.byKey(const Key('officialClock')), findsOneWidget);
+      expect(find.text('Clock in'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('nextPunch')));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('confirmPunch')));
+      await settle(tester);
+      expect(punches, hasLength(1));
+      expect(punches.single['type'], 'clock_in');
+      expect(punches.single['offline'], isFalse);
+      expect(punches.single['source'], 'mobile');
+      expect(punches.single['idempotencyKey'], hasLength(36));
+      expect(find.text('Punch saved.'), findsOneWidget);
+      expect(find.text('Break start'), findsOneWidget);
+      expect(find.textContaining('NSR 1'), findsWidgets);
+      expect(await PunchQueue('account-1').load(), isEmpty);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  /// API double for the photo tests: today reports [mode]; punches and photos are recorded.
+  MockClient photoClient(
+    String mode,
+    List<Map<String, dynamic>> punches,
+    List<http.Request> photos,
+  ) => MockClient((request) async {
+    final path = request.url.path;
+    if (path.endsWith('/auth/refresh')) return json(session());
+    if (path.endsWith('/time')) {
+      return json({
+        'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
+      });
+    }
+    if (path.endsWith('/today')) {
+      return json({
+        'data': {
+          'date': '2026-11-08',
+          'timezone': 'America/Sao_Paulo',
+          'punchPhotoMode': mode,
+          'punches': <Object>[],
+          'working': false,
+          'workedMinutes': 0,
+        },
+      });
+    }
+    if (path.endsWith('/photo')) {
+      photos.add(request);
+      return json({
+        'data': {
+          'item': {'PhotoUUID': 'photo-1', 'Duplicate': false},
+        },
+      });
+    }
+    if (path.endsWith('/punches') && request.method == 'POST') {
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      punches.add(body);
+      return json({
+        'data': {
+          'item': {
+            'TimePunchUUID': 'punch-${punches.length}',
+            'Type': body['type'],
+            'OccurredAt': DateTime.now().toUtc().toIso8601String(),
+            'NSR': punches.length,
+            'Hash': 'a' * 64,
+            'Flags': <String>[],
+            'Duplicate': 0,
           },
-        });
-      }
-      if (path.endsWith('/punches')) {
-        return json({
-          'data': {
-            'items': [
-              for (final (i, p) in punches.indexed)
-                {
-                  'Type': p['type'],
-                  'OccurredAt': DateTime.now().toUtc().toIso8601String(),
-                  'NSR': i + 1,
-                  'Hash': 'b' * 64,
-                  'Flags': <String>[],
-                },
-            ].reversed.toList(),
-          },
-        });
-      }
-      return json({'code': 'requestError'}, 400);
-    });
-    await tester.pumpWidget(app(client));
+        },
+      });
+    }
+    if (path.endsWith('/punches')) {
+      return json({
+        'data': {
+          'items': [
+            for (final (i, p) in punches.indexed)
+              {
+                'TimePunchUUID': 'punch-${i + 1}',
+                'Type': p['type'],
+                'OccurredAt': DateTime.now().toUtc().toIso8601String(),
+                'NSR': i + 1,
+                'Flags': <String>[],
+                'HasPhoto': photos.isNotEmpty,
+              },
+          ].reversed.toList(),
+        },
+      });
+    }
+    return json({'code': 'requestError'}, 400);
+  });
+
+  testWidgets('a cancelled confirmation records nothing', (tester) async {
+    final punches = <Map<String, dynamic>>[];
+    await tester.pumpWidget(app(photoClient('off', punches, [])));
     await settle(tester);
-    expect(find.text('Test Employee'), findsOneWidget);
-    expect(find.byKey(const Key('officialClock')), findsOneWidget);
-    expect(find.text('Clock in'), findsOneWidget);
     await tester.tap(find.byKey(const Key('nextPunch')));
     await settle(tester);
-    expect(punches, hasLength(1));
-    expect(punches.single['type'], 'clock_in');
-    expect(punches.single['offline'], isFalse);
-    expect(punches.single['source'], 'mobile');
-    expect(punches.single['idempotencyKey'], hasLength(36));
-    expect(find.text('Punch saved.'), findsOneWidget);
-    expect(find.text('Break start'), findsOneWidget);
-    expect(find.textContaining('NSR 1'), findsWidgets);
+    expect(find.byKey(const Key('confirmPunchDialog')), findsOneWidget);
+    expect(find.text('Confirm Clock in?'), findsOneWidget);
+    expect(find.byKey(const Key('retakePhoto')), findsNothing);
+    await tester.tap(find.byKey(const Key('cancelPunch')));
+    await settle(tester);
+    expect(punches, isEmpty);
     expect(await PunchQueue('account-1').load(), isEmpty);
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('a required photo is taken, confirmed and sent with the punch', (
+    tester,
+  ) async {
+    final punches = <Map<String, dynamic>>[];
+    final photos = <http.Request>[];
+    var shots = 0;
+    punchPhotoCapture = () async {
+      shots++;
+      return Uint8List.fromList(base64Decode(_pixelJpeg));
+    };
+    addTearDown(() => punchPhotoCapture = capturePunchPhoto);
+    await tester.pumpWidget(app(photoClient('required', punches, photos)));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('nextPunch')));
+    await settle(tester);
+    expect(shots, 1);
+    expect(find.byKey(const Key('punchPhotoPreview')), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('retakePhoto')));
+    await tester.tap(find.byKey(const Key('retakePhoto')));
+    await settle(tester);
+    expect(shots, 2);
+    await tester.tap(find.byKey(const Key('confirmPunch')));
+    await settle(tester);
+    expect(punches, hasLength(1));
+    expect(photos, hasLength(1));
+    expect(photos.single.url.path, endsWith('/pulse/punches/punch-1/photo'));
+    expect(photos.single.headers['authorization'], 'Bearer access-token');
+    expect(find.text('Punch saved with photo.'), findsOneWidget);
+    expect(find.textContaining('With photo'), findsWidgets);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets(
+    'without a photo (camera refused) the punch still goes, flagged',
+    (tester) async {
+      final punches = <Map<String, dynamic>>[];
+      final photos = <http.Request>[];
+      punchPhotoCapture = () async => throw StateError('camera denied');
+      addTearDown(() => punchPhotoCapture = capturePunchPhoto);
+      await tester.pumpWidget(app(photoClient('required', punches, photos)));
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('nextPunch')));
+      await settle(tester);
+      expect(find.byKey(const Key('punchPhotoMissing')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('confirmPunch')));
+      await settle(tester);
+      expect(punches, hasLength(1));
+      expect(photos, isEmpty);
+      expect(find.text('Punch saved.'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets('without connection the mark is kept and sent later as offline', (
     tester,
@@ -210,6 +353,8 @@ void main() {
     await tester.pumpWidget(app(client));
     await settle(tester);
     await tester.tap(find.byKey(const Key('nextPunch')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('confirmPunch')));
     await settle(tester);
     expect(find.byKey(const Key('pendingPunches')), findsOneWidget);
     expect(find.text('Waiting to be sent'), findsOneWidget);
@@ -296,6 +441,8 @@ void main() {
       expect(find.text('Test Employee'), findsOneWidget);
       await tester.tap(find.byKey(const Key('nextPunch')));
       await settle(tester);
+      await tester.tap(find.byKey(const Key('confirmPunch')));
+      await settle(tester);
       expect(find.byKey(const Key('pendingPunches')), findsOneWidget);
       final queued = await PunchQueue('account-1').load();
       expect(queued, hasLength(1));
@@ -331,3 +478,7 @@ void main() {
     },
   );
 }
+
+/// 1x1 JPEG, enough for Image.memory in the confirmation preview.
+const _pixelJpeg =
+    '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/yQALCAABAAEBAREA/8wABgAQEAX/2gAIAQEAAD8A0s8g/9k=';

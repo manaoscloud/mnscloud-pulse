@@ -516,6 +516,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String requestAnswer(String note) {
     return 'Answer: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return 'Confirm $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirm';
+
+  @override
+  String get retakePhoto => 'Take again';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get punchPhotoNote =>
+      'Your company asks for a photo at each punch. It is kept for 90 days and seen only by HR.';
+
+  @override
+  String get punchPhotoMissing =>
+      'No photo: the punch is recorded and flagged for HR.';
+
+  @override
+  String get punchPhotoFailed =>
+      'Punch saved, but the photo could not be sent.';
+
+  @override
+  String get punchPhotoOffline =>
+      'No connection: the punch was kept; the photo is only sent with connection.';
+
+  @override
+  String get punchPhotoSaved => 'Punch saved with photo.';
+
+  @override
+  String get withPhoto => 'With photo';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -1029,4 +1065,40 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   String requestAnswer(String note) {
     return 'Answer: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return 'Confirm $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirm';
+
+  @override
+  String get retakePhoto => 'Take again';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get punchPhotoNote =>
+      'Your company asks for a photo at each punch. It is kept for 90 days and seen only by HR.';
+
+  @override
+  String get punchPhotoMissing =>
+      'No photo: the punch is recorded and flagged for HR.';
+
+  @override
+  String get punchPhotoFailed =>
+      'Punch saved, but the photo could not be sent.';
+
+  @override
+  String get punchPhotoOffline =>
+      'No connection: the punch was kept; the photo is only sent with connection.';
+
+  @override
+  String get punchPhotoSaved => 'Punch saved with photo.';
+
+  @override
+  String get withPhoto => 'With photo';
 }

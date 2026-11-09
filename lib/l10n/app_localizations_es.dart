@@ -517,6 +517,41 @@ class AppLocalizationsEs extends AppLocalizations {
   String requestAnswer(String note) {
     return 'Respuesta: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return '¿Confirmar $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirmar';
+
+  @override
+  String get retakePhoto => 'Tomar otra';
+
+  @override
+  String get takePhoto => 'Tomar foto';
+
+  @override
+  String get punchPhotoNote =>
+      'Tu empresa pide una foto en cada registro. Se guarda 90 días y solo RR. HH. la ve.';
+
+  @override
+  String get punchPhotoMissing =>
+      'Sin foto: el registro se guarda y se señala para RR. HH.';
+
+  @override
+  String get punchPhotoFailed => 'Registro guardado, pero la foto no se envió.';
+
+  @override
+  String get punchPhotoOffline =>
+      'Sin conexión: el registro se guardó; la foto solo se envía con conexión.';
+
+  @override
+  String get punchPhotoSaved => 'Registro guardado con foto.';
+
+  @override
+  String get withPhoto => 'Con foto';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -1031,4 +1066,39 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   String requestAnswer(String note) {
     return 'Respuesta: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return '¿Confirmar $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirmar';
+
+  @override
+  String get retakePhoto => 'Tomar otra';
+
+  @override
+  String get takePhoto => 'Tomar foto';
+
+  @override
+  String get punchPhotoNote =>
+      'Tu empresa pide una foto en cada registro. Se guarda 90 días y solo RR. HH. la ve.';
+
+  @override
+  String get punchPhotoMissing =>
+      'Sin foto: el registro se guarda y se señala para RR. HH.';
+
+  @override
+  String get punchPhotoFailed => 'Registro guardado, pero la foto no se envió.';
+
+  @override
+  String get punchPhotoOffline =>
+      'Sin conexión: el registro se guardó; la foto solo se envía con conexión.';
+
+  @override
+  String get punchPhotoSaved => 'Registro guardado con foto.';
+
+  @override
+  String get withPhoto => 'Con foto';
 }

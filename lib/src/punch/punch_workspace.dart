@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../core/ids.dart';
 import '../core/location.dart';
+import '../core/punch_camera.dart';
 import '../core/pulse_api.dart';
 import '../core/punch_queue.dart';
 import '../core/server_clock.dart';
@@ -49,6 +50,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   bool _busy = false;
   bool _flushing = false;
   bool _showOthers = false;
+  bool _confirming = false;
   String? _message;
   bool _messageError = false;
   Timer? _retry;
@@ -141,9 +143,17 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   }
 
   Future<void> _record(String type) async {
-    if (_busy) return;
+    if (_busy || _confirming) return;
     try {
-      await _recordMark(type);
+      _confirming = true;
+      final _PunchDecision? decision;
+      try {
+        decision = await _confirm(type);
+      } finally {
+        _confirming = false;
+      }
+      if (decision == null || !mounted) return;
+      await _recordMark(type, decision.photo);
     } catch (_) {
       // The device store or the platform failed: the button never stays waiting.
       if (!mounted) return;
@@ -155,7 +165,47 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     }
   }
 
-  Future<void> _recordMark(String type) async {
+  /// Photo at punch of the employee policy; read once from the day summary when still unknown.
+  Future<String> _photoMode() async {
+    if (widget.api.punchPhotoMode == null && widget.api.signedIn) {
+      try {
+        await widget.api.today();
+      } catch (_) {
+        // Unknown (offline, error): no photo is asked, the mark never waits for it.
+      }
+    }
+    return widget.api.punchPhotoMode ?? 'off';
+  }
+
+  Future<Uint8List?> _takePhoto() async {
+    try {
+      return await punchPhotoCapture();
+    } catch (_) {
+      // Camera denied or unavailable: the mark goes without a photo and HR sees it flagged.
+      return null;
+    }
+  }
+
+  /// Every mark is confirmed first: type, official time and, when the policy asks, the photo.
+  Future<_PunchDecision?> _confirm(String type) async {
+    final mode = await _photoMode();
+    final wantsPhoto = mode == 'optional' || mode == 'required';
+    final photo = wantsPhoto ? await _takePhoto() : null;
+    if (!mounted) return null;
+    return showDialog<_PunchDecision>(
+      context: context,
+      builder: (_) => _ConfirmPunchDialog(
+        type: type,
+        icon: _icon(type),
+        clock: widget.clock,
+        photoMode: mode,
+        photo: photo,
+        takePhoto: _takePhoto,
+      ),
+    );
+  }
+
+  Future<void> _recordMark(String type, Uint8List? photo) async {
     setState(() {
       _busy = true;
       _message = null;
@@ -183,7 +233,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       setState(() {
         _busy = false;
         _message = _pending.any((p) => p.idempotencyKey == punch.idempotencyKey)
-            ? 'punchQueued'
+            ? (photo == null ? 'punchQueued' : 'punchPhotoOffline')
             : 'punchSaved';
         _messageError = false;
       });
@@ -197,11 +247,15 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       if (item['Duplicate'] == 1) message = 'punchSynced';
       _online = true;
       _delivered.value++;
+      final punchUUID = item['TimePunchUUID']?.toString();
+      if (photo != null && punchUUID != null && punchUUID.isNotEmpty) {
+        message = await _sendPhoto(punchUUID, photo);
+      }
     } on PulseFailure catch (failure) {
       if (_handleFailure(failure)) return;
       if (failure.code == 'networkError') {
         _online = false;
-        message = 'punchQueued';
+        message = photo == null ? 'punchQueued' : 'punchPhotoOffline';
       } else if (failure.versionUnsupported) {
         // This app version is refused: the mark stays queued and goes after the update.
         message = 'punchQueued';
@@ -225,8 +279,24 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     if (_online) await _reload();
   }
 
+  /// The mark is already recorded: a photo that does not go is reported, never retried later.
+  Future<String> _sendPhoto(String punchUUID, Uint8List photo) async {
+    try {
+      await widget.api.uploadPunchPhoto(punchUUID, uuidV4(), photo);
+      return 'punchPhotoSaved';
+    } on PulseFailure catch (failure) {
+      if (failure.sessionEnded) widget.onSessionEnded(failure.code);
+      return 'punchPhotoFailed';
+    } catch (_) {
+      return 'punchPhotoFailed';
+    }
+  }
+
   String _text(String key) => switch (key) {
     'punchSaved' => l.punchSaved,
+    'punchPhotoSaved' => l.punchPhotoSaved,
+    'punchPhotoFailed' => l.punchPhotoFailed,
+    'punchPhotoOffline' => l.punchPhotoOffline,
     'punchSynced' => l.punchSynced,
     'punchQueued' => l.punchQueued,
     'rateLimited' => l.rateLimited,
@@ -408,6 +478,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
                 if ((punch['Flags'] as List?)?.contains('offline') ?? false)
                   l.sentLater,
                 if (punch['NSR'] != null) l.nsrLabel(punch['NSR'].toString()),
+                if (punch['HasPhoto'] == true) l.withPhoto,
               ].join('\n'),
               textAlign: TextAlign.end,
               style: Theme.of(context).textTheme.bodySmall,
@@ -475,6 +546,119 @@ class _OfficialClockState extends State<_OfficialClock> {
           ),
         ),
         Text(MaterialLocalizations.of(context).formatFullDate(now)),
+      ],
+    );
+  }
+}
+
+class _PunchDecision {
+  const _PunchDecision(this.photo);
+  final Uint8List? photo;
+}
+
+/// Confirmation of one mark: what will be recorded, the official time and the photo (if asked).
+class _ConfirmPunchDialog extends StatefulWidget {
+  const _ConfirmPunchDialog({
+    required this.type,
+    required this.icon,
+    required this.clock,
+    required this.photoMode,
+    required this.photo,
+    required this.takePhoto,
+  });
+
+  final String type;
+  final IconData icon;
+  final ServerClock clock;
+  final String photoMode;
+  final Uint8List? photo;
+  final Future<Uint8List?> Function() takePhoto;
+
+  @override
+  State<_ConfirmPunchDialog> createState() => _ConfirmPunchDialogState();
+}
+
+class _ConfirmPunchDialogState extends State<_ConfirmPunchDialog> {
+  late Uint8List? _photo = widget.photo;
+  bool _taking = false;
+
+  bool get _asksPhoto =>
+      widget.photoMode == 'optional' || widget.photoMode == 'required';
+
+  Future<void> _retake() async {
+    setState(() => _taking = true);
+    final photo = await widget.takePhoto();
+    if (!mounted) return;
+    setState(() {
+      _taking = false;
+      if (photo != null) _photo = photo;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    final label = punchLabel(l, widget.type);
+    return AlertDialog(
+      key: const Key('confirmPunchDialog'),
+      icon: Icon(widget.icon),
+      title: Text(l.confirmPunchTitle(label)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _OfficialClock(clock: widget.clock),
+            if (_asksPhoto) ...[
+              const SizedBox(height: 16),
+              if (_photo != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    _photo!,
+                    key: const Key('punchPhotoPreview'),
+                    height: 180,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                  ),
+                )
+              else
+                Text(
+                  l.punchPhotoMissing,
+                  key: const Key('punchPhotoMissing'),
+                  style: TextStyle(color: scheme.error),
+                ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const Key('retakePhoto'),
+                onPressed: _taking ? null : _retake,
+                icon: const Icon(Icons.photo_camera_outlined),
+                label: Text(_photo == null ? l.takePhoto : l.retakePhoto),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l.punchPhotoNote,
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          key: const Key('cancelPunch'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.cancel),
+        ),
+        FilledButton(
+          key: const Key('confirmPunch'),
+          onPressed: _taking
+              ? null
+              : () => Navigator.of(context).pop(_PunchDecision(_photo)),
+          child: Text(l.confirmPunch),
+        ),
       ],
     );
   }

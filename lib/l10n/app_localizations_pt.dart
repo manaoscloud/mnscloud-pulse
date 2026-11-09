@@ -517,6 +517,42 @@ class AppLocalizationsPt extends AppLocalizations {
   String requestAnswer(String note) {
     return 'Resposta: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return 'Confirmar $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirmar';
+
+  @override
+  String get retakePhoto => 'Tirar outra';
+
+  @override
+  String get takePhoto => 'Tirar foto';
+
+  @override
+  String get punchPhotoNote =>
+      'Sua empresa pede uma foto em cada marcação. Ela fica guardada por 90 dias e só o RH vê.';
+
+  @override
+  String get punchPhotoMissing =>
+      'Sem foto: a marcação é registrada e sinalizada para o RH.';
+
+  @override
+  String get punchPhotoFailed =>
+      'Ponto registrado, mas a foto não foi enviada.';
+
+  @override
+  String get punchPhotoOffline =>
+      'Sem conexão: a marcação foi guardada; a foto só é enviada com conexão.';
+
+  @override
+  String get punchPhotoSaved => 'Ponto registrado com foto.';
+
+  @override
+  String get withPhoto => 'Com foto';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1031,4 +1067,40 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String requestAnswer(String note) {
     return 'Resposta: $note';
   }
+
+  @override
+  String confirmPunchTitle(String punch) {
+    return 'Confirmar $punch?';
+  }
+
+  @override
+  String get confirmPunch => 'Confirmar';
+
+  @override
+  String get retakePhoto => 'Tirar outra';
+
+  @override
+  String get takePhoto => 'Tirar foto';
+
+  @override
+  String get punchPhotoNote =>
+      'Sua empresa pede uma foto em cada marcação. Ela fica guardada por 90 dias e só o RH vê.';
+
+  @override
+  String get punchPhotoMissing =>
+      'Sem foto: a marcação é registrada e sinalizada para o RH.';
+
+  @override
+  String get punchPhotoFailed =>
+      'Ponto registrado, mas a foto não foi enviada.';
+
+  @override
+  String get punchPhotoOffline =>
+      'Sem conexão: a marcação foi guardada; a foto só é enviada com conexão.';
+
+  @override
+  String get punchPhotoSaved => 'Ponto registrado com foto.';
+
+  @override
+  String get withPhoto => 'Com foto';
 }
