@@ -189,7 +189,10 @@ Widget app(FakePulse fake, {List<String>? openedFiles, DateTimeRange? range}) =>
       locale: const Locale('en', 'US'),
       home: Scaffold(
         body: DocumentsView(
-          api: PulseApi(client: fake.client, baseUrl: 'https://pulse.test/api/v1'),
+          api: PulseApi(
+            client: fake.client,
+            baseUrl: 'https://pulse.test/api/v1',
+          ),
           onSessionEnded: (_) {},
           pickFile: () async => (utf8.encode('%PDF-1.7 comprovante'), 'c.pdf'),
           openFile: (bytes, type, name) async {
