@@ -1,6 +1,14 @@
+import 'location_stub.dart'
+    if (dart.library.js_interop) 'location_web.dart'
+    if (dart.library.io) 'location_io.dart'
+    as platform;
+
 export 'location_stub.dart'
     if (dart.library.js_interop) 'location_web.dart'
     if (dart.library.io) 'location_io.dart';
+
+/// Reads the position of a mark; replaced only by tests.
+Future<PunchLocation?> Function() punchLocator = platform.currentPunchLocation;
 
 /// Position captured at the moment of a punch (never tracked in the background).
 class PunchLocation {

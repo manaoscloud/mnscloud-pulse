@@ -11,6 +11,7 @@ import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
 import 'package:mnscloud_pulse/main.dart';
 import 'package:mnscloud_pulse/src/core/ids.dart';
+import 'package:mnscloud_pulse/src/core/location.dart';
 import 'package:mnscloud_pulse/src/core/punch_camera.dart';
 import 'package:mnscloud_pulse/src/core/pulse_api.dart';
 import 'package:mnscloud_pulse/src/core/punch_queue.dart';
@@ -277,7 +278,7 @@ void main() {
     final punches = <Map<String, dynamic>>[];
     final photos = <http.Request>[];
     var shots = 0;
-    punchPhotoCapture = () async {
+    punchPhotoCapture = (_) async {
       shots++;
       return Uint8List.fromList(base64Decode(_pixelJpeg));
     };
@@ -303,14 +304,40 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('a required photo keeps the mark closed while there is none', (
+    tester,
+  ) async {
+    final punches = <Map<String, dynamic>>[];
+    final photos = <http.Request>[];
+    punchPhotoCapture = (_) async => throw StateError('camera denied');
+    addTearDown(() => punchPhotoCapture = capturePunchPhoto);
+    await tester.pumpWidget(app(photoClient('required', punches, photos)));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('nextPunch')));
+    await settle(tester);
+    expect(find.byKey(const Key('punchPhotoMissing')), findsOneWidget);
+    expect(
+      find.text('Your company requires the photo to confirm the punch.'),
+      findsOneWidget,
+    );
+    final confirm = tester.widget<FilledButton>(
+      find.byKey(const Key('confirmPunch')),
+    );
+    expect(confirm.onPressed, isNull);
+    await tester.tap(find.byKey(const Key('cancelPunch')));
+    await settle(tester);
+    expect(punches, isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
-    'without a photo (camera refused) the punch still goes, flagged',
+    'an optional photo refused by the camera lets the punch go, flagged',
     (tester) async {
       final punches = <Map<String, dynamic>>[];
       final photos = <http.Request>[];
-      punchPhotoCapture = () async => throw StateError('camera denied');
+      punchPhotoCapture = (_) async => throw StateError('camera denied');
       addTearDown(() => punchPhotoCapture = capturePunchPhoto);
-      await tester.pumpWidget(app(photoClient('required', punches, photos)));
+      await tester.pumpWidget(app(photoClient('optional', punches, photos)));
       await settle(tester);
       await tester.tap(find.byKey(const Key('nextPunch')));
       await settle(tester);
@@ -318,11 +345,32 @@ void main() {
       await tester.tap(find.byKey(const Key('confirmPunch')));
       await settle(tester);
       expect(punches, hasLength(1));
+      expect(punches.single['latitude'], -3.1);
       expect(photos, isEmpty);
       expect(find.text('Punch saved.'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets('without a position the punch is not recorded', (tester) async {
+    final punches = <Map<String, dynamic>>[];
+    final previous = punchLocator;
+    punchLocator = () async => null;
+    addTearDown(() => punchLocator = previous);
+    await tester.pumpWidget(app(photoClient('off', punches, [])));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('nextPunch')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('confirmPunch')));
+    await settle(tester);
+    expect(punches, isEmpty);
+    expect(await PunchQueue('account-1').load(), isEmpty);
+    expect(
+      find.textContaining('Your location could not be read'),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets('without connection the mark is kept and sent later as offline', (
     tester,

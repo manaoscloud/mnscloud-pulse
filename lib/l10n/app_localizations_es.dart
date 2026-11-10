@@ -835,6 +835,86 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get conversationManager => 'Gestor';
+
+  @override
+  String get permissionsTitle => 'Permisos de Pulse';
+
+  @override
+  String get permissionsIntro =>
+      'Para registrar la jornada con seguridad, Pulse necesita la ubicación, la cámara y las notificaciones. Las autorizas una sola vez y el navegador o el dispositivo guarda la elección.';
+
+  @override
+  String get permissionLocation => 'Ubicación (GPS)';
+
+  @override
+  String get permissionLocationHelp =>
+      'Se registra solo en el momento de cada fichaje.';
+
+  @override
+  String get permissionCamera => 'Cámara';
+
+  @override
+  String get permissionCameraHelp =>
+      'Foto en vivo para confirmar cada fichaje.';
+
+  @override
+  String get permissionNotifications => 'Notificaciones';
+
+  @override
+  String get permissionNotificationsHelp =>
+      'Solicitudes, documentos, avisos y recordatorios.';
+
+  @override
+  String get permissionGranted => 'Permitido';
+
+  @override
+  String get permissionPending => 'Aún no permitido';
+
+  @override
+  String get permissionDenied => 'Bloqueado';
+
+  @override
+  String get permissionUnavailable => 'Apagado o no disponible';
+
+  @override
+  String get permissionUnsupported => 'No disponible en este navegador';
+
+  @override
+  String get permissionsAllow => 'Permitir todo';
+
+  @override
+  String get permissionsRecheck => 'Verificar de nuevo';
+
+  @override
+  String get permissionsAlwaysHint =>
+      'Cuando el navegador pregunte, elige Permitir (no \"solo esta vez\") para que no te pregunte de nuevo.';
+
+  @override
+  String get permissionsDeniedHelp =>
+      'Un permiso está bloqueado. Abre la configuración del sitio (el candado junto a la dirección) o del dispositivo, cámbialo a Permitir y toca Verificar de nuevo.';
+
+  @override
+  String get permissionsUnavailableHelp =>
+      'Activa la ubicación (GPS) del dispositivo y comprueba que haya una cámara disponible.';
+
+  @override
+  String get permissionsLost =>
+      'Se desactivó un permiso de Pulse. Vuelve a permitirlo para fichar.';
+
+  @override
+  String get locationRequired =>
+      'No se pudo obtener tu ubicación. Activa el GPS e inténtalo de nuevo; el fichaje no se registró.';
+
+  @override
+  String get punchPhotoRequired =>
+      'Tu empresa exige la foto para confirmar el fichaje.';
+
+  @override
+  String get cameraUnavailable =>
+      'No se pudo abrir la cámara. Revisa el permiso de la cámara e inténtalo de nuevo.';
+
+  @override
+  String get capturePhoto => 'Capturar';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -1667,4 +1747,84 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get conversationManager => 'Gestor';
+
+  @override
+  String get permissionsTitle => 'Permisos de Pulse';
+
+  @override
+  String get permissionsIntro =>
+      'Para registrar la jornada con seguridad, Pulse necesita la ubicación, la cámara y las notificaciones. Las autorizas una sola vez y el navegador o el dispositivo guarda la elección.';
+
+  @override
+  String get permissionLocation => 'Ubicación (GPS)';
+
+  @override
+  String get permissionLocationHelp =>
+      'Se registra solo en el momento de cada fichaje.';
+
+  @override
+  String get permissionCamera => 'Cámara';
+
+  @override
+  String get permissionCameraHelp =>
+      'Foto en vivo para confirmar cada fichaje.';
+
+  @override
+  String get permissionNotifications => 'Notificaciones';
+
+  @override
+  String get permissionNotificationsHelp =>
+      'Solicitudes, documentos, avisos y recordatorios.';
+
+  @override
+  String get permissionGranted => 'Permitido';
+
+  @override
+  String get permissionPending => 'Aún no permitido';
+
+  @override
+  String get permissionDenied => 'Bloqueado';
+
+  @override
+  String get permissionUnavailable => 'Apagado o no disponible';
+
+  @override
+  String get permissionUnsupported => 'No disponible en este navegador';
+
+  @override
+  String get permissionsAllow => 'Permitir todo';
+
+  @override
+  String get permissionsRecheck => 'Verificar de nuevo';
+
+  @override
+  String get permissionsAlwaysHint =>
+      'Cuando el navegador pregunte, elige Permitir (no \"solo esta vez\") para que no te pregunte de nuevo.';
+
+  @override
+  String get permissionsDeniedHelp =>
+      'Un permiso está bloqueado. Abre la configuración del sitio (el candado junto a la dirección) o del dispositivo, cámbialo a Permitir y toca Verificar de nuevo.';
+
+  @override
+  String get permissionsUnavailableHelp =>
+      'Activa la ubicación (GPS) del dispositivo y comprueba que haya una cámara disponible.';
+
+  @override
+  String get permissionsLost =>
+      'Se desactivó un permiso de Pulse. Vuelve a permitirlo para fichar.';
+
+  @override
+  String get locationRequired =>
+      'No se pudo obtener tu ubicación. Activa el GPS e inténtalo de nuevo; el fichaje no se registró.';
+
+  @override
+  String get punchPhotoRequired =>
+      'Tu empresa exige la foto para confirmar el fichaje.';
+
+  @override
+  String get cameraUnavailable =>
+      'No se pudo abrir la cámara. Revisa el permiso de la cámara e inténtalo de nuevo.';
+
+  @override
+  String get capturePhoto => 'Capturar';
 }

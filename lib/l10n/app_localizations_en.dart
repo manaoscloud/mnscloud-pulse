@@ -832,6 +832,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get conversationManager => 'Manager';
+
+  @override
+  String get permissionsTitle => 'Allow Pulse to work';
+
+  @override
+  String get permissionsIntro =>
+      'To record your time safely, Pulse needs your location, camera and notifications. You allow them once and the browser or device keeps your choice.';
+
+  @override
+  String get permissionLocation => 'Location (GPS)';
+
+  @override
+  String get permissionLocationHelp =>
+      'Recorded only at the moment of each punch.';
+
+  @override
+  String get permissionCamera => 'Camera';
+
+  @override
+  String get permissionCameraHelp => 'Live photo to confirm each punch.';
+
+  @override
+  String get permissionNotifications => 'Notifications';
+
+  @override
+  String get permissionNotificationsHelp =>
+      'Requests, documents, notices and reminders.';
+
+  @override
+  String get permissionGranted => 'Allowed';
+
+  @override
+  String get permissionPending => 'Not allowed yet';
+
+  @override
+  String get permissionDenied => 'Blocked';
+
+  @override
+  String get permissionUnavailable => 'Turned off or not available';
+
+  @override
+  String get permissionUnsupported => 'Not available in this browser';
+
+  @override
+  String get permissionsAllow => 'Allow all';
+
+  @override
+  String get permissionsRecheck => 'Check again';
+
+  @override
+  String get permissionsAlwaysHint =>
+      'When the browser asks, choose Allow (not \"only this time\") so you are not asked again.';
+
+  @override
+  String get permissionsDeniedHelp =>
+      'A permission is blocked. Open the site settings (the lock next to the address) or the device settings, switch it to Allow and tap Check again.';
+
+  @override
+  String get permissionsUnavailableHelp =>
+      'Turn on the device location (GPS) and make sure a camera is available.';
+
+  @override
+  String get permissionsLost =>
+      'A permission of Pulse was turned off. Allow it again to punch.';
+
+  @override
+  String get locationRequired =>
+      'Your location could not be read. Turn on the GPS and try again; the punch was not recorded.';
+
+  @override
+  String get punchPhotoRequired =>
+      'Your company requires the photo to confirm the punch.';
+
+  @override
+  String get cameraUnavailable =>
+      'The camera could not be opened. Check the camera permission and try again.';
+
+  @override
+  String get capturePhoto => 'Capture';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -1661,4 +1740,83 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get conversationManager => 'Manager';
+
+  @override
+  String get permissionsTitle => 'Allow Pulse to work';
+
+  @override
+  String get permissionsIntro =>
+      'To record your time safely, Pulse needs your location, camera and notifications. You allow them once and the browser or device keeps your choice.';
+
+  @override
+  String get permissionLocation => 'Location (GPS)';
+
+  @override
+  String get permissionLocationHelp =>
+      'Recorded only at the moment of each punch.';
+
+  @override
+  String get permissionCamera => 'Camera';
+
+  @override
+  String get permissionCameraHelp => 'Live photo to confirm each punch.';
+
+  @override
+  String get permissionNotifications => 'Notifications';
+
+  @override
+  String get permissionNotificationsHelp =>
+      'Requests, documents, notices and reminders.';
+
+  @override
+  String get permissionGranted => 'Allowed';
+
+  @override
+  String get permissionPending => 'Not allowed yet';
+
+  @override
+  String get permissionDenied => 'Blocked';
+
+  @override
+  String get permissionUnavailable => 'Turned off or not available';
+
+  @override
+  String get permissionUnsupported => 'Not available in this browser';
+
+  @override
+  String get permissionsAllow => 'Allow all';
+
+  @override
+  String get permissionsRecheck => 'Check again';
+
+  @override
+  String get permissionsAlwaysHint =>
+      'When the browser asks, choose Allow (not \"only this time\") so you are not asked again.';
+
+  @override
+  String get permissionsDeniedHelp =>
+      'A permission is blocked. Open the site settings (the lock next to the address) or the device settings, switch it to Allow and tap Check again.';
+
+  @override
+  String get permissionsUnavailableHelp =>
+      'Turn on the device location (GPS) and make sure a camera is available.';
+
+  @override
+  String get permissionsLost =>
+      'A permission of Pulse was turned off. Allow it again to punch.';
+
+  @override
+  String get locationRequired =>
+      'Your location could not be read. Turn on the GPS and try again; the punch was not recorded.';
+
+  @override
+  String get punchPhotoRequired =>
+      'Your company requires the photo to confirm the punch.';
+
+  @override
+  String get cameraUnavailable =>
+      'The camera could not be opened. Check the camera permission and try again.';
+
+  @override
+  String get capturePhoto => 'Capture';
 }

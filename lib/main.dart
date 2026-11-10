@@ -14,6 +14,7 @@ import 'src/core/server_clock.dart';
 import 'src/offline/device_grant.dart';
 import 'src/offline/device_lock.dart';
 import 'src/offline/punch_sync.dart';
+import 'src/permissions/permission_gate.dart';
 import 'src/offline/secret_vault.dart';
 import 'src/pwa/pwa.dart';
 import 'src/punch/punch_workspace.dart';
@@ -171,6 +172,9 @@ class _PulseShellState extends State<PulseShell> {
   bool _timesheetOpened = false;
   bool _requestsOpened = false;
   bool _documentsOpened = false;
+
+  /// Permission gate of the signed-in app (checked again before every mark).
+  final _gate = GlobalKey<PermissionGateState>();
 
   /// Request whose conversation a notification asked to open.
   final _focusRequest = ValueNotifier<String?>(null);
@@ -503,6 +507,15 @@ class _PulseShellState extends State<PulseShell> {
         ),
       );
     }
+    return PermissionGate(
+      key: _gate,
+      api: _api,
+      onSignOut: _loading ? null : _signOut,
+      child: _signedIn(context, account, banner),
+    );
+  }
+
+  Widget _signedIn(BuildContext context, PulseAccount account, Widget? banner) {
     return Scaffold(
       appBar: AppBar(
         title: Text(pulseBrand.value?.title ?? 'MNSCloud Pulse'),
@@ -559,6 +572,8 @@ class _PulseShellState extends State<PulseShell> {
                           clock: _clock,
                           sync: _sync,
                           onSessionEnded: _sessionEnded,
+                          ensurePermissions: () async =>
+                              await _gate.currentState?.ensure() ?? true,
                         ),
                       ],
                     ),
