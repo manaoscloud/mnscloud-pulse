@@ -1483,6 +1483,12 @@ abstract class AppLocalizations {
   /// **'New message on a request'**
   String get notificationMessage;
 
+  /// No description provided for @notificationNotice.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Company notice'**
+  String get notificationNotice;
+
   /// No description provided for @pushTitle.
   ///
   /// In en_US, this message translates to:

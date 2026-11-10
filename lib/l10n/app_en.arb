@@ -230,6 +230,7 @@
   "notificationApproved": "Request approved",
   "notificationRejected": "Request rejected",
   "notificationMessage": "New message on a request",
+  "notificationNotice": "Company notice",
   "pushTitle": "Notifications on this device",
   "pushText": "Get answers and reminders even when Pulse is closed.",
   "pushDenied": "Notifications are blocked in the browser. Allow them in the site settings.",

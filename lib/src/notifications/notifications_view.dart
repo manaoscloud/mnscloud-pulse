@@ -22,11 +22,15 @@ class NotificationsButton extends StatefulWidget {
     required this.api,
     required this.onOpenRequest,
     required this.onSessionEnded,
+    this.onOpenDocuments,
     this.refresh,
   });
 
   final PulseApi api;
   final void Function(String? requestUUID) onOpenRequest;
+
+  /// Documents tab (HR document or company notice entry).
+  final VoidCallback? onOpenDocuments;
   final void Function(String code) onSessionEnded;
   final Listenable? refresh;
 
@@ -77,7 +81,11 @@ class _NotificationsButtonState extends State<NotificationsButton> {
       ),
     );
     unawaited(_count());
-    if (request != null) widget.onOpenRequest(request.isEmpty ? null : request);
+    if (request == openDocumentsTab) {
+      widget.onOpenDocuments?.call();
+    } else if (request != null) {
+      widget.onOpenRequest(request.isEmpty ? null : request);
+    }
   }
 
   @override
@@ -98,8 +106,14 @@ class _NotificationsButtonState extends State<NotificationsButton> {
   }
 }
 
+/// Pops this from [NotificationsSheet] to open the Documents tab (HR document or company notice).
+const openDocumentsTab = 'documents';
+
+bool isContentNotification(Map<String, dynamic> item) =>
+    item['Type'] == 'document_published' || item['Type'] == 'notice_published';
+
 /// Inbox plus the device settings: Web Push on this browser and mark reminders. Pops the request
-/// to open ('' for the requests tab), or null.
+/// to open ('' for the requests tab), [openDocumentsTab], or null.
 class NotificationsSheet extends StatefulWidget {
   const NotificationsSheet({
     super.key,
@@ -226,7 +240,11 @@ class _NotificationsSheetState extends State<NotificationsSheet> {
       if (_ended(failure)) return;
     }
     if (mounted) {
-      Navigator.of(context).pop(item['RequestUUID']?.toString() ?? '');
+      Navigator.of(context).pop(
+        isContentNotification(item)
+            ? openDocumentsTab
+            : item['RequestUUID']?.toString() ?? '',
+      );
     }
   }
 
@@ -240,6 +258,13 @@ class _NotificationsSheetState extends State<NotificationsSheet> {
   }
 
   String _title(Map<String, dynamic> item) {
+    if (isContentNotification(item)) {
+      final title = item['Title']?.toString() ?? '';
+      if (title.isNotEmpty) return title;
+      return item['Type'] == 'notice_published'
+          ? l.notificationNotice
+          : l.docKindDocument;
+    }
     if (item['Type'] == 'request_message') return l.notificationMessage;
     return item['RequestStatus'] == 'approved'
         ? l.notificationApproved
@@ -247,6 +272,14 @@ class _NotificationsSheetState extends State<NotificationsSheet> {
   }
 
   String _subtitle(Map<String, dynamic> item) {
+    if (item['Type'] == 'notice_published') return l.notificationNotice;
+    if (item['Type'] == 'document_published') {
+      return switch (item['DocumentKind']) {
+        'payslip' => l.docKindPayslip,
+        'warning' => l.docKindWarning,
+        _ => l.docKindDocument,
+      };
+    }
     final type = requestTypeLabel(l, item['RequestType']?.toString() ?? '');
     final date = DateTime.tryParse(item['RequestDate']?.toString() ?? '');
     if (date == null) return type;
@@ -349,7 +382,11 @@ class _NotificationsSheetState extends State<NotificationsSheet> {
               ListTile(
                 key: ValueKey('notification-${item['NotificationUUID']}'),
                 leading: Icon(
-                  item['Type'] == 'request_message'
+                  item['Type'] == 'document_published'
+                      ? Icons.description_outlined
+                      : item['Type'] == 'notice_published'
+                      ? Icons.campaign_outlined
+                      : item['Type'] == 'request_message'
                       ? Icons.chat_bubble_outline
                       : item['RequestStatus'] == 'approved'
                       ? Icons.check_circle_outline

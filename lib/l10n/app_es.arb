@@ -230,6 +230,7 @@
   "notificationApproved": "Solicitud aprobada",
   "notificationRejected": "Solicitud rechazada",
   "notificationMessage": "Nuevo mensaje en una solicitud",
+  "notificationNotice": "Aviso de la empresa",
   "pushTitle": "Notificaciones en este dispositivo",
   "pushText": "Reciba respuestas y recordatorios incluso con Pulse cerrado.",
   "pushDenied": "Las notificaciones están bloqueadas en el navegador. Permítalas en la configuración del sitio.",

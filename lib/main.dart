@@ -185,6 +185,15 @@ class _PulseShellState extends State<PulseShell> {
     if (requestUUID != null) _focusRequest.value = requestUUID;
   }
 
+  /// Documents tab (inbox entry or push of a new HR document or company notice, `?tab=documents`).
+  void _openDocuments() {
+    if (!mounted) return;
+    setState(() {
+      _tab = 3;
+      _documentsOpened = true;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -199,9 +208,13 @@ class _PulseShellState extends State<PulseShell> {
     if (Uri.base.queryParameters['tab'] == 'requests') {
       _tab = 2;
       _requestsOpened = true;
+    } else if (Uri.base.queryParameters['tab'] == 'documents') {
+      _tab = 3;
+      _documentsOpened = true;
     }
     pwaOnNotificationClick((url) {
       if (url.contains('tab=requests')) _openRequests();
+      if (url.contains('tab=documents')) _openDocuments();
     });
     onBrowserOnline(() => unawaited(_syncAll()));
   }
@@ -498,6 +511,7 @@ class _PulseShellState extends State<PulseShell> {
             key: ValueKey('bell-${account.timeClockAccountUUID}'),
             api: _api,
             onOpenRequest: _openRequests,
+            onOpenDocuments: _openDocuments,
             onSessionEnded: _sessionEnded,
           ),
           const AccessLanguageButton(),
