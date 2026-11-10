@@ -5,7 +5,7 @@ import 'package:web/web.dart' as web;
 
 import 'location.dart';
 
-/// One browser position read for the punch (permission asked by the browser, 5 s at most). A
+/// One browser position read for the punch (permission asked by the browser, 8 s at most). A
 /// refusal, an error or a timeout records the punch without location.
 Future<PunchLocation?> currentPunchLocation() {
   final completer = Completer<PunchLocation?>();
@@ -22,7 +22,7 @@ Future<PunchLocation?> currentPunchLocation() {
       ((web.GeolocationPositionError _) => done(null)).toJS,
       web.PositionOptions(
         enableHighAccuracy: true,
-        timeout: 5000,
+        timeout: 8000,
         maximumAge: 60000,
       ),
     );
@@ -30,7 +30,7 @@ Future<PunchLocation?> currentPunchLocation() {
     done(null);
   }
   return completer.future.timeout(
-    const Duration(seconds: 6),
+    const Duration(seconds: 9),
     onTimeout: () => null,
   );
 }

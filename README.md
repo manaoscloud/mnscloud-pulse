@@ -61,8 +61,18 @@ ships with the store apps.
   device (`lib/src/core/punch_queue.dart`) before it is sent. Without connection it stays queued and
   is sent later as `offline` with the corrected time of the tap; a retry after a lost answer is
   recorded once by the API. Only marks are queued, never credentials or tokens.
-- The browser position is read once at the moment of the punch, when the employee allows it
-  (`lib/src/core/location_web.dart`); there is no background tracking.
+- The position is read once at the moment of the punch (`lib/src/core/location_web.dart`,
+  `location_io.dart`); there is no background tracking. A mark is recorded only with a position:
+  GPS off, refused or timed out keeps it unrecorded with a message.
+- `lib/src/permissions/permission_gate.dart` opens the signed-in app only when location, the camera
+  (unless the policy is known to take no photo) and notifications (where the platform has them) are
+  allowed. One tap asks every missing permission once and the browser or the system keeps the
+  answer; the gate checks again when the app returns to the foreground and before every mark, and a
+  permission blocked in the settings keeps the app closed with instructions. Native apps check
+  location; their camera is asked by the system camera and they have no notification channel yet.
+- Photo at punch (`lib/src/core/punch_camera.dart`): the native front camera on phones and a live
+  `getUserMedia` stream on the web (no file chooser, so an old picture cannot be sent). With the
+  policy `required` (also the default without a policy) the mark is confirmed only with a photo.
 - The API owns the official time, the immutable ledger (NSR and SHA-256 per establishment) and the
   flags (offline, late sync, clock skew, sequence); the client never decides them.
 

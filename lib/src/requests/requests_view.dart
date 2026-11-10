@@ -279,6 +279,9 @@ class _RequestsViewState extends State<RequestsView> {
               ),
               FilledButton.icon(
                 key: const Key('newRequest'),
+                // The app theme makes filled buttons full width; inside this row it must keep
+                // its own size, or the title gets no width and breaks letter by letter.
+                style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                 onPressed: _new,
                 icon: const Icon(Icons.add),
                 label: Text(l.requestNew),

@@ -837,6 +837,86 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get conversationManager => 'Gestor';
+
+  @override
+  String get permissionsTitle => 'Permissões do Pulse';
+
+  @override
+  String get permissionsIntro =>
+      'Para registrar o ponto com segurança, o Pulse precisa da localização, da câmera e das notificações. Você autoriza uma única vez e o navegador ou o aparelho guarda a escolha.';
+
+  @override
+  String get permissionLocation => 'Localização (GPS)';
+
+  @override
+  String get permissionLocationHelp =>
+      'Registrada só no momento de cada marcação.';
+
+  @override
+  String get permissionCamera => 'Câmera';
+
+  @override
+  String get permissionCameraHelp =>
+      'Foto ao vivo para confirmar cada marcação.';
+
+  @override
+  String get permissionNotifications => 'Notificações';
+
+  @override
+  String get permissionNotificationsHelp =>
+      'Solicitações, documentos, avisos e lembretes.';
+
+  @override
+  String get permissionGranted => 'Liberada';
+
+  @override
+  String get permissionPending => 'Ainda não liberada';
+
+  @override
+  String get permissionDenied => 'Bloqueada';
+
+  @override
+  String get permissionUnavailable => 'Desligada ou indisponível';
+
+  @override
+  String get permissionUnsupported => 'Não disponível neste navegador';
+
+  @override
+  String get permissionsAllow => 'Permitir tudo';
+
+  @override
+  String get permissionsRecheck => 'Verificar novamente';
+
+  @override
+  String get permissionsAlwaysHint =>
+      'Quando o navegador perguntar, escolha Permitir (não \"só desta vez\") para não ser perguntado de novo.';
+
+  @override
+  String get permissionsDeniedHelp =>
+      'Uma permissão está bloqueada. Abra as configurações do site (o cadeado ao lado do endereço) ou do aparelho, mude para Permitir e toque em Verificar novamente.';
+
+  @override
+  String get permissionsUnavailableHelp =>
+      'Ative a localização (GPS) do aparelho e confira se há uma câmera disponível.';
+
+  @override
+  String get permissionsLost =>
+      'Uma permissão do Pulse foi desligada. Libere de novo para marcar o ponto.';
+
+  @override
+  String get locationRequired =>
+      'Não foi possível obter sua localização. Ative o GPS e tente de novo; a marcação não foi registrada.';
+
+  @override
+  String get punchPhotoRequired =>
+      'Sua empresa exige a foto para confirmar a marcação.';
+
+  @override
+  String get cameraUnavailable =>
+      'Não foi possível abrir a câmera. Verifique a permissão da câmera e tente de novo.';
+
+  @override
+  String get capturePhoto => 'Capturar';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1671,4 +1751,84 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get conversationManager => 'Gestor';
+
+  @override
+  String get permissionsTitle => 'Permissões do Pulse';
+
+  @override
+  String get permissionsIntro =>
+      'Para registrar o ponto com segurança, o Pulse precisa da localização, da câmera e das notificações. Você autoriza uma única vez e o navegador ou o aparelho guarda a escolha.';
+
+  @override
+  String get permissionLocation => 'Localização (GPS)';
+
+  @override
+  String get permissionLocationHelp =>
+      'Registrada só no momento de cada marcação.';
+
+  @override
+  String get permissionCamera => 'Câmera';
+
+  @override
+  String get permissionCameraHelp =>
+      'Foto ao vivo para confirmar cada marcação.';
+
+  @override
+  String get permissionNotifications => 'Notificações';
+
+  @override
+  String get permissionNotificationsHelp =>
+      'Solicitações, documentos, avisos e lembretes.';
+
+  @override
+  String get permissionGranted => 'Liberada';
+
+  @override
+  String get permissionPending => 'Ainda não liberada';
+
+  @override
+  String get permissionDenied => 'Bloqueada';
+
+  @override
+  String get permissionUnavailable => 'Desligada ou indisponível';
+
+  @override
+  String get permissionUnsupported => 'Não disponível neste navegador';
+
+  @override
+  String get permissionsAllow => 'Permitir tudo';
+
+  @override
+  String get permissionsRecheck => 'Verificar novamente';
+
+  @override
+  String get permissionsAlwaysHint =>
+      'Quando o navegador perguntar, escolha Permitir (não \"só desta vez\") para não ser perguntado de novo.';
+
+  @override
+  String get permissionsDeniedHelp =>
+      'Uma permissão está bloqueada. Abra as configurações do site (o cadeado ao lado do endereço) ou do aparelho, mude para Permitir e toque em Verificar novamente.';
+
+  @override
+  String get permissionsUnavailableHelp =>
+      'Ative a localização (GPS) do aparelho e confira se há uma câmera disponível.';
+
+  @override
+  String get permissionsLost =>
+      'Uma permissão do Pulse foi desligada. Libere de novo para marcar o ponto.';
+
+  @override
+  String get locationRequired =>
+      'Não foi possível obter sua localização. Ative o GPS e tente de novo; a marcação não foi registrada.';
+
+  @override
+  String get punchPhotoRequired =>
+      'Sua empresa exige a foto para confirmar a marcação.';
+
+  @override
+  String get cameraUnavailable =>
+      'Não foi possível abrir a câmera. Verifique a permissão da câmera e tente de novo.';
+
+  @override
+  String get capturePhoto => 'Capturar';
 }

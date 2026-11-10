@@ -1590,6 +1590,144 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Manager'**
   String get conversationManager;
+
+  /// No description provided for @permissionsTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Allow Pulse to work'**
+  String get permissionsTitle;
+
+  /// No description provided for @permissionsIntro.
+  ///
+  /// In en_US, this message translates to:
+  /// **'To record your time safely, Pulse needs your location, camera and notifications. You allow them once and the browser or device keeps your choice.'**
+  String get permissionsIntro;
+
+  /// No description provided for @permissionLocation.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Location (GPS)'**
+  String get permissionLocation;
+
+  /// No description provided for @permissionLocationHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Recorded only at the moment of each punch.'**
+  String get permissionLocationHelp;
+
+  /// No description provided for @permissionCamera.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Camera'**
+  String get permissionCamera;
+
+  /// No description provided for @permissionCameraHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Live photo to confirm each punch.'**
+  String get permissionCameraHelp;
+
+  /// No description provided for @permissionNotifications.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Notifications'**
+  String get permissionNotifications;
+
+  /// No description provided for @permissionNotificationsHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Requests, documents, notices and reminders.'**
+  String get permissionNotificationsHelp;
+
+  /// No description provided for @permissionGranted.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Allowed'**
+  String get permissionGranted;
+
+  /// No description provided for @permissionPending.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Not allowed yet'**
+  String get permissionPending;
+
+  /// No description provided for @permissionDenied.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Blocked'**
+  String get permissionDenied;
+
+  /// No description provided for @permissionUnavailable.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Turned off or not available'**
+  String get permissionUnavailable;
+
+  /// No description provided for @permissionUnsupported.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Not available in this browser'**
+  String get permissionUnsupported;
+
+  /// No description provided for @permissionsAllow.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Allow all'**
+  String get permissionsAllow;
+
+  /// No description provided for @permissionsRecheck.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Check again'**
+  String get permissionsRecheck;
+
+  /// No description provided for @permissionsAlwaysHint.
+  ///
+  /// In en_US, this message translates to:
+  /// **'When the browser asks, choose Allow (not \"only this time\") so you are not asked again.'**
+  String get permissionsAlwaysHint;
+
+  /// No description provided for @permissionsDeniedHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'A permission is blocked. Open the site settings (the lock next to the address) or the device settings, switch it to Allow and tap Check again.'**
+  String get permissionsDeniedHelp;
+
+  /// No description provided for @permissionsUnavailableHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Turn on the device location (GPS) and make sure a camera is available.'**
+  String get permissionsUnavailableHelp;
+
+  /// No description provided for @permissionsLost.
+  ///
+  /// In en_US, this message translates to:
+  /// **'A permission of Pulse was turned off. Allow it again to punch.'**
+  String get permissionsLost;
+
+  /// No description provided for @locationRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your location could not be read. Turn on the GPS and try again; the punch was not recorded.'**
+  String get locationRequired;
+
+  /// No description provided for @punchPhotoRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your company requires the photo to confirm the punch.'**
+  String get punchPhotoRequired;
+
+  /// No description provided for @cameraUnavailable.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The camera could not be opened. Check the camera permission and try again.'**
+  String get cameraUnavailable;
+
+  /// No description provided for @capturePhoto.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Capture'**
+  String get capturePhoto;
 }
 
 class _AppLocalizationsDelegate

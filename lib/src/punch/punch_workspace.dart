@@ -24,7 +24,8 @@ class PunchWorkspace extends StatefulWidget {
     required this.clock,
     required this.sync,
     required this.onSessionEnded,
-    this.locate = currentPunchLocation,
+    this.locate,
+    this.ensurePermissions,
   });
 
   final PulseApi api;
@@ -34,7 +35,13 @@ class PunchWorkspace extends StatefulWidget {
   final PulseAccount account;
   final ServerClock clock;
   final void Function(String code) onSessionEnded;
-  final Future<PunchLocation?> Function() locate;
+
+  /// Position of the mark; [punchLocator] when not given.
+  final Future<PunchLocation?> Function()? locate;
+
+  /// Checked before every mark: false when a permission Pulse needs was turned off (the
+  /// permission gate opens again and nothing is recorded).
+  final Future<bool> Function()? ensurePermissions;
 
   @override
   State<PunchWorkspace> createState() => _PunchWorkspaceState();
@@ -148,6 +155,9 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       _confirming = true;
       final _PunchDecision? decision;
       try {
+        final ensure = widget.ensurePermissions;
+        if (ensure != null && !await ensure()) return;
+        if (!mounted) return;
         decision = await _confirm(type);
       } finally {
         _confirming = false;
@@ -179,9 +189,10 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
 
   Future<Uint8List?> _takePhoto() async {
     try {
-      return await punchPhotoCapture();
+      return await punchPhotoCapture(context);
     } catch (_) {
-      // Camera denied or unavailable: the mark goes without a photo and HR sees it flagged.
+      // Camera denied or unavailable: a required photo keeps the confirmation closed, an
+      // optional one lets the mark go flagged for HR.
       return null;
     }
   }
@@ -212,14 +223,24 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       _showOthers = false;
     });
     final occurredAt = widget.clock.nowUtc();
-    final location = await widget.locate();
+    final location = await (widget.locate ?? punchLocator)();
+    if (location == null) {
+      // Pulse records a mark only with the position of that moment (GPS off, refused, timeout).
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _message = 'locationRequired';
+        _messageError = true;
+      });
+      return;
+    }
     final punch = QueuedPunch(
       idempotencyKey: uuidV4(),
       type: type,
       occurredAt: occurredAt,
-      latitude: location?.latitude,
-      longitude: location?.longitude,
-      accuracyMeters: location?.accuracyMeters,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      accuracyMeters: location.accuracyMeters,
     );
     // Kept on the device before sending: a lost answer or no connection never loses the mark.
     await _queue.add(punch);
@@ -295,6 +316,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   String _text(String key) => switch (key) {
     'punchSaved' => l.punchSaved,
     'punchPhotoSaved' => l.punchPhotoSaved,
+    'locationRequired' => l.locationRequired,
     'punchPhotoFailed' => l.punchPhotoFailed,
     'punchPhotoOffline' => l.punchPhotoOffline,
     'punchSynced' => l.punchSynced,
@@ -585,6 +607,9 @@ class _ConfirmPunchDialogState extends State<_ConfirmPunchDialog> {
   bool get _asksPhoto =>
       widget.photoMode == 'optional' || widget.photoMode == 'required';
 
+  /// A required photo is the confirmation itself: no photo, no mark.
+  bool get _blocked => widget.photoMode == 'required' && _photo == null;
+
   Future<void> _retake() async {
     setState(() => _taking = true);
     final photo = await widget.takePhoto();
@@ -625,7 +650,9 @@ class _ConfirmPunchDialogState extends State<_ConfirmPunchDialog> {
                 )
               else
                 Text(
-                  l.punchPhotoMissing,
+                  widget.photoMode == 'required'
+                      ? l.punchPhotoRequired
+                      : l.punchPhotoMissing,
                   key: const Key('punchPhotoMissing'),
                   style: TextStyle(color: scheme.error),
                 ),
@@ -654,7 +681,7 @@ class _ConfirmPunchDialogState extends State<_ConfirmPunchDialog> {
         ),
         FilledButton(
           key: const Key('confirmPunch'),
-          onPressed: _taking
+          onPressed: _taking || _blocked
               ? null
               : () => Navigator.of(context).pop(_PunchDecision(_photo)),
           child: Text(l.confirmPunch),
