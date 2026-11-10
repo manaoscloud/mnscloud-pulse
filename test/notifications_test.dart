@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
 import 'package:mnscloud_pulse/main.dart';
+import 'package:mnscloud_pulse/src/core/pulse_api.dart';
 import 'package:mnscloud_pulse/src/core/punch_queue.dart';
 import 'package:mnscloud_pulse/src/notifications/notifications_view.dart';
 import 'package:mnscloud_pulse/src/offline/device_lock.dart';
@@ -214,6 +215,99 @@ void main() {
       expect(sent[1]['uuid'], sent[0]['uuid']);
       expect(sent[1]['body'], 'Saí às 18h');
       expect(find.text('You'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'HR document and notice entries show their title and open the Documents tab',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final read = <Object?>[];
+      final client = MockClient((request) async {
+        final path = request.url.path;
+        if (path.endsWith('/notifications') && request.method == 'GET') {
+          return json({
+            'data': {
+              'unread': 2,
+              'items': [
+                {
+                  'NotificationUUID': 'c1',
+                  'Type': 'document_published',
+                  'DocumentUUID': 'D1',
+                  'DocumentKind': 'payslip',
+                  'Title': 'Payslip October',
+                  'Read': false,
+                },
+                {
+                  'NotificationUUID': 'c2',
+                  'Type': 'notice_published',
+                  'NoticeUUID': 'N1',
+                  'Title': 'Holiday schedule',
+                  'Read': false,
+                },
+              ],
+            },
+          });
+        }
+        if (path.endsWith('/notifications/read')) {
+          read.add((jsonDecode(request.body) as Map)['notificationUUID']);
+          return json({
+            'data': {'Updated': 1},
+          });
+        }
+        if (path.endsWith('/preferences')) {
+          return json({
+            'data': {
+              'MarkReminders': false,
+              'RemindersAvailable': false,
+              'PushDevices': 0,
+            },
+          });
+        }
+        return json({'code': 'requestError'}, 404);
+      });
+      String? popped;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en', 'US'),
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                popped = await showModalBottomSheet<String?>(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => NotificationsSheet(
+                    api: PulseApi(
+                      client: client,
+                      baseUrl: 'https://pulse.test/api/v1',
+                    ),
+                    onSessionEnded: (_) {},
+                  ),
+                );
+              },
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await settle(tester);
+      expect(find.text('Payslip October'), findsOneWidget);
+      expect(find.text('Payslip'), findsOneWidget);
+      expect(find.text('Holiday schedule'), findsOneWidget);
+      expect(find.text('Company notice'), findsOneWidget);
+      expect(find.byIcon(Icons.description_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.campaign_outlined), findsOneWidget);
+
+      await tester.tap(find.text('Holiday schedule'));
+      await settle(tester);
+      expect(read, ['c2']);
+      expect(popped, openDocumentsTab);
     },
   );
 }

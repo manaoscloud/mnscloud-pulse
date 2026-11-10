@@ -765,6 +765,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationMessage => 'New message on a request';
 
   @override
+  String get notificationNotice => 'Company notice';
+
+  @override
   String get pushTitle => 'Notifications on this device';
 
   @override
@@ -1589,6 +1592,9 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get notificationMessage => 'New message on a request';
+
+  @override
+  String get notificationNotice => 'Company notice';
 
   @override
   String get pushTitle => 'Notifications on this device';
