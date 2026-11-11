@@ -16,6 +16,7 @@ import 'package:mnscloud_pulse/src/kiosk/kiosk_pin_dialog.dart';
 import 'package:mnscloud_pulse/src/offline/device_lock.dart';
 import 'package:mnscloud_pulse/src/offline/p256.dart';
 import 'package:mnscloud_pulse/src/offline/secret_vault.dart';
+import 'package:mnscloud_pulse/src/receipt/receipt.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlite3/sqlite3.dart';
 
@@ -135,6 +136,16 @@ class KioskApi {
             'employee': {
               'EmployeeName': 'Test Employee',
               'NextPunchType': 'break_start',
+            },
+          },
+        });
+      }
+      if (path.endsWith('/receipt/email')) {
+        return json({
+          'data': {
+            'item': {
+              'EmailDelivery': 'sent',
+              'EmailRecipient': 'm***@example.com',
             },
           },
         });
@@ -307,8 +318,20 @@ void main() {
         api.requests.where((r) => r.url.path.endsWith('/photo')),
         hasLength(1),
       );
+      // Receipt by e-mail to the registry address (printing is web only).
+      expect(find.byKey(const Key('receiptPrint')), findsNothing);
+      await tester.ensureVisible(find.byKey(const Key('receiptEmail')));
+      await tester.tap(find.byKey(const Key('receiptEmail')));
+      await settle(tester);
+      expect(find.text('Receipt sent to m***@example.com.'), findsOneWidget);
+      expect(
+        api.requests.where(
+          (r) => r.url.path.endsWith('/punch-1/receipt/email'),
+        ),
+        hasLength(1),
+      );
       // Back to the start after the receipt, with nothing of the employee left.
-      await tester.pump(const Duration(seconds: 11));
+      await tester.pump(const Duration(seconds: 31));
       await settle(tester);
       expect(find.byKey(const Key('kioskLoginCode')), findsOneWidget);
       expect(find.text('Hello, Test Employee'), findsNothing);
@@ -401,6 +424,42 @@ void main() {
       expect(sent.last, {'currentPassword': 'secret-pass', 'pin': '4821'});
       expect(find.byKey(const Key('kioskPinDialog')), findsNothing);
       expect(find.text('Time clock PIN saved.'), findsOneWidget);
+    },
+  );
+
+  test(
+    'the printable receipt carries the art. 79 fields and escapes values',
+    () {
+      final html = receiptHtml(
+        PunchReceipt.fromJson({
+          'Title': 'Comprovante de Registro de Ponto do Trabalhador',
+          'TimePunchUUID': 'p',
+          'NSR': 7,
+          'Hash': 'a0de',
+          'TypeLabel': 'Saída',
+          'OccurredAtText': '10/11/2026 18:00:00 (horário de Brasília)',
+          'EmployerName': 'Aurora <Ltda>',
+          'EmployerDocument': '12.345.678/0001-90',
+          'EmployeeName': 'Marina',
+          'EmployeeDocument': '***.***.789-00',
+          'Collector': 'Relógio Recepção (00000001)',
+          'Offline': true,
+        }),
+      );
+      for (final part in [
+        'Comprovante de Registro de Ponto do Trabalhador',
+        'Aurora &lt;Ltda&gt;',
+        '12.345.678/0001-90',
+        '***.***.789-00',
+        'Saída',
+        'NSR',
+        'a0de',
+        'Relógio Recepção (00000001)',
+        'sem conexão',
+      ]) {
+        expect(html, contains(part));
+      }
+      expect(html, isNot(contains('<Ltda>')));
     },
   );
 }

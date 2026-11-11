@@ -96,6 +96,12 @@ connection to record (offline kiosk marks are a later phase). Employees set thei
 clock PIN in the signed-in app (key icon, current password required; 4 to 6 digits, no sequence or
 repeated digit).
 
+Receipts (`lib/src/receipt/receipt.dart`, Portaria 671 art. 79): after a mark the time clock and the
+"Last receipt" of the personal Pulse offer **Print** (web: the browser print dialog of a receipt page in
+a hidden frame, A4 or 80 mm paper) and **Send by e-mail** (only to the employee e-mail in the
+registry; the API never accepts a typed address). On the time clock the CPF is masked and the receipt
+stays on screen longer while the employee uses these buttons.
+
 ## Today and timesheet
 
 The signed-in app has two tabs in a bottom navigation bar: **Home** (the punch workspace) and

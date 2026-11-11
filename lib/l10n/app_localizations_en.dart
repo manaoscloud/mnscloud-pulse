@@ -1060,6 +1060,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kioskPinSave => 'Save PIN';
+
+  @override
+  String get receiptPrint => 'Print';
+
+  @override
+  String get receiptEmail => 'Send by e-mail';
+
+  @override
+  String receiptEmailSent(String recipient) {
+    return 'Receipt sent to $recipient.';
+  }
+
+  @override
+  String get receiptNoEmail =>
+      'There is no e-mail in your registry. Ask HR to add it.';
+
+  @override
+  String get receiptEmailDisabled =>
+      'This time clock does not send receipts by e-mail.';
+
+  @override
+  String get receiptEmailLimit =>
+      'This receipt was already sent several times. Try again later.';
+
+  @override
+  String get receiptFailed => 'The receipt could not be prepared. Try again.';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2117,4 +2143,30 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get kioskPinSave => 'Save PIN';
+
+  @override
+  String get receiptPrint => 'Print';
+
+  @override
+  String get receiptEmail => 'Send by e-mail';
+
+  @override
+  String receiptEmailSent(String recipient) {
+    return 'Receipt sent to $recipient.';
+  }
+
+  @override
+  String get receiptNoEmail =>
+      'There is no e-mail in your registry. Ask HR to add it.';
+
+  @override
+  String get receiptEmailDisabled =>
+      'This time clock does not send receipts by e-mail.';
+
+  @override
+  String get receiptEmailLimit =>
+      'This receipt was already sent several times. Try again later.';
+
+  @override
+  String get receiptFailed => 'The receipt could not be prepared. Try again.';
 }

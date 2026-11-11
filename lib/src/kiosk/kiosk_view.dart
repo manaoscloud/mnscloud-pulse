@@ -12,6 +12,7 @@ import '../core/punch_camera.dart';
 import '../core/pulse_api.dart';
 import '../core/server_clock.dart';
 import '../punch/punch_labels.dart';
+import '../receipt/receipt.dart';
 import 'fullscreen.dart';
 import 'kiosk_client.dart';
 
@@ -570,6 +571,19 @@ class _KioskShellState extends State<KioskShell> {
             ),
           ),
         ),
+        const SizedBox(height: 12),
+        if ((receipt['TimePunchUUID']?.toString() ?? '').isNotEmpty)
+          ReceiptActions(
+            load: () async => PunchReceipt.fromJson(
+              await widget.client.receipt(receipt['TimePunchUUID'].toString()),
+            ),
+            email: () =>
+                widget.client.emailReceipt(receipt['TimePunchUUID'].toString()),
+            emailVisible:
+                _profile.emailReceipt && (_employee?.hasEmail ?? false),
+            onActivity: () =>
+                setState(() => _doneLeft = widget.doneAfter.inSeconds * 3),
+          ),
         const SizedBox(height: 16),
         FilledButton(
           key: const Key('kioskDone'),

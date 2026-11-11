@@ -411,6 +411,24 @@ class KioskClient {
     );
   }
 
+  /// Receipt of a mark this time clock collected (CPF masked).
+  Future<Map<String, dynamic>> receipt(String punchUUID) async {
+    final data = await _signed('GET', '/kiosk/punches/$punchUUID/receipt');
+    final item = (data['data'] as Map?)?['item'];
+    return item is Map<String, dynamic> ? item : <String, dynamic>{};
+  }
+
+  /// Sends the receipt to the registry e-mail of the employee; answers the masked recipient.
+  Future<String?> emailReceipt(String punchUUID) async {
+    final data = await _signed(
+      'POST',
+      '/kiosk/punches/$punchUUID/receipt/email',
+      json: const {},
+    );
+    return ((data['data'] as Map?)?['item'] as Map?)?['EmailRecipient']
+        ?.toString();
+  }
+
   Future<void> uploadPhoto(
     String punchUUID,
     String photoUUID,
