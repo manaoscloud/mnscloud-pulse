@@ -1728,6 +1728,270 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Capture'**
   String get capturePhoto;
+
+  /// No description provided for @kioskUseDevice.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Use this device as the company time clock'**
+  String get kioskUseDevice;
+
+  /// No description provided for @kioskActivationTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Activate time clock'**
+  String get kioskActivationTitle;
+
+  /// No description provided for @kioskActivationHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'In the App, HR creates the time clock in HR › Time clocks and generates an activation code valid for 15 minutes. Type the code and set an administrator PIN, needed to leave the time clock mode on this device.'**
+  String get kioskActivationHelp;
+
+  /// No description provided for @kioskActivationCode.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Activation code'**
+  String get kioskActivationCode;
+
+  /// No description provided for @kioskAdminPin.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Administrator PIN (4 to 8 digits)'**
+  String get kioskAdminPin;
+
+  /// No description provided for @kioskAdminPinConfirm.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm the administrator PIN'**
+  String get kioskAdminPinConfirm;
+
+  /// No description provided for @kioskAdminPinInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Use 4 to 8 digits.'**
+  String get kioskAdminPinInvalid;
+
+  /// No description provided for @kioskPinMismatch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The PINs do not match.'**
+  String get kioskPinMismatch;
+
+  /// No description provided for @kioskActivate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Activate'**
+  String get kioskActivate;
+
+  /// No description provided for @kioskCodeInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Invalid or expired activation code. Ask HR for a new one.'**
+  String get kioskCodeInvalid;
+
+  /// No description provided for @kioskKeyRejected.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This device could not be activated. Try again.'**
+  String get kioskKeyRejected;
+
+  /// No description provided for @kioskClockSkew.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This device\'s clock is far from the official time. Fix the date and time and try again.'**
+  String get kioskClockSkew;
+
+  /// No description provided for @kioskPinFixHint.
+  ///
+  /// In en_US, this message translates to:
+  /// **'For use as a time clock, pin the app to the screen (Android: pin app; iPhone/iPad: Guided Access).'**
+  String get kioskPinFixHint;
+
+  /// No description provided for @kioskEnterCode.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Type your access code'**
+  String get kioskEnterCode;
+
+  /// No description provided for @kioskEnterPin.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Type your PIN'**
+  String get kioskEnterPin;
+
+  /// No description provided for @kioskContinue.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Continue'**
+  String get kioskContinue;
+
+  /// No description provided for @kioskHello.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Hello, {name}'**
+  String kioskHello(String name);
+
+  /// No description provided for @kioskSuggested.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Suggested mark'**
+  String get kioskSuggested;
+
+  /// No description provided for @kioskOtherMarks.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Other mark'**
+  String get kioskOtherMarks;
+
+  /// No description provided for @kioskConfirmPunch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm and record'**
+  String get kioskConfirmPunch;
+
+  /// No description provided for @kioskPhotoNote.
+  ///
+  /// In en_US, this message translates to:
+  /// **'A live photo is taken to confirm the mark.'**
+  String get kioskPhotoNote;
+
+  /// No description provided for @kioskInvalidPin.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Invalid code or PIN.'**
+  String get kioskInvalidPin;
+
+  /// No description provided for @kioskPinLocked.
+  ///
+  /// In en_US, this message translates to:
+  /// **'PIN locked after wrong attempts. Try later or talk to HR.'**
+  String get kioskPinLocked;
+
+  /// No description provided for @kioskPinNotSet.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You have no time clock PIN yet. Set it in Pulse (Time clock PIN) or ask HR.'**
+  String get kioskPinNotSet;
+
+  /// No description provided for @kioskOffline.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No connection: the time clock needs internet to record.'**
+  String get kioskOffline;
+
+  /// No description provided for @kioskPhotoRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The photo is required to record the mark.'**
+  String get kioskPhotoRequired;
+
+  /// No description provided for @kioskPunchSaved.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Mark recorded'**
+  String get kioskPunchSaved;
+
+  /// No description provided for @kioskPhotoFailed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Mark recorded, but the photo could not be sent.'**
+  String get kioskPhotoFailed;
+
+  /// No description provided for @kioskDone.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Done'**
+  String get kioskDone;
+
+  /// No description provided for @kioskReturning.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Back to start in {seconds} s'**
+  String kioskReturning(int seconds);
+
+  /// No description provided for @kioskRevoked.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This time clock was deactivated by HR. Ask for a new activation code.'**
+  String get kioskRevoked;
+
+  /// No description provided for @kioskExit.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Leave time clock mode'**
+  String get kioskExit;
+
+  /// No description provided for @kioskExitHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Type the administrator PIN of this device. Ask HR to revoke the time clock in the App if the device is no longer used.'**
+  String get kioskExitHelp;
+
+  /// No description provided for @kioskExitWrong.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Invalid administrator PIN.'**
+  String get kioskExitWrong;
+
+  /// No description provided for @kioskFullscreen.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Full screen'**
+  String get kioskFullscreen;
+
+  /// No description provided for @kioskMarkTime.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Time'**
+  String get kioskMarkTime;
+
+  /// No description provided for @kioskPinMenu.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Time clock PIN'**
+  String get kioskPinMenu;
+
+  /// No description provided for @kioskPinHelp.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Use this PIN with your access code on the company time clocks: 4 to 6 digits, no sequence or repeated digit.'**
+  String get kioskPinHelp;
+
+  /// No description provided for @kioskPinCurrentPassword.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Current password'**
+  String get kioskPinCurrentPassword;
+
+  /// No description provided for @kioskPinNew.
+  ///
+  /// In en_US, this message translates to:
+  /// **'New PIN'**
+  String get kioskPinNew;
+
+  /// No description provided for @kioskPinConfirm.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Confirm the PIN'**
+  String get kioskPinConfirm;
+
+  /// No description provided for @kioskPinInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Use 4 to 6 digits, no sequence (1234) or repeated digit (1111).'**
+  String get kioskPinInvalid;
+
+  /// No description provided for @kioskPinSaved.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Time clock PIN saved.'**
+  String get kioskPinSaved;
+
+  /// No description provided for @kioskPinSave.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Save PIN'**
+  String get kioskPinSave;
 }
 
 class _AppLocalizationsDelegate

@@ -377,6 +377,15 @@ class PulseApi {
     return item is Map<String, dynamic> ? item : const {};
   }
 
+  /// Personal PIN of the company time clocks (confirms the current password).
+  Future<void> setKioskPin(String currentPassword, String pin) async {
+    await call(
+      'PUT',
+      '/pulse/kiosk-pin',
+      body: {'currentPassword': currentPassword, 'pin': pin},
+    );
+  }
+
   Future<List<Map<String, dynamic>>> listPunches({int limit = 30}) async {
     final data = await call('GET', '/pulse/punches?limit=$limit');
     final items = (data['data'] as Map<String, dynamic>?)?['items'];
