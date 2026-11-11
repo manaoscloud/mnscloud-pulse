@@ -21,11 +21,19 @@ class PermissionGate extends StatefulWidget {
     required this.api,
     required this.child,
     this.onSignOut,
+    this.camera,
+    this.notifications = true,
   });
 
   final PulseApi api;
   final Widget child;
   final VoidCallback? onSignOut;
+
+  /// Camera requirement decided by the caller (the time clock setting); null = the policy.
+  final bool? camera;
+
+  /// Notifications are asked for the personal app; the shared time clock does not need them.
+  final bool notifications;
 
   @override
   State<PermissionGate> createState() => PermissionGateState();
@@ -40,9 +48,15 @@ class PermissionGateState extends State<PermissionGate> {
   AppLocalizations get l => AppLocalizations.of(context)!;
 
   /// The camera is needed unless the policy of this employee is known to take no photo.
-  bool get _needsCamera => (widget.api.punchPhotoMode ?? 'required') != 'off';
+  bool get _needsCamera =>
+      widget.camera ?? (widget.api.punchPhotoMode ?? 'required') != 'off';
 
-  bool get _ready => _status?.ready(needsCamera: _needsCamera) ?? false;
+  bool get _ready =>
+      _status?.ready(
+        needsCamera: _needsCamera,
+        needsNotifications: widget.notifications,
+      ) ??
+      false;
 
   @override
   void initState() {
@@ -151,7 +165,11 @@ class PermissionGateState extends State<PermissionGate> {
     final scheme = Theme.of(context).colorScheme;
     final needsCamera = _needsCamera;
     final settings =
-        status?.blockedInSettings(needsCamera: needsCamera) ?? false;
+        status?.blockedInSettings(
+          needsCamera: needsCamera,
+          needsNotifications: widget.notifications,
+        ) ??
+        false;
     final unavailable =
         status != null &&
         (status.location == PermissionState.unavailable ||
@@ -204,13 +222,14 @@ class PermissionGateState extends State<PermissionGate> {
                           l.permissionCameraHelp,
                           status.camera,
                         ),
-                      _row(
-                        const Key('permissionNotifications'),
-                        Icons.notifications_outlined,
-                        l.permissionNotifications,
-                        l.permissionNotificationsHelp,
-                        status.notifications,
-                      ),
+                      if (widget.notifications)
+                        _row(
+                          const Key('permissionNotifications'),
+                          Icons.notifications_outlined,
+                          l.permissionNotifications,
+                          l.permissionNotificationsHelp,
+                          status.notifications,
+                        ),
                       const SizedBox(height: 16),
                       if (settings)
                         Text(

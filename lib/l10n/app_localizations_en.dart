@@ -911,6 +911,155 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get capturePhoto => 'Capture';
+
+  @override
+  String get kioskUseDevice => 'Use this device as the company time clock';
+
+  @override
+  String get kioskActivationTitle => 'Activate time clock';
+
+  @override
+  String get kioskActivationHelp =>
+      'In the App, HR creates the time clock in HR › Time clocks and generates an activation code valid for 15 minutes. Type the code and set an administrator PIN, needed to leave the time clock mode on this device.';
+
+  @override
+  String get kioskActivationCode => 'Activation code';
+
+  @override
+  String get kioskAdminPin => 'Administrator PIN (4 to 8 digits)';
+
+  @override
+  String get kioskAdminPinConfirm => 'Confirm the administrator PIN';
+
+  @override
+  String get kioskAdminPinInvalid => 'Use 4 to 8 digits.';
+
+  @override
+  String get kioskPinMismatch => 'The PINs do not match.';
+
+  @override
+  String get kioskActivate => 'Activate';
+
+  @override
+  String get kioskCodeInvalid =>
+      'Invalid or expired activation code. Ask HR for a new one.';
+
+  @override
+  String get kioskKeyRejected =>
+      'This device could not be activated. Try again.';
+
+  @override
+  String get kioskClockSkew =>
+      'This device\'s clock is far from the official time. Fix the date and time and try again.';
+
+  @override
+  String get kioskPinFixHint =>
+      'For use as a time clock, pin the app to the screen (Android: pin app; iPhone/iPad: Guided Access).';
+
+  @override
+  String get kioskEnterCode => 'Type your access code';
+
+  @override
+  String get kioskEnterPin => 'Type your PIN';
+
+  @override
+  String get kioskContinue => 'Continue';
+
+  @override
+  String kioskHello(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String get kioskSuggested => 'Suggested mark';
+
+  @override
+  String get kioskOtherMarks => 'Other mark';
+
+  @override
+  String get kioskConfirmPunch => 'Confirm and record';
+
+  @override
+  String get kioskPhotoNote => 'A live photo is taken to confirm the mark.';
+
+  @override
+  String get kioskInvalidPin => 'Invalid code or PIN.';
+
+  @override
+  String get kioskPinLocked =>
+      'PIN locked after wrong attempts. Try later or talk to HR.';
+
+  @override
+  String get kioskPinNotSet =>
+      'You have no time clock PIN yet. Set it in Pulse (Time clock PIN) or ask HR.';
+
+  @override
+  String get kioskOffline =>
+      'No connection: the time clock needs internet to record.';
+
+  @override
+  String get kioskPhotoRequired => 'The photo is required to record the mark.';
+
+  @override
+  String get kioskPunchSaved => 'Mark recorded';
+
+  @override
+  String get kioskPhotoFailed =>
+      'Mark recorded, but the photo could not be sent.';
+
+  @override
+  String get kioskDone => 'Done';
+
+  @override
+  String kioskReturning(int seconds) {
+    return 'Back to start in $seconds s';
+  }
+
+  @override
+  String get kioskRevoked =>
+      'This time clock was deactivated by HR. Ask for a new activation code.';
+
+  @override
+  String get kioskExit => 'Leave time clock mode';
+
+  @override
+  String get kioskExitHelp =>
+      'Type the administrator PIN of this device. Ask HR to revoke the time clock in the App if the device is no longer used.';
+
+  @override
+  String get kioskExitWrong => 'Invalid administrator PIN.';
+
+  @override
+  String get kioskFullscreen => 'Full screen';
+
+  @override
+  String get kioskMarkTime => 'Time';
+
+  @override
+  String get kioskPinMenu => 'Time clock PIN';
+
+  @override
+  String get kioskPinHelp =>
+      'Use this PIN with your access code on the company time clocks: 4 to 6 digits, no sequence or repeated digit.';
+
+  @override
+  String get kioskPinCurrentPassword => 'Current password';
+
+  @override
+  String get kioskPinNew => 'New PIN';
+
+  @override
+  String get kioskPinConfirm => 'Confirm the PIN';
+
+  @override
+  String get kioskPinInvalid =>
+      'Use 4 to 6 digits, no sequence (1234) or repeated digit (1111).';
+
+  @override
+  String get kioskPinSaved => 'Time clock PIN saved.';
+
+  @override
+  String get kioskPinSave => 'Save PIN';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -1819,4 +1968,153 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get capturePhoto => 'Capture';
+
+  @override
+  String get kioskUseDevice => 'Use this device as the company time clock';
+
+  @override
+  String get kioskActivationTitle => 'Activate time clock';
+
+  @override
+  String get kioskActivationHelp =>
+      'In the App, HR creates the time clock in HR › Time clocks and generates an activation code valid for 15 minutes. Type the code and set an administrator PIN, needed to leave the time clock mode on this device.';
+
+  @override
+  String get kioskActivationCode => 'Activation code';
+
+  @override
+  String get kioskAdminPin => 'Administrator PIN (4 to 8 digits)';
+
+  @override
+  String get kioskAdminPinConfirm => 'Confirm the administrator PIN';
+
+  @override
+  String get kioskAdminPinInvalid => 'Use 4 to 8 digits.';
+
+  @override
+  String get kioskPinMismatch => 'The PINs do not match.';
+
+  @override
+  String get kioskActivate => 'Activate';
+
+  @override
+  String get kioskCodeInvalid =>
+      'Invalid or expired activation code. Ask HR for a new one.';
+
+  @override
+  String get kioskKeyRejected =>
+      'This device could not be activated. Try again.';
+
+  @override
+  String get kioskClockSkew =>
+      'This device\'s clock is far from the official time. Fix the date and time and try again.';
+
+  @override
+  String get kioskPinFixHint =>
+      'For use as a time clock, pin the app to the screen (Android: pin app; iPhone/iPad: Guided Access).';
+
+  @override
+  String get kioskEnterCode => 'Type your access code';
+
+  @override
+  String get kioskEnterPin => 'Type your PIN';
+
+  @override
+  String get kioskContinue => 'Continue';
+
+  @override
+  String kioskHello(String name) {
+    return 'Hello, $name';
+  }
+
+  @override
+  String get kioskSuggested => 'Suggested mark';
+
+  @override
+  String get kioskOtherMarks => 'Other mark';
+
+  @override
+  String get kioskConfirmPunch => 'Confirm and record';
+
+  @override
+  String get kioskPhotoNote => 'A live photo is taken to confirm the mark.';
+
+  @override
+  String get kioskInvalidPin => 'Invalid code or PIN.';
+
+  @override
+  String get kioskPinLocked =>
+      'PIN locked after wrong attempts. Try later or talk to HR.';
+
+  @override
+  String get kioskPinNotSet =>
+      'You have no time clock PIN yet. Set it in Pulse (Time clock PIN) or ask HR.';
+
+  @override
+  String get kioskOffline =>
+      'No connection: the time clock needs internet to record.';
+
+  @override
+  String get kioskPhotoRequired => 'The photo is required to record the mark.';
+
+  @override
+  String get kioskPunchSaved => 'Mark recorded';
+
+  @override
+  String get kioskPhotoFailed =>
+      'Mark recorded, but the photo could not be sent.';
+
+  @override
+  String get kioskDone => 'Done';
+
+  @override
+  String kioskReturning(int seconds) {
+    return 'Back to start in $seconds s';
+  }
+
+  @override
+  String get kioskRevoked =>
+      'This time clock was deactivated by HR. Ask for a new activation code.';
+
+  @override
+  String get kioskExit => 'Leave time clock mode';
+
+  @override
+  String get kioskExitHelp =>
+      'Type the administrator PIN of this device. Ask HR to revoke the time clock in the App if the device is no longer used.';
+
+  @override
+  String get kioskExitWrong => 'Invalid administrator PIN.';
+
+  @override
+  String get kioskFullscreen => 'Full screen';
+
+  @override
+  String get kioskMarkTime => 'Time';
+
+  @override
+  String get kioskPinMenu => 'Time clock PIN';
+
+  @override
+  String get kioskPinHelp =>
+      'Use this PIN with your access code on the company time clocks: 4 to 6 digits, no sequence or repeated digit.';
+
+  @override
+  String get kioskPinCurrentPassword => 'Current password';
+
+  @override
+  String get kioskPinNew => 'New PIN';
+
+  @override
+  String get kioskPinConfirm => 'Confirm the PIN';
+
+  @override
+  String get kioskPinInvalid =>
+      'Use 4 to 6 digits, no sequence (1234) or repeated digit (1111).';
+
+  @override
+  String get kioskPinSaved => 'Time clock PIN saved.';
+
+  @override
+  String get kioskPinSave => 'Save PIN';
 }

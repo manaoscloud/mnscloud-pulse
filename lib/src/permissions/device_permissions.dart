@@ -46,14 +46,19 @@ class DevicePermissionsStatus {
       notifications == PermissionState.granted ||
       notifications == PermissionState.unsupported;
 
-  bool ready({required bool needsCamera}) =>
-      locationReady && cameraReady(needsCamera) && notificationsReady;
+  bool ready({required bool needsCamera, bool needsNotifications = true}) =>
+      locationReady &&
+      cameraReady(needsCamera) &&
+      (!needsNotifications || notificationsReady);
 
   /// Something only the settings can fix (the browser or the system does not ask again).
-  bool blockedInSettings({required bool needsCamera}) =>
+  bool blockedInSettings({
+    required bool needsCamera,
+    bool needsNotifications = true,
+  }) =>
       location == PermissionState.denied ||
       (needsCamera && camera == PermissionState.denied) ||
-      notifications == PermissionState.denied;
+      (needsNotifications && notifications == PermissionState.denied);
 }
 
 /// Reads and asks the permissions of this device. Replaced only by tests.

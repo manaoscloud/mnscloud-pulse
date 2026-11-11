@@ -917,6 +917,157 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get capturePhoto => 'Capturar';
+
+  @override
+  String get kioskUseDevice => 'Usar este aparelho como relógio da empresa';
+
+  @override
+  String get kioskActivationTitle => 'Ativar relógio de ponto';
+
+  @override
+  String get kioskActivationHelp =>
+      'No App, o RH cria o relógio em RH › Relógios e gera um código de ativação válido por 15 minutos. Digite o código e defina um PIN de administrador, necessário para sair do modo relógio neste aparelho.';
+
+  @override
+  String get kioskActivationCode => 'Código de ativação';
+
+  @override
+  String get kioskAdminPin => 'PIN de administrador (4 a 8 dígitos)';
+
+  @override
+  String get kioskAdminPinConfirm => 'Confirme o PIN de administrador';
+
+  @override
+  String get kioskAdminPinInvalid => 'Use de 4 a 8 dígitos.';
+
+  @override
+  String get kioskPinMismatch => 'Os PINs não conferem.';
+
+  @override
+  String get kioskActivate => 'Ativar';
+
+  @override
+  String get kioskCodeInvalid =>
+      'Código de ativação inválido ou expirado. Peça um novo ao RH.';
+
+  @override
+  String get kioskKeyRejected =>
+      'Este aparelho não pôde ser ativado. Tente novamente.';
+
+  @override
+  String get kioskClockSkew =>
+      'O relógio deste aparelho está muito diferente da hora oficial. Ajuste a data e a hora e tente de novo.';
+
+  @override
+  String get kioskPinFixHint =>
+      'Para usar como relógio, fixe o app na tela (Android: fixar app; iPhone/iPad: Acesso Guiado).';
+
+  @override
+  String get kioskEnterCode => 'Digite seu código de acesso';
+
+  @override
+  String get kioskEnterPin => 'Digite seu PIN';
+
+  @override
+  String get kioskContinue => 'Continuar';
+
+  @override
+  String kioskHello(String name) {
+    return 'Olá, $name';
+  }
+
+  @override
+  String get kioskSuggested => 'Marcação sugerida';
+
+  @override
+  String get kioskOtherMarks => 'Outra marcação';
+
+  @override
+  String get kioskConfirmPunch => 'Confirmar e registrar';
+
+  @override
+  String get kioskPhotoNote =>
+      'Uma foto ao vivo é tirada para confirmar a marcação.';
+
+  @override
+  String get kioskInvalidPin => 'Código ou PIN inválido.';
+
+  @override
+  String get kioskPinLocked =>
+      'PIN bloqueado por tentativas erradas. Tente mais tarde ou fale com o RH.';
+
+  @override
+  String get kioskPinNotSet =>
+      'Você ainda não tem PIN do relógio. Defina no Pulse (PIN do relógio) ou peça ao RH.';
+
+  @override
+  String get kioskOffline =>
+      'Sem conexão: o relógio precisa de internet para registrar.';
+
+  @override
+  String get kioskPhotoRequired =>
+      'A foto é obrigatória para registrar a marcação.';
+
+  @override
+  String get kioskPunchSaved => 'Ponto registrado';
+
+  @override
+  String get kioskPhotoFailed =>
+      'Ponto registrado, mas a foto não foi enviada.';
+
+  @override
+  String get kioskDone => 'Concluir';
+
+  @override
+  String kioskReturning(int seconds) {
+    return 'Voltando ao início em $seconds s';
+  }
+
+  @override
+  String get kioskRevoked =>
+      'Este relógio foi desativado pelo RH. Peça um novo código de ativação.';
+
+  @override
+  String get kioskExit => 'Sair do modo relógio';
+
+  @override
+  String get kioskExitHelp =>
+      'Digite o PIN de administrador deste aparelho. Peça ao RH para revogar o relógio no App se o aparelho não for mais usado.';
+
+  @override
+  String get kioskExitWrong => 'PIN de administrador inválido.';
+
+  @override
+  String get kioskFullscreen => 'Tela cheia';
+
+  @override
+  String get kioskMarkTime => 'Horário';
+
+  @override
+  String get kioskPinMenu => 'PIN do relógio';
+
+  @override
+  String get kioskPinHelp =>
+      'Use este PIN com seu código de acesso nos relógios de ponto da empresa: 4 a 6 dígitos, sem sequência nem número repetido.';
+
+  @override
+  String get kioskPinCurrentPassword => 'Senha atual';
+
+  @override
+  String get kioskPinNew => 'Novo PIN';
+
+  @override
+  String get kioskPinConfirm => 'Confirme o PIN';
+
+  @override
+  String get kioskPinInvalid =>
+      'Use de 4 a 6 dígitos, sem sequência (1234) nem número repetido (1111).';
+
+  @override
+  String get kioskPinSaved => 'PIN do relógio salvo.';
+
+  @override
+  String get kioskPinSave => 'Salvar PIN';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -1831,4 +1982,155 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get capturePhoto => 'Capturar';
+
+  @override
+  String get kioskUseDevice => 'Usar este aparelho como relógio da empresa';
+
+  @override
+  String get kioskActivationTitle => 'Ativar relógio de ponto';
+
+  @override
+  String get kioskActivationHelp =>
+      'No App, o RH cria o relógio em RH › Relógios e gera um código de ativação válido por 15 minutos. Digite o código e defina um PIN de administrador, necessário para sair do modo relógio neste aparelho.';
+
+  @override
+  String get kioskActivationCode => 'Código de ativação';
+
+  @override
+  String get kioskAdminPin => 'PIN de administrador (4 a 8 dígitos)';
+
+  @override
+  String get kioskAdminPinConfirm => 'Confirme o PIN de administrador';
+
+  @override
+  String get kioskAdminPinInvalid => 'Use de 4 a 8 dígitos.';
+
+  @override
+  String get kioskPinMismatch => 'Os PINs não conferem.';
+
+  @override
+  String get kioskActivate => 'Ativar';
+
+  @override
+  String get kioskCodeInvalid =>
+      'Código de ativação inválido ou expirado. Peça um novo ao RH.';
+
+  @override
+  String get kioskKeyRejected =>
+      'Este aparelho não pôde ser ativado. Tente novamente.';
+
+  @override
+  String get kioskClockSkew =>
+      'O relógio deste aparelho está muito diferente da hora oficial. Ajuste a data e a hora e tente de novo.';
+
+  @override
+  String get kioskPinFixHint =>
+      'Para usar como relógio, fixe o app na tela (Android: fixar app; iPhone/iPad: Acesso Guiado).';
+
+  @override
+  String get kioskEnterCode => 'Digite seu código de acesso';
+
+  @override
+  String get kioskEnterPin => 'Digite seu PIN';
+
+  @override
+  String get kioskContinue => 'Continuar';
+
+  @override
+  String kioskHello(String name) {
+    return 'Olá, $name';
+  }
+
+  @override
+  String get kioskSuggested => 'Marcação sugerida';
+
+  @override
+  String get kioskOtherMarks => 'Outra marcação';
+
+  @override
+  String get kioskConfirmPunch => 'Confirmar e registrar';
+
+  @override
+  String get kioskPhotoNote =>
+      'Uma foto ao vivo é tirada para confirmar a marcação.';
+
+  @override
+  String get kioskInvalidPin => 'Código ou PIN inválido.';
+
+  @override
+  String get kioskPinLocked =>
+      'PIN bloqueado por tentativas erradas. Tente mais tarde ou fale com o RH.';
+
+  @override
+  String get kioskPinNotSet =>
+      'Você ainda não tem PIN do relógio. Defina no Pulse (PIN do relógio) ou peça ao RH.';
+
+  @override
+  String get kioskOffline =>
+      'Sem conexão: o relógio precisa de internet para registrar.';
+
+  @override
+  String get kioskPhotoRequired =>
+      'A foto é obrigatória para registrar a marcação.';
+
+  @override
+  String get kioskPunchSaved => 'Ponto registrado';
+
+  @override
+  String get kioskPhotoFailed =>
+      'Ponto registrado, mas a foto não foi enviada.';
+
+  @override
+  String get kioskDone => 'Concluir';
+
+  @override
+  String kioskReturning(int seconds) {
+    return 'Voltando ao início em $seconds s';
+  }
+
+  @override
+  String get kioskRevoked =>
+      'Este relógio foi desativado pelo RH. Peça um novo código de ativação.';
+
+  @override
+  String get kioskExit => 'Sair do modo relógio';
+
+  @override
+  String get kioskExitHelp =>
+      'Digite o PIN de administrador deste aparelho. Peça ao RH para revogar o relógio no App se o aparelho não for mais usado.';
+
+  @override
+  String get kioskExitWrong => 'PIN de administrador inválido.';
+
+  @override
+  String get kioskFullscreen => 'Tela cheia';
+
+  @override
+  String get kioskMarkTime => 'Horário';
+
+  @override
+  String get kioskPinMenu => 'PIN do relógio';
+
+  @override
+  String get kioskPinHelp =>
+      'Use este PIN com seu código de acesso nos relógios de ponto da empresa: 4 a 6 dígitos, sem sequência nem número repetido.';
+
+  @override
+  String get kioskPinCurrentPassword => 'Senha atual';
+
+  @override
+  String get kioskPinNew => 'Novo PIN';
+
+  @override
+  String get kioskPinConfirm => 'Confirme o PIN';
+
+  @override
+  String get kioskPinInvalid =>
+      'Use de 4 a 6 dígitos, sem sequência (1234) nem número repetido (1111).';
+
+  @override
+  String get kioskPinSaved => 'PIN do relógio salvo.';
+
+  @override
+  String get kioskPinSave => 'Salvar PIN';
 }

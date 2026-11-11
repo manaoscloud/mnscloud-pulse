@@ -15,6 +15,10 @@ import 'src/offline/device_grant.dart';
 import 'src/offline/device_lock.dart';
 import 'src/offline/punch_sync.dart';
 import 'src/permissions/permission_gate.dart';
+import 'src/kiosk/kiosk_activation.dart';
+import 'src/kiosk/kiosk_client.dart';
+import 'src/kiosk/kiosk_pin_dialog.dart';
+import 'src/kiosk/kiosk_view.dart';
 import 'src/offline/secret_vault.dart';
 import 'src/pwa/pwa.dart';
 import 'src/punch/punch_workspace.dart';
@@ -173,6 +177,15 @@ class _PulseShellState extends State<PulseShell> {
   bool _requestsOpened = false;
   bool _documentsOpened = false;
 
+  /// This device as the company time clock (read once at start; null = personal Pulse).
+  late final KioskClient _kiosk = KioskClient(
+    httpClient: widget.client,
+    clock: _clock,
+  );
+  KioskState? _kioskState;
+  bool _kioskChecked = false;
+  bool _kioskActivating = false;
+
   /// Permission gate of the signed-in app (checked again before every mark).
   final _gate = GlobalKey<PermissionGateState>();
 
@@ -202,7 +215,7 @@ class _PulseShellState extends State<PulseShell> {
   void initState() {
     super.initState();
     pulseBrand.addListener(_brandChanged);
-    if (widget.restoreSession) _restore();
+    unawaited(_start());
     _syncTimer = Timer.periodic(
       const Duration(seconds: 30),
       (_) => unawaited(_syncAll()),
@@ -292,6 +305,26 @@ class _PulseShellState extends State<PulseShell> {
     _clock.dispose();
     _focusRequest.dispose();
     super.dispose();
+  }
+
+  /// A device activated as the company time clock opens straight in the time clock mode.
+  Future<void> _start() async {
+    final kiosk = await _kiosk.read();
+    if (!mounted) return;
+    setState(() {
+      _kioskState = kiosk;
+      _kioskChecked = true;
+    });
+    if (kiosk == null && widget.restoreSession) await _restore();
+  }
+
+  Future<void> _kioskActivated(KioskProfile profile) async {
+    final state = await _kiosk.read();
+    if (!mounted) return;
+    setState(() {
+      _kioskState = state;
+      _kioskActivating = false;
+    });
   }
 
   Future<void> _restore() async {
@@ -455,8 +488,31 @@ class _PulseShellState extends State<PulseShell> {
 
   @override
   Widget build(BuildContext context) {
+    final kiosk = _kioskState;
+    if (kiosk != null) {
+      return PermissionGate(
+        key: const ValueKey('kiosk-gate'),
+        api: _api,
+        camera: kiosk.profile.photoRequired,
+        notifications: false,
+        child: KioskShell(
+          client: _kiosk,
+          profile: kiosk.profile,
+          onExit: () {
+            if (mounted) setState(() => _kioskState = null);
+          },
+        ),
+      );
+    }
+    if (_kioskActivating) {
+      return KioskActivationView(
+        client: _kiosk,
+        onActivated: (profile) => unawaited(_kioskActivated(profile)),
+        onCancel: () => setState(() => _kioskActivating = false),
+      );
+    }
     final account = _account;
-    if (_restoring) {
+    if (_restoring || !_kioskChecked) {
       return Scaffold(
         body: Center(
           child: Column(
@@ -520,6 +576,12 @@ class _PulseShellState extends State<PulseShell> {
       appBar: AppBar(
         title: Text(pulseBrand.value?.title ?? 'MNSCloud Pulse'),
         actions: [
+          IconButton(
+            key: const Key('kioskPinButton'),
+            tooltip: l.kioskPinMenu,
+            onPressed: () => showKioskPinDialog(context, _api),
+            icon: const Icon(Icons.pin_outlined),
+          ),
           NotificationsButton(
             key: ValueKey('bell-${account.timeClockAccountUUID}'),
             api: _api,
@@ -743,6 +805,17 @@ class _PulseShellState extends State<PulseShell> {
             FilledButton(
               onPressed: _loading ? null : _signIn,
               child: Text(l.signIn),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: TextButton.icon(
+                key: const Key('useAsKiosk'),
+                onPressed: _loading
+                    ? null
+                    : () => setState(() => _kioskActivating = true),
+                icon: const Icon(Icons.storefront_outlined, size: 18),
+                label: Text(l.kioskUseDevice),
+              ),
             ),
           ],
         ),

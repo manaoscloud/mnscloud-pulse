@@ -76,6 +76,26 @@ ships with the store apps.
 - The API owns the official time, the immutable ledger (NSR and SHA-256 per establishment) and the
   flags (offline, late sync, clock skew, sequence); the client never decides them.
 
+## Company time clock (kiosk mode)
+
+One device serves many employees (handoff `docs/handoffs/2026-11-10-pulse-kiosk-assessment.md` of the
+workspace, K2). The sign-in page offers "Use this device as the company time clock"
+(`lib/src/kiosk/kiosk_activation.dart`): the one-time activation code HR generated in the App
+(HR › Time clocks) and a local administrator PIN. The device keeps an ECDSA P-256 key and the
+monotonic counter in the platform secure storage (`lib/src/kiosk/kiosk_client.dart`) and signs every
+`/pulse/kiosk/*` request (`MNSCLOUD-PULSE-KIOSK-V1`); the counter is stored before sending.
+
+An activated device opens straight in `lib/src/kiosk/kiosk_view.dart`: official clock, the employee
+access code, a PIN pad, the suggested mark (every mark allowed), a live photo when the time clock asks
+for it, the position, and the receipt on screen (NSR, hash) that returns to the start after
+10 seconds; an unfinished step resets after 45 seconds of inactivity. The profile is checked every
+5 minutes: a time clock revoked by HR stops at once. Leaving the mode needs the administrator PIN
+(checked on the device; HR revokes the time clock in the App). The permission gate requires location
+and, when the photo is asked, the camera; notifications are not needed. The time clock needs a
+connection to record (offline kiosk marks are a later phase). Employees set their personal time
+clock PIN in the signed-in app (key icon, current password required; 4 to 6 digits, no sequence or
+repeated digit).
+
 ## Today and timesheet
 
 The signed-in app has two tabs in a bottom navigation bar: **Home** (the punch workspace) and
