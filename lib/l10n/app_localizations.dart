@@ -1992,6 +1992,48 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Save PIN'**
   String get kioskPinSave;
+
+  /// No description provided for @receiptPrint.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Print'**
+  String get receiptPrint;
+
+  /// No description provided for @receiptEmail.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Send by e-mail'**
+  String get receiptEmail;
+
+  /// No description provided for @receiptEmailSent.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Receipt sent to {recipient}.'**
+  String receiptEmailSent(String recipient);
+
+  /// No description provided for @receiptNoEmail.
+  ///
+  /// In en_US, this message translates to:
+  /// **'There is no e-mail in your registry. Ask HR to add it.'**
+  String get receiptNoEmail;
+
+  /// No description provided for @receiptEmailDisabled.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This time clock does not send receipts by e-mail.'**
+  String get receiptEmailDisabled;
+
+  /// No description provided for @receiptEmailLimit.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This receipt was already sent several times. Try again later.'**
+  String get receiptEmailLimit;
+
+  /// No description provided for @receiptFailed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The receipt could not be prepared. Try again.'**
+  String get receiptFailed;
 }
 
 class _AppLocalizationsDelegate

@@ -1068,6 +1068,33 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get kioskPinSave => 'Salvar PIN';
+
+  @override
+  String get receiptPrint => 'Imprimir';
+
+  @override
+  String get receiptEmail => 'Enviar por e-mail';
+
+  @override
+  String receiptEmailSent(String recipient) {
+    return 'Comprovante enviado para $recipient.';
+  }
+
+  @override
+  String get receiptNoEmail =>
+      'Não há e-mail no seu cadastro. Peça ao RH para incluir.';
+
+  @override
+  String get receiptEmailDisabled =>
+      'Este relógio não envia comprovantes por e-mail.';
+
+  @override
+  String get receiptEmailLimit =>
+      'Este comprovante já foi enviado várias vezes. Tente mais tarde.';
+
+  @override
+  String get receiptFailed =>
+      'Não foi possível preparar o comprovante. Tente novamente.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2133,4 +2160,31 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get kioskPinSave => 'Salvar PIN';
+
+  @override
+  String get receiptPrint => 'Imprimir';
+
+  @override
+  String get receiptEmail => 'Enviar por e-mail';
+
+  @override
+  String receiptEmailSent(String recipient) {
+    return 'Comprovante enviado para $recipient.';
+  }
+
+  @override
+  String get receiptNoEmail =>
+      'Não há e-mail no seu cadastro. Peça ao RH para incluir.';
+
+  @override
+  String get receiptEmailDisabled =>
+      'Este relógio não envia comprovantes por e-mail.';
+
+  @override
+  String get receiptEmailLimit =>
+      'Este comprovante já foi enviado várias vezes. Tente mais tarde.';
+
+  @override
+  String get receiptFailed =>
+      'Não foi possível preparar o comprovante. Tente novamente.';
 }

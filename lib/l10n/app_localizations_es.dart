@@ -1066,6 +1066,33 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get kioskPinSave => 'Guardar PIN';
+
+  @override
+  String get receiptPrint => 'Imprimir';
+
+  @override
+  String get receiptEmail => 'Enviar por correo';
+
+  @override
+  String receiptEmailSent(String recipient) {
+    return 'Comprobante enviado a $recipient.';
+  }
+
+  @override
+  String get receiptNoEmail =>
+      'No hay correo en tu registro. Pide a RR. HH. que lo agregue.';
+
+  @override
+  String get receiptEmailDisabled =>
+      'Este reloj no envía comprobantes por correo.';
+
+  @override
+  String get receiptEmailLimit =>
+      'Este comprobante ya se envió varias veces. Inténtalo más tarde.';
+
+  @override
+  String get receiptFailed =>
+      'No se pudo preparar el comprobante. Inténtalo de nuevo.';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2129,4 +2156,31 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get kioskPinSave => 'Guardar PIN';
+
+  @override
+  String get receiptPrint => 'Imprimir';
+
+  @override
+  String get receiptEmail => 'Enviar por correo';
+
+  @override
+  String receiptEmailSent(String recipient) {
+    return 'Comprobante enviado a $recipient.';
+  }
+
+  @override
+  String get receiptNoEmail =>
+      'No hay correo en tu registro. Pide a RR. HH. que lo agregue.';
+
+  @override
+  String get receiptEmailDisabled =>
+      'Este reloj no envía comprobantes por correo.';
+
+  @override
+  String get receiptEmailLimit =>
+      'Este comprobante ya se envió varias veces. Inténtalo más tarde.';
+
+  @override
+  String get receiptFailed =>
+      'No se pudo preparar el comprobante. Inténtalo de nuevo.';
 }

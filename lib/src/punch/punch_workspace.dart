@@ -13,6 +13,7 @@ import '../core/server_clock.dart';
 import '../offline/punch_sync.dart';
 import '../timesheet/today_card.dart';
 import 'punch_labels.dart';
+import '../receipt/receipt.dart';
 
 /// Employee home: official time, the suggested next mark (every mark stays available), the
 /// delivery state of marks taken without connection and the recent marks with their receipt.
@@ -469,6 +470,18 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
               isThreeLine: true,
             ),
           ),
+          if (widget.api.signedIn &&
+              (receipt['TimePunchUUID']?.toString() ?? '').isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ReceiptActions(
+              key: ValueKey('receipt-${receipt['TimePunchUUID']}'),
+              load: () async => PunchReceipt.fromJson(
+                await widget.api.receipt(receipt['TimePunchUUID'].toString()),
+              ),
+              email: () =>
+                  widget.api.emailReceipt(receipt['TimePunchUUID'].toString()),
+            ),
+          ],
         ],
         const SizedBox(height: 24),
         Text(l.recentPunches, style: Theme.of(context).textTheme.titleMedium),

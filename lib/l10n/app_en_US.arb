@@ -431,5 +431,19 @@
   "kioskPinConfirm": "Confirm the PIN",
   "kioskPinInvalid": "Use 4 to 6 digits, no sequence (1234) or repeated digit (1111).",
   "kioskPinSaved": "Time clock PIN saved.",
-  "kioskPinSave": "Save PIN"
+  "kioskPinSave": "Save PIN",
+  "receiptPrint": "Print",
+  "receiptEmail": "Send by e-mail",
+  "receiptEmailSent": "Receipt sent to {recipient}.",
+  "@receiptEmailSent": {
+    "placeholders": {
+      "recipient": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptNoEmail": "There is no e-mail in your registry. Ask HR to add it.",
+  "receiptEmailDisabled": "This time clock does not send receipts by e-mail.",
+  "receiptEmailLimit": "This receipt was already sent several times. Try again later.",
+  "receiptFailed": "The receipt could not be prepared. Try again."
 }

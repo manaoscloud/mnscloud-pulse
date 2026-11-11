@@ -314,5 +314,12 @@
   "kioskPinConfirm": "Confirme o PIN",
   "kioskPinInvalid": "Use de 4 a 6 dígitos, sem sequência (1234) nem número repetido (1111).",
   "kioskPinSaved": "PIN do relógio salvo.",
-  "kioskPinSave": "Salvar PIN"
+  "kioskPinSave": "Salvar PIN",
+  "receiptPrint": "Imprimir",
+  "receiptEmail": "Enviar por e-mail",
+  "receiptEmailSent": "Comprovante enviado para {recipient}.",
+  "receiptNoEmail": "Não há e-mail no seu cadastro. Peça ao RH para incluir.",
+  "receiptEmailDisabled": "Este relógio não envia comprovantes por e-mail.",
+  "receiptEmailLimit": "Este comprovante já foi enviado várias vezes. Tente mais tarde.",
+  "receiptFailed": "Não foi possível preparar o comprovante. Tente novamente."
 }

@@ -377,6 +377,25 @@ class PulseApi {
     return item is Map<String, dynamic> ? item : const {};
   }
 
+  /// Receipt of an own mark (Portaria 671 art. 79).
+  Future<Map<String, dynamic>> receipt(String punchUUID) async {
+    final data = await call('GET', '/pulse/punches/$punchUUID/receipt');
+    final item = (data['data'] as Map<String, dynamic>?)?['item'];
+    return item is Map<String, dynamic> ? item : const {};
+  }
+
+  /// Sends the receipt of an own mark to the registry e-mail; answers the masked recipient.
+  Future<String?> emailReceipt(String punchUUID) async {
+    final data = await call(
+      'POST',
+      '/pulse/punches/$punchUUID/receipt/email',
+      body: {},
+    );
+    return ((data['data'] as Map<String, dynamic>?)?['item']
+            as Map?)?['EmailRecipient']
+        ?.toString();
+  }
+
   /// Personal PIN of the company time clocks (confirms the current password).
   Future<void> setKioskPin(String currentPassword, String pin) async {
     await call(
