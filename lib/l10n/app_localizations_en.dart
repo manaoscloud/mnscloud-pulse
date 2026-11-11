@@ -1086,6 +1086,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get receiptFailed => 'The receipt could not be prepared. Try again.';
+
+  @override
+  String get kioskOfflineTitle => 'No connection';
+
+  @override
+  String get kioskOfflineNote =>
+      'Your mark stays on this time clock and is sent when the connection is back. The PIN is checked then; if it is wrong, HR sees the mark as refused.';
+
+  @override
+  String get kioskChooseMark => 'Choose the mark';
+
+  @override
+  String get kioskOfflineSaved => 'Mark kept on this time clock';
+
+  @override
+  String get kioskOfflineSavedNote =>
+      'It is sent as soon as the connection is back.';
+
+  @override
+  String get kioskQueueFull =>
+      'This time clock already keeps the maximum of marks without connection. Restore the internet.';
+
+  @override
+  String kioskOfflinePending(int count) {
+    return '$count marks waiting to be sent';
+  }
+
+  @override
+  String kioskExitPending(int count) {
+    return '$count marks not sent yet are lost when leaving.';
+  }
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2169,4 +2200,35 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get receiptFailed => 'The receipt could not be prepared. Try again.';
+
+  @override
+  String get kioskOfflineTitle => 'No connection';
+
+  @override
+  String get kioskOfflineNote =>
+      'Your mark stays on this time clock and is sent when the connection is back. The PIN is checked then; if it is wrong, HR sees the mark as refused.';
+
+  @override
+  String get kioskChooseMark => 'Choose the mark';
+
+  @override
+  String get kioskOfflineSaved => 'Mark kept on this time clock';
+
+  @override
+  String get kioskOfflineSavedNote =>
+      'It is sent as soon as the connection is back.';
+
+  @override
+  String get kioskQueueFull =>
+      'This time clock already keeps the maximum of marks without connection. Restore the internet.';
+
+  @override
+  String kioskOfflinePending(int count) {
+    return '$count marks waiting to be sent';
+  }
+
+  @override
+  String kioskExitPending(int count) {
+    return '$count marks not sent yet are lost when leaving.';
+  }
 }

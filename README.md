@@ -91,8 +91,12 @@ for it, the position, and the receipt on screen (NSR, hash) that returns to the 
 10 seconds; an unfinished step resets after 45 seconds of inactivity. The profile is checked every
 5 minutes: a time clock revoked by HR stops at once. Leaving the mode needs the administrator PIN
 (checked on the device; HR revokes the time clock in the App). The permission gate requires location
-and, when the photo is asked, the camera; notifications are not needed. The time clock needs a
-connection to record (offline kiosk marks are a later phase). Employees set their personal time
+and, when the photo is asked, the camera; notifications are not needed. Without connection the time clock keeps the mark on the device
+(code, PIN, mark, corrected time and position in the secure storage, at most 300 marks, no photo)
+and delivers it oldest first every minute and after each successful check
+(`POST /pulse/kiosk/offline-punches`); the API verifies the PIN then and records the mark as offline
+or keeps it as refused for HR (RH › Relógios › Marcações recusadas). The header shows how many marks
+wait; leaving the time clock mode warns that they would be lost. Employees set their personal time
 clock PIN in the signed-in app (key icon, current password required; 4 to 6 digits, no sequence or
 repeated digit).
 

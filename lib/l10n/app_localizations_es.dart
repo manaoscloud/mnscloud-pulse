@@ -1093,6 +1093,37 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get receiptFailed =>
       'No se pudo preparar el comprobante. Inténtalo de nuevo.';
+
+  @override
+  String get kioskOfflineTitle => 'Sin conexión';
+
+  @override
+  String get kioskOfflineNote =>
+      'Tu fichaje queda guardado en este reloj y se envía cuando vuelva la conexión. El PIN se verifica en el envío; si es incorrecto, RR. HH. verá el fichaje como rechazado.';
+
+  @override
+  String get kioskChooseMark => 'Elige el fichaje';
+
+  @override
+  String get kioskOfflineSaved => 'Fichaje guardado en este reloj';
+
+  @override
+  String get kioskOfflineSavedNote =>
+      'Se enviará en cuanto vuelva la conexión.';
+
+  @override
+  String get kioskQueueFull =>
+      'Este reloj ya guardó el máximo de fichajes sin conexión. Restablece internet.';
+
+  @override
+  String kioskOfflinePending(int count) {
+    return '$count fichajes esperando envío';
+  }
+
+  @override
+  String kioskExitPending(int count) {
+    return '$count fichajes aún no enviados se perderán al salir.';
+  }
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2183,4 +2214,35 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   @override
   String get receiptFailed =>
       'No se pudo preparar el comprobante. Inténtalo de nuevo.';
+
+  @override
+  String get kioskOfflineTitle => 'Sin conexión';
+
+  @override
+  String get kioskOfflineNote =>
+      'Tu fichaje queda guardado en este reloj y se envía cuando vuelva la conexión. El PIN se verifica en el envío; si es incorrecto, RR. HH. verá el fichaje como rechazado.';
+
+  @override
+  String get kioskChooseMark => 'Elige el fichaje';
+
+  @override
+  String get kioskOfflineSaved => 'Fichaje guardado en este reloj';
+
+  @override
+  String get kioskOfflineSavedNote =>
+      'Se enviará en cuanto vuelva la conexión.';
+
+  @override
+  String get kioskQueueFull =>
+      'Este reloj ya guardó el máximo de fichajes sin conexión. Restablece internet.';
+
+  @override
+  String kioskOfflinePending(int count) {
+    return '$count fichajes esperando envío';
+  }
+
+  @override
+  String kioskExitPending(int count) {
+    return '$count fichajes aún no enviados se perderán al salir.';
+  }
 }

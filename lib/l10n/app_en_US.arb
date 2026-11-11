@@ -445,5 +445,27 @@
   "receiptNoEmail": "There is no e-mail in your registry. Ask HR to add it.",
   "receiptEmailDisabled": "This time clock does not send receipts by e-mail.",
   "receiptEmailLimit": "This receipt was already sent several times. Try again later.",
-  "receiptFailed": "The receipt could not be prepared. Try again."
+  "receiptFailed": "The receipt could not be prepared. Try again.",
+  "kioskOfflineTitle": "No connection",
+  "kioskOfflineNote": "Your mark stays on this time clock and is sent when the connection is back. The PIN is checked then; if it is wrong, HR sees the mark as refused.",
+  "kioskChooseMark": "Choose the mark",
+  "kioskOfflineSaved": "Mark kept on this time clock",
+  "kioskOfflineSavedNote": "It is sent as soon as the connection is back.",
+  "kioskQueueFull": "This time clock already keeps the maximum of marks without connection. Restore the internet.",
+  "kioskOfflinePending": "{count} marks waiting to be sent",
+  "@kioskOfflinePending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "kioskExitPending": "{count} marks not sent yet are lost when leaving.",
+  "@kioskExitPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

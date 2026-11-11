@@ -69,7 +69,13 @@ class _KioskShellState extends State<KioskShell> {
   bool _offline = false;
   String? _message;
   Timer? _check;
+  Timer? _sync;
   Timer? _idle;
+  int _pending = 0;
+  bool _flushing = false;
+
+  /// The mark of this step is taken without connection (PIN checked at delivery).
+  bool _offlineMark = false;
   Timer? _done;
   int _doneLeft = 0;
 
@@ -80,11 +86,32 @@ class _KioskShellState extends State<KioskShell> {
     super.initState();
     unawaited(_refresh());
     _check = Timer.periodic(widget.checkEvery, (_) => unawaited(_refresh()));
+    _sync = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => unawaited(_deliver()),
+    );
+    unawaited(_deliver());
+  }
+
+  /// Sends the marks taken without connection (oldest first); the count stays on screen.
+  Future<void> _deliver() async {
+    if (_flushing) return;
+    _flushing = true;
+    try {
+      final pending = await widget.client.flushQueue();
+      if (mounted) setState(() => _pending = pending);
+    } catch (_) {
+      final pending = (await widget.client.queued()).length;
+      if (mounted) setState(() => _pending = pending);
+    } finally {
+      _flushing = false;
+    }
   }
 
   @override
   void dispose() {
     _check?.cancel();
+    _sync?.cancel();
     _idle?.cancel();
     _done?.cancel();
     _codeController.dispose();
@@ -101,6 +128,7 @@ class _KioskShellState extends State<KioskShell> {
         if (profile.kioskUUID.isNotEmpty) _profile = profile;
         _offline = false;
       });
+      unawaited(_deliver());
     } on PulseFailure catch (failure) {
       if (!mounted) return;
       setState(() {
@@ -133,6 +161,7 @@ class _KioskShellState extends State<KioskShell> {
       _receipt = null;
       _photoFailed = false;
       _busy = false;
+      _offlineMark = false;
       _codeController.clear();
     });
     _codeFocus.requestFocus();
@@ -210,8 +239,76 @@ class _KioskShellState extends State<KioskShell> {
       });
       _touch();
     } on PulseFailure catch (failure) {
+      if (failure.code == 'networkError') {
+        _startOffline();
+        return;
+      }
       _fail(failure);
     }
+  }
+
+  /// No connection at the PIN: the employee picks the mark, which waits on this device.
+  void _startOffline() {
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _offline = true;
+      _offlineMark = true;
+      _employee = null;
+      _type = null;
+      _message = null;
+      _step = _Step.confirm;
+    });
+    _touch();
+  }
+
+  Future<void> _keepOffline(String type, PunchLocation location) async {
+    final kept = await widget.client.enqueue(
+      KioskQueuedMark(
+        idempotencyKey: uuidV4(),
+        loginCode: _codeController.text.trim(),
+        pin: _pin,
+        type: type,
+        occurredAt: widget.client.clock.nowUtc().toIso8601String(),
+        latitude: location.latitude,
+        longitude: location.longitude,
+        accuracyMeters: location.accuracyMeters,
+      ),
+    );
+    if (!mounted) return;
+    if (!kept) {
+      setState(() {
+        _busy = false;
+        _message = l.kioskQueueFull;
+      });
+      return;
+    }
+    setState(() {
+      _busy = false;
+      _offlineMark = true;
+      _pending++;
+      _receipt = {
+        'Type': type,
+        'OccurredAt': widget.client.clock.nowUtc().toIso8601String(),
+      };
+      _pin = '';
+      _step = _Step.done;
+    });
+    _startDoneCountdown();
+  }
+
+  void _startDoneCountdown() {
+    _doneLeft = widget.doneAfter.inSeconds;
+    _done?.cancel();
+    _done = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return timer.cancel();
+      if (_doneLeft <= 1) {
+        timer.cancel();
+        _reset();
+      } else {
+        setState(() => _doneLeft--);
+      }
+    });
   }
 
   Future<void> _record() async {
@@ -223,7 +320,7 @@ class _KioskShellState extends State<KioskShell> {
     });
     _idle?.cancel();
     Uint8List? photo;
-    if (_profile.photoRequired) {
+    if (_profile.photoRequired && !_offlineMark) {
       try {
         photo = await punchPhotoCapture(context);
       } catch (_) {
@@ -247,6 +344,10 @@ class _KioskShellState extends State<KioskShell> {
         _message = l.locationRequired;
       });
       _touch();
+      return;
+    }
+    if (_offlineMark) {
+      await _keepOffline(type, location);
       return;
     }
     try {
@@ -276,19 +377,14 @@ class _KioskShellState extends State<KioskShell> {
         _photoFailed = photoFailed;
         _pin = '';
         _step = _Step.done;
-        _doneLeft = widget.doneAfter.inSeconds;
       });
-      _done?.cancel();
-      _done = Timer.periodic(const Duration(seconds: 1), (timer) {
-        if (!mounted) return timer.cancel();
-        if (_doneLeft <= 1) {
-          timer.cancel();
-          _reset();
-        } else {
-          setState(() => _doneLeft--);
-        }
-      });
+      _startDoneCountdown();
     } on PulseFailure catch (failure) {
+      // The PIN was right a moment ago: a lost connection keeps the mark on this device.
+      if (failure.code == 'networkError') {
+        await _keepOffline(type, location);
+        return;
+      }
       _fail(failure);
     }
   }
@@ -296,7 +392,7 @@ class _KioskShellState extends State<KioskShell> {
   Future<void> _exit() async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => _ExitDialog(client: widget.client),
+      builder: (_) => _ExitDialog(client: widget.client, pending: _pending),
     );
     if (ok != true) return;
     await widget.client.forget();
@@ -328,6 +424,18 @@ class _KioskShellState extends State<KioskShell> {
             ],
           ),
         ),
+        if (_pending > 0)
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Tooltip(
+              message: l.kioskOfflinePending(_pending),
+              child: Chip(
+                key: const Key('kioskPending'),
+                avatar: const Icon(Icons.cloud_upload_outlined, size: 18),
+                label: Text('$_pending'),
+              ),
+            ),
+          ),
         if (_offline)
           Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -456,7 +564,63 @@ class _KioskShellState extends State<KioskShell> {
     );
   }
 
+  Widget _offlineConfirmStep(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.cloud_off, color: theme.colorScheme.error),
+            const SizedBox(width: 8),
+            Text(
+              l.kioskOfflineTitle,
+              key: const Key('kioskOfflineTitle'),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(l.kioskOfflineNote),
+        const SizedBox(height: 16),
+        Text(l.kioskChooseMark, style: theme.textTheme.labelLarge),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final type in kioskPunchTypes)
+              ChoiceChip(
+                key: Key('kioskType-$type'),
+                avatar: Icon(kioskPunchIcon(type), size: 18),
+                label: Text(punchLabel(l, type)),
+                selected: _type == type,
+                onSelected: _busy
+                    ? null
+                    : (_) {
+                        setState(() => _type = type);
+                        _touch();
+                      },
+              ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        FilledButton.icon(
+          key: const Key('kioskRecord'),
+          onPressed: _busy || _type == null ? null : _record,
+          icon: const Icon(Icons.save_alt),
+          label: Text(l.kioskConfirmPunch),
+        ),
+        const SizedBox(height: 8),
+        TextButton(onPressed: _busy ? null : _reset, child: Text(l.cancel)),
+      ],
+    );
+  }
+
   Widget _confirmStep(BuildContext context) {
+    if (_offlineMark) return _offlineConfirmStep(context);
     final employee = _employee!;
     final theme = Theme.of(context);
     final suggested = employee.nextPunchType;
@@ -527,7 +691,47 @@ class _KioskShellState extends State<KioskShell> {
     return '${material.formatShortDate(at)} ${two(at.hour)}:${two(at.minute)}:${two(at.second)}';
   }
 
+  Widget _offlineDoneStep(BuildContext context) {
+    final theme = Theme.of(context);
+    final receipt = _receipt ?? const {};
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Icon(Icons.save_alt, size: 64, color: theme.colorScheme.primary),
+        const SizedBox(height: 8),
+        Text(
+          l.kioskOfflineSaved,
+          key: const Key('kioskOfflineSaved'),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${punchLabel(l, receipt['Type']?.toString() ?? '')} · ${_time(receipt['OccurredAt'])}',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(l.kioskOfflineSavedNote, textAlign: TextAlign.center),
+        const SizedBox(height: 16),
+        FilledButton(
+          key: const Key('kioskDone'),
+          onPressed: _reset,
+          child: Text(l.kioskDone),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          l.kioskReturning(_doneLeft),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
+
   Widget _doneStep(BuildContext context) {
+    if (_offlineMark) return _offlineDoneStep(context);
     final theme = Theme.of(context);
     final receipt = _receipt ?? const {};
     final hash = receipt['Hash']?.toString() ?? '';
@@ -736,8 +940,9 @@ class _KioskClockState extends State<_KioskClock> {
 
 /// Administrator PIN that unlocks leaving the time clock mode (checked on the device only).
 class _ExitDialog extends StatefulWidget {
-  const _ExitDialog({required this.client});
+  const _ExitDialog({required this.client, this.pending = 0});
   final KioskClient client;
+  final int pending;
 
   @override
   State<_ExitDialog> createState() => _ExitDialogState();
@@ -773,6 +978,14 @@ class _ExitDialogState extends State<_ExitDialog> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(l.kioskExitHelp),
+          if (widget.pending > 0) ...[
+            const SizedBox(height: 8),
+            Text(
+              l.kioskExitPending(widget.pending),
+              key: const Key('kioskExitPending'),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
           const SizedBox(height: 12),
           TextField(
             key: const Key('kioskExitPin'),

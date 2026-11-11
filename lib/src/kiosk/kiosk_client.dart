@@ -94,6 +94,53 @@ class KioskState {
   };
 }
 
+/// A mark taken without connection: code and PIN stay only in the secure storage of this device
+/// until the API verifies them at delivery.
+class KioskQueuedMark {
+  const KioskQueuedMark({
+    required this.idempotencyKey,
+    required this.loginCode,
+    required this.pin,
+    required this.type,
+    required this.occurredAt,
+    this.latitude,
+    this.longitude,
+    this.accuracyMeters,
+  });
+
+  factory KioskQueuedMark.fromJson(Map<String, dynamic> json) =>
+      KioskQueuedMark(
+        idempotencyKey: json['idempotencyKey']?.toString() ?? '',
+        loginCode: json['loginCode']?.toString() ?? '',
+        pin: json['pin']?.toString() ?? '',
+        type: json['type']?.toString() ?? 'clock_in',
+        occurredAt: json['occurredAt']?.toString() ?? '',
+        latitude: (json['latitude'] as num?)?.toDouble(),
+        longitude: (json['longitude'] as num?)?.toDouble(),
+        accuracyMeters: (json['accuracyMeters'] as num?)?.toDouble(),
+      );
+
+  final String idempotencyKey;
+  final String loginCode;
+  final String pin;
+  final String type;
+  final String occurredAt;
+  final double? latitude;
+  final double? longitude;
+  final double? accuracyMeters;
+
+  Map<String, dynamic> toJson() => {
+    'idempotencyKey': idempotencyKey,
+    'loginCode': loginCode,
+    'pin': pin,
+    'type': type,
+    'occurredAt': occurredAt,
+    'latitude': ?latitude,
+    'longitude': ?longitude,
+    'accuracyMeters': ?accuracyMeters,
+  };
+}
+
 /// The employee a kiosk identified (code + PIN), before the mark.
 class KioskEmployee {
   const KioskEmployee({
@@ -158,6 +205,10 @@ class KioskClient {
        clock = clock ?? ServerClock();
 
   static const _stateKey = 'pulse.kiosk';
+  static const _queueKey = 'pulse.kiosk.queue';
+
+  /// Marks kept at most while offline (oldest first); a full queue refuses new offline marks.
+  static const queueLimit = 300;
 
   final http.Client? httpClient;
   final String _base;
@@ -184,8 +235,66 @@ class KioskClient {
   Future<void> _save(KioskState state) =>
       _vault.write(_stateKey, jsonEncode(state.toJson()));
 
-  /// Leaves the kiosk mode on this device: the key is forgotten (HR revokes the kiosk in the App).
-  Future<void> forget() => _vault.delete(_stateKey);
+  /// Leaves the kiosk mode on this device: the key and the undelivered marks are forgotten (HR
+  /// revokes the kiosk in the App).
+  Future<void> forget() async {
+    await _vault.delete(_queueKey);
+    await _vault.delete(_stateKey);
+  }
+
+  Future<List<KioskQueuedMark>> queued() async {
+    try {
+      final raw = await _vault.read(_queueKey);
+      if (raw == null) return [];
+      return (jsonDecode(raw) as List)
+          .whereType<Map>()
+          .map((item) => KioskQueuedMark.fromJson(item.cast<String, dynamic>()))
+          .where((mark) => mark.idempotencyKey.isNotEmpty)
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<void> _saveQueue(List<KioskQueuedMark> marks) => marks.isEmpty
+      ? _vault.delete(_queueKey)
+      : _vault.write(
+          _queueKey,
+          jsonEncode(marks.map((m) => m.toJson()).toList()),
+        );
+
+  /// Keeps a mark taken without connection; false when the queue is full.
+  Future<bool> enqueue(KioskQueuedMark mark) => withDeviceLock(() async {
+    final marks = await queued();
+    if (marks.length >= queueLimit) return false;
+    await _saveQueue([...marks, mark]);
+    return true;
+  });
+
+  /// Delivers the queued marks oldest first. A mark recorded or refused by the API (refused ones
+  /// are kept for HR) leaves the queue; a network failure or a refused kiosk stops the pass.
+  /// Answers how many marks are still waiting.
+  Future<int> flushQueue() async {
+    for (;;) {
+      final marks = await queued();
+      if (marks.isEmpty) return 0;
+      final mark = marks.first;
+      try {
+        await _signed('POST', '/kiosk/offline-punches', json: mark.toJson());
+      } on PulseFailure catch (failure) {
+        // A malformed mark can never be delivered: it leaves the queue.
+        if (failure.code != 'PULSE_INVALID_PUNCH') return marks.length;
+      }
+      await withDeviceLock(() async {
+        final current = await queued();
+        await _saveQueue(
+          current
+              .where((m) => m.idempotencyKey != mark.idempotencyKey)
+              .toList(),
+        );
+      });
+    }
+  }
 
   /// Local administrator PIN (unlocks leaving the kiosk mode); never sent anywhere.
   Future<bool> checkAdminPin(String pin) async {
