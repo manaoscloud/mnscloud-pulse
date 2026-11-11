@@ -26,6 +26,6 @@ Future<void> printReceiptHtml(String html) async {
     frame.contentWindow?.focus();
     frame.contentWindow?.print();
   } finally {
-    Timer(const Duration(minutes: 1), frame.remove);
+    Timer(const Duration(minutes: 1), () => frame.remove());
   }
 }
