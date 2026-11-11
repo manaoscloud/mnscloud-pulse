@@ -2034,6 +2034,54 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'The receipt could not be prepared. Try again.'**
   String get receiptFailed;
+
+  /// No description provided for @kioskOfflineTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No connection'**
+  String get kioskOfflineTitle;
+
+  /// No description provided for @kioskOfflineNote.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your mark stays on this time clock and is sent when the connection is back. The PIN is checked then; if it is wrong, HR sees the mark as refused.'**
+  String get kioskOfflineNote;
+
+  /// No description provided for @kioskChooseMark.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Choose the mark'**
+  String get kioskChooseMark;
+
+  /// No description provided for @kioskOfflineSaved.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Mark kept on this time clock'**
+  String get kioskOfflineSaved;
+
+  /// No description provided for @kioskOfflineSavedNote.
+  ///
+  /// In en_US, this message translates to:
+  /// **'It is sent as soon as the connection is back.'**
+  String get kioskOfflineSavedNote;
+
+  /// No description provided for @kioskQueueFull.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This time clock already keeps the maximum of marks without connection. Restore the internet.'**
+  String get kioskQueueFull;
+
+  /// No description provided for @kioskOfflinePending.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count} marks waiting to be sent'**
+  String kioskOfflinePending(int count);
+
+  /// No description provided for @kioskExitPending.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count} marks not sent yet are lost when leaving.'**
+  String kioskExitPending(int count);
 }
 
 class _AppLocalizationsDelegate

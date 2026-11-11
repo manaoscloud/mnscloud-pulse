@@ -1095,6 +1095,37 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get receiptFailed =>
       'Não foi possível preparar o comprovante. Tente novamente.';
+
+  @override
+  String get kioskOfflineTitle => 'Sem conexão';
+
+  @override
+  String get kioskOfflineNote =>
+      'Sua marcação fica guardada neste relógio e é enviada quando a conexão voltar. O PIN é conferido no envio; se estiver errado, o RH verá a marcação como recusada.';
+
+  @override
+  String get kioskChooseMark => 'Escolha a marcação';
+
+  @override
+  String get kioskOfflineSaved => 'Marcação guardada neste relógio';
+
+  @override
+  String get kioskOfflineSavedNote =>
+      'Ela será enviada assim que a conexão voltar.';
+
+  @override
+  String get kioskQueueFull =>
+      'Este relógio já guardou o máximo de marcações sem conexão. Restabeleça a internet.';
+
+  @override
+  String kioskOfflinePending(int count) {
+    return '$count marcações aguardando envio';
+  }
+
+  @override
+  String kioskExitPending(int count) {
+    return '$count marcações ainda não enviadas serão perdidas ao sair.';
+  }
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2187,4 +2218,35 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get receiptFailed =>
       'Não foi possível preparar o comprovante. Tente novamente.';
+
+  @override
+  String get kioskOfflineTitle => 'Sem conexão';
+
+  @override
+  String get kioskOfflineNote =>
+      'Sua marcação fica guardada neste relógio e é enviada quando a conexão voltar. O PIN é conferido no envio; se estiver errado, o RH verá a marcação como recusada.';
+
+  @override
+  String get kioskChooseMark => 'Escolha a marcação';
+
+  @override
+  String get kioskOfflineSaved => 'Marcação guardada neste relógio';
+
+  @override
+  String get kioskOfflineSavedNote =>
+      'Ela será enviada assim que a conexão voltar.';
+
+  @override
+  String get kioskQueueFull =>
+      'Este relógio já guardou o máximo de marcações sem conexão. Restabeleça a internet.';
+
+  @override
+  String kioskOfflinePending(int count) {
+    return '$count marcações aguardando envio';
+  }
+
+  @override
+  String kioskExitPending(int count) {
+    return '$count marcações ainda não enviadas serão perdidas ao sair.';
+  }
 }

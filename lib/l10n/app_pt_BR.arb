@@ -321,5 +321,13 @@
   "receiptNoEmail": "Não há e-mail no seu cadastro. Peça ao RH para incluir.",
   "receiptEmailDisabled": "Este relógio não envia comprovantes por e-mail.",
   "receiptEmailLimit": "Este comprovante já foi enviado várias vezes. Tente mais tarde.",
-  "receiptFailed": "Não foi possível preparar o comprovante. Tente novamente."
+  "receiptFailed": "Não foi possível preparar o comprovante. Tente novamente.",
+  "kioskOfflineTitle": "Sem conexão",
+  "kioskOfflineNote": "Sua marcação fica guardada neste relógio e é enviada quando a conexão voltar. O PIN é conferido no envio; se estiver errado, o RH verá a marcação como recusada.",
+  "kioskChooseMark": "Escolha a marcação",
+  "kioskOfflineSaved": "Marcação guardada neste relógio",
+  "kioskOfflineSavedNote": "Ela será enviada assim que a conexão voltar.",
+  "kioskQueueFull": "Este relógio já guardou o máximo de marcações sem conexão. Restabeleça a internet.",
+  "kioskOfflinePending": "{count} marcações aguardando envio",
+  "kioskExitPending": "{count} marcações ainda não enviadas serão perdidas ao sair."
 }

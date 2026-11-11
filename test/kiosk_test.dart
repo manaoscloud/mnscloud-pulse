@@ -50,12 +50,16 @@ class KioskApi {
   final requests = <http.Request>[];
   String? publicKey;
   bool revoked = false;
+  bool down = false;
   bool wrongPin = false;
   int lastCounter = 0;
 
   late final client = MockClient((request) async {
     requests.add(request);
     final path = request.url.path;
+    if (down && !path.endsWith('/activate')) {
+      throw http.ClientException('offline');
+    }
     if (path.endsWith('/pulse/time')) {
       return json({
         'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
@@ -138,6 +142,21 @@ class KioskApi {
               'NextPunchType': 'break_start',
             },
           },
+        });
+      }
+      if (path.endsWith('/kiosk/offline-punches')) {
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['occurredAt'], isNotNull);
+        return json({
+          'data': body['pin'] == '4821'
+              ? {
+                  'status': 'recorded',
+                  'item': {
+                    'TimePunchUUID': 'off-${body['idempotencyKey']}',
+                    'Offline': 1,
+                  },
+                }
+              : {'status': 'rejected', 'reason': 'INVALID_PIN'},
         });
       }
       if (path.endsWith('/receipt/email')) {
@@ -460,6 +479,65 @@ void main() {
         expect(html, contains(part));
       }
       expect(html, isNot(contains('<Ltda>')));
+    },
+  );
+
+  testWidgets(
+    'without connection the mark waits on the device and is delivered later',
+    (tester) async {
+      tester.view.physicalSize = const Size(600, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final api = KioskApi();
+      final client = KioskClient(httpClient: api.client);
+      await client.activate('K7QM2XWP', '24680');
+      api.down = true;
+      await tester.pumpWidget(app(api.client));
+      await settle(tester);
+      Future<void> offlineMark(String pin, String type) async {
+        await tester.enterText(
+          find.byKey(const Key('kioskLoginCode')),
+          'ABCD-EFGH',
+        );
+        await tester.tap(find.byKey(const Key('kioskCodeContinue')));
+        await settle(tester);
+        for (final d in pin.split('')) {
+          await tester.tap(find.byKey(Key('kioskDigit$d')));
+          await tester.pump();
+        }
+        await tester.tap(find.byKey(const Key('kioskPinOk')));
+        await settle(tester);
+        expect(find.byKey(const Key('kioskOfflineTitle')), findsOneWidget);
+        await tester.tap(find.byKey(Key('kioskType-$type')));
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('kioskRecord')));
+        await settle(tester);
+        expect(find.byKey(const Key('kioskOfflineSaved')), findsOneWidget);
+        await tester.tap(find.byKey(const Key('kioskDone')));
+        await settle(tester);
+      }
+
+      await offlineMark('4821', 'clock_in');
+      await offlineMark('9991', 'break_start');
+      expect(find.byKey(const Key('kioskPending')), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+      final kept = await client.queued();
+      expect(kept.map((m) => m.type), ['clock_in', 'break_start']);
+      expect(kept.first.latitude, -3.1);
+      // Connection back: the next delivery pass sends both; the API records one and refuses one.
+      api.down = false;
+      await tester.pump(const Duration(minutes: 1));
+      await settle(tester, 20);
+      expect(
+        api.requests.where(
+          (r) => r.url.path.endsWith('/kiosk/offline-punches'),
+        ),
+        hasLength(2),
+      );
+      expect(await client.queued(), isEmpty);
+      expect(find.byKey(const Key('kioskPending')), findsNothing);
+      await tester.pumpWidget(const SizedBox());
     },
   );
 }

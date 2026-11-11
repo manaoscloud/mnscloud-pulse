@@ -321,5 +321,13 @@
   "receiptNoEmail": "No hay correo en tu registro. Pide a RR. HH. que lo agregue.",
   "receiptEmailDisabled": "Este reloj no envía comprobantes por correo.",
   "receiptEmailLimit": "Este comprobante ya se envió varias veces. Inténtalo más tarde.",
-  "receiptFailed": "No se pudo preparar el comprobante. Inténtalo de nuevo."
+  "receiptFailed": "No se pudo preparar el comprobante. Inténtalo de nuevo.",
+  "kioskOfflineTitle": "Sin conexión",
+  "kioskOfflineNote": "Tu fichaje queda guardado en este reloj y se envía cuando vuelva la conexión. El PIN se verifica en el envío; si es incorrecto, RR. HH. verá el fichaje como rechazado.",
+  "kioskChooseMark": "Elige el fichaje",
+  "kioskOfflineSaved": "Fichaje guardado en este reloj",
+  "kioskOfflineSavedNote": "Se enviará en cuanto vuelva la conexión.",
+  "kioskQueueFull": "Este reloj ya guardó el máximo de fichajes sin conexión. Restablece internet.",
+  "kioskOfflinePending": "{count} fichajes esperando envío",
+  "kioskExitPending": "{count} fichajes aún no enviados se perderán al salir."
 }
