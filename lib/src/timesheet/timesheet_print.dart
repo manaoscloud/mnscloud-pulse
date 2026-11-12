@@ -16,6 +16,7 @@ class TimesheetHeader {
     this.periodFrom = '',
     this.periodTo = '',
     this.issuedAt = '',
+    this.issuedAtLocal = '',
     this.timezone = '',
     this.schedules = const [],
   });
@@ -37,6 +38,7 @@ class TimesheetHeader {
       periodFrom: text(period, 'From'),
       periodTo: text(period, 'To'),
       issuedAt: text(map, 'IssuedAt'),
+      issuedAtLocal: text(map, 'IssuedAtLocal'),
       timezone: text(map, 'Timezone'),
       schedules: [
         for (final s in (map['schedules'] as List?) ?? const [])
@@ -55,6 +57,7 @@ class TimesheetHeader {
   final String periodFrom;
   final String periodTo;
   final String issuedAt;
+  final String issuedAtLocal;
   final String timezone;
   final List<Map<String, dynamic>> schedules;
 
@@ -258,8 +261,12 @@ String timesheetHtml(
   final legendHtml = legend.isEmpty
       ? ''
       : '<h2>${e(l.tspLegend)}</h2><p>${e(l.tspLegendText)}</p><table><tr><th>${e(l.tspDate)}</th><th></th><th>${e(l.tspTime)}</th><th>${e(l.tspType)}</th><th>${e(l.tspReason)}</th></tr>$legend</table>';
-  final issued = issuedText(header.issuedAt);
-  final tz = '';
+  final issued = header.issuedAtLocal.isNotEmpty
+      ? header.issuedAtLocal
+      : issuedText(header.issuedAt);
+  final tz = header.issuedAtLocal.isNotEmpty && header.timezone.isNotEmpty
+      ? ' (${e(header.timezone)})'
+      : '';
   return '''<!doctype html><html lang="${e(language)}"><head><meta charset="utf-8"><title>${e(l.tspTitle)}</title><style>$_style</style></head><body>
 <h1>${e(l.tspTitle)}</h1>
 <table class="kv">
