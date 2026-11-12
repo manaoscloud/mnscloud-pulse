@@ -168,6 +168,11 @@ class PunchSync extends ChangeNotifier {
           // The same photo goes again signed by the device, when there is a key.
           sessionEnded = failure.code;
           useSession = false;
+        } else if (!useSession &&
+            failure.deviceRefused &&
+            failure.code != 'PULSE_DEVICE_CLOCK_SKEW') {
+          // Device key refused: keep the photos for a session; no more device tries this pass.
+          break;
         } else if (photoUploadDefinitive(failure)) {
           await queue.removePhoto(photo.punchKey);
           index++;

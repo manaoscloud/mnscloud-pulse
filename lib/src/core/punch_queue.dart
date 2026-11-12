@@ -81,10 +81,6 @@ class PendingPhoto {
 /// too large (413), or this device key is invalid or revoked. Everything else (network, 5xx, 403,
 /// 408, 429, clock skew, storage or module unavailable, session ended) keeps the photo.
 bool photoUploadDefinitive(PulseFailure failure) {
-  if (failure.code.startsWith('PULSE_DEVICE_') &&
-      failure.code != 'PULSE_DEVICE_CLOCK_SKEW') {
-    return true;
-  }
   final status = failure.status;
   return status == 400 || status == 404 || status == 413;
 }

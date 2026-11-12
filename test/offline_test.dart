@@ -383,39 +383,36 @@ void main() {
       expect(store.hasPhoto('gone'), isFalse);
     });
 
-    test(
-      'the upload decision deletes only 400/404/413 and invalid devices',
-      () {
-        bool retry(String code, [int? status]) =>
-            photoUploadRetry(PulseFailure(code, status: status));
-        for (final keep in [
-          ('networkError', null),
-          ('requestError', 500),
-          ('requestError', 503),
-          ('requestError', 408),
-          ('PULSE_RATE_LIMITED', 429),
-          ('PULSE_ACCESS_DENIED', 403),
-          ('HR_STORAGE_NOT_CONFIGURED', 409),
-          ('HR_STORAGE_UNAVAILABLE', 503),
-          ('PULSE_MODULE_UNAVAILABLE', 403),
-          ('PULSE_DEVICE_CLOCK_SKEW', 401),
-        ]) {
-          expect(retry(keep.$1, keep.$2), isTrue, reason: keep.$1);
-        }
-        for (final drop in [
-          ('PULSE_PUNCH_NOT_FOUND', 404),
-          ('requestError', 400),
-          ('requestError', 413),
-          ('PULSE_DEVICE_INVALID', 401),
-        ]) {
-          expect(retry(drop.$1, drop.$2), isFalse, reason: drop.$1);
-        }
-        expect(
-          photoAlreadyStored(const PulseFailure('PULSE_PUNCH_PHOTO_EXISTS')),
-          isTrue,
-        );
-      },
-    );
+    test('the upload decision deletes only 400/404/413', () {
+      bool retry(String code, [int? status]) =>
+          photoUploadRetry(PulseFailure(code, status: status));
+      for (final keep in [
+        ('networkError', null),
+        ('requestError', 500),
+        ('requestError', 503),
+        ('requestError', 408),
+        ('PULSE_RATE_LIMITED', 429),
+        ('PULSE_ACCESS_DENIED', 403),
+        ('HR_STORAGE_NOT_CONFIGURED', 409),
+        ('HR_STORAGE_UNAVAILABLE', 503),
+        ('PULSE_MODULE_UNAVAILABLE', 403),
+        ('PULSE_DEVICE_CLOCK_SKEW', 401),
+        ('PULSE_DEVICE_INVALID', 401),
+      ]) {
+        expect(retry(keep.$1, keep.$2), isTrue, reason: keep.$1);
+      }
+      for (final drop in [
+        ('PULSE_PUNCH_NOT_FOUND', 404),
+        ('requestError', 400),
+        ('requestError', 413),
+      ]) {
+        expect(retry(drop.$1, drop.$2), isFalse, reason: drop.$1);
+      }
+      expect(
+        photoAlreadyStored(const PulseFailure('PULSE_PUNCH_PHOTO_EXISTS')),
+        isTrue,
+      );
+    });
 
     Future<DeviceGrants> grantsFor(
       PulseApi api,
