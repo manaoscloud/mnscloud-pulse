@@ -1146,6 +1146,116 @@ class AppLocalizationsEs extends AppLocalizations {
   String kioskExitPending(int count) {
     return '$count fichajes aún no enviados se perderán al salir.';
   }
+
+  @override
+  String get tspPrint => 'Imprimir / PDF';
+
+  @override
+  String get tspTitle => 'Hoja de horas';
+
+  @override
+  String get tspEmployer => 'Empleador (razón social)';
+
+  @override
+  String get tspEmployerDocument => 'ID fiscal';
+
+  @override
+  String get tspEmployee => 'Colaborador';
+
+  @override
+  String get tspCpf => 'CPF';
+
+  @override
+  String get tspHireDate => 'Alta';
+
+  @override
+  String get tspPosition => 'Cargo';
+
+  @override
+  String get tspDepartment => 'Departamento';
+
+  @override
+  String get tspPeriod => 'Período';
+
+  @override
+  String get tspSchedules => 'Jornadas contractuales';
+
+  @override
+  String get tspKindWeekly => 'Semanal';
+
+  @override
+  String get tspKindCycle => 'Ciclo';
+
+  @override
+  String get tspCycleDay => 'Día del ciclo';
+
+  @override
+  String get tspWeekdays =>
+      'Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo';
+
+  @override
+  String get tspDays => 'Fichajes por día';
+
+  @override
+  String get tspDate => 'Fecha';
+
+  @override
+  String get tspDayCol => 'Día';
+
+  @override
+  String get tspMarks => 'Fichajes (NSR)';
+
+  @override
+  String get tspExpected => 'Previsto';
+
+  @override
+  String get tspWorked => 'Trabajado';
+
+  @override
+  String get tspOvertime => 'Extras';
+
+  @override
+  String get tspAbsence => 'Ausencias';
+
+  @override
+  String get tspLate => 'Retrasos';
+
+  @override
+  String get tspNight => 'Nocturno';
+
+  @override
+  String get tspBalance => 'Saldo';
+
+  @override
+  String get tspIssues => 'Incidencias';
+
+  @override
+  String get tspTotals => 'Totales';
+
+  @override
+  String get tspLegend => 'Leyenda de los tratamientos';
+
+  @override
+  String get tspLegendText =>
+      'I = fichaje incluido por un tratamiento; D = fichaje desconsiderado (tachado).';
+
+  @override
+  String get tspTime => 'Hora';
+
+  @override
+  String get tspType => 'Tipo';
+
+  @override
+  String get tspReason => 'Motivo';
+
+  @override
+  String get tspIssuedAt => 'Emitido el';
+
+  @override
+  String get tspIncluded => 'Incluido';
+
+  @override
+  String get tspDisregarded => 'Desconsiderado';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2289,4 +2399,114 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   String kioskExitPending(int count) {
     return '$count fichajes aún no enviados se perderán al salir.';
   }
+
+  @override
+  String get tspPrint => 'Imprimir / PDF';
+
+  @override
+  String get tspTitle => 'Hoja de horas';
+
+  @override
+  String get tspEmployer => 'Empleador (razón social)';
+
+  @override
+  String get tspEmployerDocument => 'ID fiscal';
+
+  @override
+  String get tspEmployee => 'Colaborador';
+
+  @override
+  String get tspCpf => 'CPF';
+
+  @override
+  String get tspHireDate => 'Alta';
+
+  @override
+  String get tspPosition => 'Cargo';
+
+  @override
+  String get tspDepartment => 'Departamento';
+
+  @override
+  String get tspPeriod => 'Período';
+
+  @override
+  String get tspSchedules => 'Jornadas contractuales';
+
+  @override
+  String get tspKindWeekly => 'Semanal';
+
+  @override
+  String get tspKindCycle => 'Ciclo';
+
+  @override
+  String get tspCycleDay => 'Día del ciclo';
+
+  @override
+  String get tspWeekdays =>
+      'Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo';
+
+  @override
+  String get tspDays => 'Fichajes por día';
+
+  @override
+  String get tspDate => 'Fecha';
+
+  @override
+  String get tspDayCol => 'Día';
+
+  @override
+  String get tspMarks => 'Fichajes (NSR)';
+
+  @override
+  String get tspExpected => 'Previsto';
+
+  @override
+  String get tspWorked => 'Trabajado';
+
+  @override
+  String get tspOvertime => 'Extras';
+
+  @override
+  String get tspAbsence => 'Ausencias';
+
+  @override
+  String get tspLate => 'Retrasos';
+
+  @override
+  String get tspNight => 'Nocturno';
+
+  @override
+  String get tspBalance => 'Saldo';
+
+  @override
+  String get tspIssues => 'Incidencias';
+
+  @override
+  String get tspTotals => 'Totales';
+
+  @override
+  String get tspLegend => 'Leyenda de los tratamientos';
+
+  @override
+  String get tspLegendText =>
+      'I = fichaje incluido por un tratamiento; D = fichaje desconsiderado (tachado).';
+
+  @override
+  String get tspTime => 'Hora';
+
+  @override
+  String get tspType => 'Tipo';
+
+  @override
+  String get tspReason => 'Motivo';
+
+  @override
+  String get tspIssuedAt => 'Emitido el';
+
+  @override
+  String get tspIncluded => 'Incluido';
+
+  @override
+  String get tspDisregarded => 'Desconsiderado';
 }

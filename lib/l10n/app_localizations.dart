@@ -2124,6 +2124,222 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'{count} marks not sent yet are lost when leaving.'**
   String kioskExitPending(int count);
+
+  /// No description provided for @tspPrint.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Print / PDF'**
+  String get tspPrint;
+
+  /// No description provided for @tspTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Timesheet'**
+  String get tspTitle;
+
+  /// No description provided for @tspEmployer.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Employer (legal name)'**
+  String get tspEmployer;
+
+  /// No description provided for @tspEmployerDocument.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Tax ID'**
+  String get tspEmployerDocument;
+
+  /// No description provided for @tspEmployee.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Employee'**
+  String get tspEmployee;
+
+  /// No description provided for @tspCpf.
+  ///
+  /// In en_US, this message translates to:
+  /// **'CPF'**
+  String get tspCpf;
+
+  /// No description provided for @tspHireDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Hire date'**
+  String get tspHireDate;
+
+  /// No description provided for @tspPosition.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Position'**
+  String get tspPosition;
+
+  /// No description provided for @tspDepartment.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Department'**
+  String get tspDepartment;
+
+  /// No description provided for @tspPeriod.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Period'**
+  String get tspPeriod;
+
+  /// No description provided for @tspSchedules.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Contractual schedules'**
+  String get tspSchedules;
+
+  /// No description provided for @tspKindWeekly.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Weekly'**
+  String get tspKindWeekly;
+
+  /// No description provided for @tspKindCycle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Cycle'**
+  String get tspKindCycle;
+
+  /// No description provided for @tspCycleDay.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Cycle day'**
+  String get tspCycleDay;
+
+  /// No description provided for @tspWeekdays.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday'**
+  String get tspWeekdays;
+
+  /// No description provided for @tspDays.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Marks per day'**
+  String get tspDays;
+
+  /// No description provided for @tspDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Date'**
+  String get tspDate;
+
+  /// No description provided for @tspDayCol.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Day'**
+  String get tspDayCol;
+
+  /// No description provided for @tspMarks.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Marks (NSR)'**
+  String get tspMarks;
+
+  /// No description provided for @tspExpected.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Expected'**
+  String get tspExpected;
+
+  /// No description provided for @tspWorked.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Worked'**
+  String get tspWorked;
+
+  /// No description provided for @tspOvertime.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Overtime'**
+  String get tspOvertime;
+
+  /// No description provided for @tspAbsence.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Absence'**
+  String get tspAbsence;
+
+  /// No description provided for @tspLate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Late'**
+  String get tspLate;
+
+  /// No description provided for @tspNight.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Night'**
+  String get tspNight;
+
+  /// No description provided for @tspBalance.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Balance'**
+  String get tspBalance;
+
+  /// No description provided for @tspIssues.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Issues'**
+  String get tspIssues;
+
+  /// No description provided for @tspTotals.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Totals'**
+  String get tspTotals;
+
+  /// No description provided for @tspLegend.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Treatment legend'**
+  String get tspLegend;
+
+  /// No description provided for @tspLegendText.
+  ///
+  /// In en_US, this message translates to:
+  /// **'I = mark included by a treatment; D = disregarded mark (struck through).'**
+  String get tspLegendText;
+
+  /// No description provided for @tspTime.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Time'**
+  String get tspTime;
+
+  /// No description provided for @tspType.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Type'**
+  String get tspType;
+
+  /// No description provided for @tspReason.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Reason'**
+  String get tspReason;
+
+  /// No description provided for @tspIssuedAt.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Issued at'**
+  String get tspIssuedAt;
+
+  /// No description provided for @tspIncluded.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Included'**
+  String get tspIncluded;
+
+  /// No description provided for @tspDisregarded.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Disregarded'**
+  String get tspDisregarded;
 }
 
 class _AppLocalizationsDelegate

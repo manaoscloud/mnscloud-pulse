@@ -1147,6 +1147,115 @@ class AppLocalizationsPt extends AppLocalizations {
   String kioskExitPending(int count) {
     return '$count marcações ainda não enviadas serão perdidas ao sair.';
   }
+
+  @override
+  String get tspPrint => 'Imprimir / PDF';
+
+  @override
+  String get tspTitle => 'Espelho de ponto';
+
+  @override
+  String get tspEmployer => 'Empregador (razão social)';
+
+  @override
+  String get tspEmployerDocument => 'CNPJ/CPF';
+
+  @override
+  String get tspEmployee => 'Colaborador';
+
+  @override
+  String get tspCpf => 'CPF';
+
+  @override
+  String get tspHireDate => 'Admissão';
+
+  @override
+  String get tspPosition => 'Cargo';
+
+  @override
+  String get tspDepartment => 'Departamento';
+
+  @override
+  String get tspPeriod => 'Período';
+
+  @override
+  String get tspSchedules => 'Jornadas contratuais';
+
+  @override
+  String get tspKindWeekly => 'Semanal';
+
+  @override
+  String get tspKindCycle => 'Ciclo';
+
+  @override
+  String get tspCycleDay => 'Dia do ciclo';
+
+  @override
+  String get tspWeekdays => 'Segunda|Terça|Quarta|Quinta|Sexta|Sábado|Domingo';
+
+  @override
+  String get tspDays => 'Marcações por dia';
+
+  @override
+  String get tspDate => 'Data';
+
+  @override
+  String get tspDayCol => 'Dia';
+
+  @override
+  String get tspMarks => 'Marcações (NSR)';
+
+  @override
+  String get tspExpected => 'Previsto';
+
+  @override
+  String get tspWorked => 'Trabalhado';
+
+  @override
+  String get tspOvertime => 'Extras';
+
+  @override
+  String get tspAbsence => 'Faltas';
+
+  @override
+  String get tspLate => 'Atrasos';
+
+  @override
+  String get tspNight => 'Noturno';
+
+  @override
+  String get tspBalance => 'Saldo';
+
+  @override
+  String get tspIssues => 'Ocorrências';
+
+  @override
+  String get tspTotals => 'Totais';
+
+  @override
+  String get tspLegend => 'Legenda dos tratamentos';
+
+  @override
+  String get tspLegendText =>
+      'I = marcação incluída pelo tratamento; D = marcação desconsiderada (riscada).';
+
+  @override
+  String get tspTime => 'Hora';
+
+  @override
+  String get tspType => 'Tipo';
+
+  @override
+  String get tspReason => 'Motivo';
+
+  @override
+  String get tspIssuedAt => 'Emitido em';
+
+  @override
+  String get tspIncluded => 'Incluída';
+
+  @override
+  String get tspDisregarded => 'Desconsiderada';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2291,4 +2400,113 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String kioskExitPending(int count) {
     return '$count marcações ainda não enviadas serão perdidas ao sair.';
   }
+
+  @override
+  String get tspPrint => 'Imprimir / PDF';
+
+  @override
+  String get tspTitle => 'Espelho de ponto';
+
+  @override
+  String get tspEmployer => 'Empregador (razão social)';
+
+  @override
+  String get tspEmployerDocument => 'CNPJ/CPF';
+
+  @override
+  String get tspEmployee => 'Colaborador';
+
+  @override
+  String get tspCpf => 'CPF';
+
+  @override
+  String get tspHireDate => 'Admissão';
+
+  @override
+  String get tspPosition => 'Cargo';
+
+  @override
+  String get tspDepartment => 'Departamento';
+
+  @override
+  String get tspPeriod => 'Período';
+
+  @override
+  String get tspSchedules => 'Jornadas contratuais';
+
+  @override
+  String get tspKindWeekly => 'Semanal';
+
+  @override
+  String get tspKindCycle => 'Ciclo';
+
+  @override
+  String get tspCycleDay => 'Dia do ciclo';
+
+  @override
+  String get tspWeekdays => 'Segunda|Terça|Quarta|Quinta|Sexta|Sábado|Domingo';
+
+  @override
+  String get tspDays => 'Marcações por dia';
+
+  @override
+  String get tspDate => 'Data';
+
+  @override
+  String get tspDayCol => 'Dia';
+
+  @override
+  String get tspMarks => 'Marcações (NSR)';
+
+  @override
+  String get tspExpected => 'Previsto';
+
+  @override
+  String get tspWorked => 'Trabalhado';
+
+  @override
+  String get tspOvertime => 'Extras';
+
+  @override
+  String get tspAbsence => 'Faltas';
+
+  @override
+  String get tspLate => 'Atrasos';
+
+  @override
+  String get tspNight => 'Noturno';
+
+  @override
+  String get tspBalance => 'Saldo';
+
+  @override
+  String get tspIssues => 'Ocorrências';
+
+  @override
+  String get tspTotals => 'Totais';
+
+  @override
+  String get tspLegend => 'Legenda dos tratamentos';
+
+  @override
+  String get tspLegendText =>
+      'I = marcação incluída pelo tratamento; D = marcação desconsiderada (riscada).';
+
+  @override
+  String get tspTime => 'Hora';
+
+  @override
+  String get tspType => 'Tipo';
+
+  @override
+  String get tspReason => 'Motivo';
+
+  @override
+  String get tspIssuedAt => 'Emitido em';
+
+  @override
+  String get tspIncluded => 'Incluída';
+
+  @override
+  String get tspDisregarded => 'Desconsiderada';
 }
