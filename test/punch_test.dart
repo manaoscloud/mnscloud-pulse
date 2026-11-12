@@ -19,6 +19,7 @@ import 'package:mnscloud_pulse/src/core/server_clock.dart';
 import 'package:mnscloud_pulse/src/offline/device_grant.dart';
 import 'package:mnscloud_pulse/src/offline/p256.dart';
 import 'package:mnscloud_pulse/src/punch/punch_labels.dart';
+import 'package:mnscloud_pulse/src/punch/punch_workspace.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 http.Response json(Object body, [int status = 200]) =>
@@ -352,7 +353,99 @@ void main() {
     },
   );
 
-  testWidgets('without a position the punch is not recorded', (tester) async {
+  test('receipts keep marks with NSR of the last 48 hours, newest first', () {
+    final now = DateTime.utc(2026, 11, 12, 12);
+    Map<String, dynamic> p(int nsr, Duration ago, {bool receipt = true}) => {
+      'NSR': receipt ? nsr : null,
+      'OccurredAt': now.subtract(ago).toIso8601String(),
+    };
+    final kept = receiptsOfLast48h([
+      p(1, const Duration(hours: 49)),
+      p(2, const Duration(hours: 47)),
+      p(3, const Duration(hours: 1)),
+      p(4, const Duration(hours: 2), receipt: false),
+    ], now);
+    expect(kept.map((e) => e['NSR']), [3, 2]);
+  });
+
+  testWidgets('the last 48 hours of receipts open the full receipt', (
+    tester,
+  ) async {
+    final queries = <Map<String, String>>[];
+    final client = MockClient((request) async {
+      final path = request.url.path;
+      if (path.endsWith('/auth/refresh')) return json(session());
+      if (path.endsWith('/time')) {
+        return json({
+          'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
+        });
+      }
+      if (path.endsWith('/receipt')) {
+        return json({
+          'data': {
+            'item': {
+              'Title': 'Comprovante de Registro de Ponto do Trabalhador',
+              'TimePunchUUID': 'punch-7',
+              'NSR': 7,
+              'Hash': 'c' * 64,
+              'TypeLabel': 'Entrada',
+              'OccurredAtText': '12/11/2026 08:00:00',
+              'EmployerName': 'Example Company',
+              'EmployeeName': 'Test Employee',
+              'Collector': 'App',
+            },
+          },
+        });
+      }
+      if (path.endsWith('/punches')) {
+        queries.add(request.url.queryParameters);
+        return json({
+          'data': {
+            'items': [
+              {
+                'TimePunchUUID': 'punch-7',
+                'Type': 'clock_in',
+                'OccurredAt': DateTime.now()
+                    .toUtc()
+                    .subtract(const Duration(hours: 3))
+                    .toIso8601String(),
+                'NSR': 7,
+                'Hash': 'c' * 64,
+                'Flags': <String>[],
+              },
+            ],
+          },
+        });
+      }
+      return json({'code': 'requestError'}, 400);
+    });
+    await tester.pumpWidget(app(client));
+    await settle(tester);
+    expect(queries.any((q) => q.containsKey('startAt')), isTrue);
+    final start = DateTime.parse(
+      queries.firstWhere((q) => q.containsKey('startAt'))['startAt']!,
+    );
+    expect(
+      DateTime.now().toUtc().difference(start).inHours,
+      inInclusiveRange(47, 48),
+    );
+    expect(find.text('Receipts of the last 48 hours'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('receiptTile-7')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('receiptTile-7')));
+    await settle(tester);
+    expect(find.byKey(const Key('receiptSheet')), findsOneWidget);
+    expect(find.text('Example Company'), findsOneWidget);
+    expect(find.text('c' * 64), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('without a position the punch is recorded flagged', (
+    tester,
+  ) async {
     final punches = <Map<String, dynamic>>[];
     final previous = punchLocator;
     punchLocator = () async => null;
@@ -363,12 +456,12 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('confirmPunch')));
     await settle(tester);
-    expect(punches, isEmpty);
+    expect(punches, hasLength(1));
+    expect(punches.single.containsKey('latitude'), isFalse);
+    expect(punches.single.containsKey('longitude'), isFalse);
     expect(await PunchQueue('account-1').load(), isEmpty);
-    expect(
-      find.textContaining('Your location could not be read'),
-      findsOneWidget,
-    );
+    expect(find.text('Punch saved.'), findsOneWidget);
+    expect(find.byKey(const Key('punchNoLocationNotice')), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 

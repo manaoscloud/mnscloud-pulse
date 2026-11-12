@@ -445,6 +445,54 @@ abstract class AppLocalizations {
   /// **'Last receipt'**
   String get receipt;
 
+  /// No description provided for @punchNoLocationNotice.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Punch recorded without location; HR will see it flagged.'**
+  String get punchNoLocationNotice;
+
+  /// No description provided for @receiptsLast48h.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Receipts of the last 48 hours'**
+  String get receiptsLast48h;
+
+  /// No description provided for @receiptsLast48hEmpty.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No receipts in the last 48 hours.'**
+  String get receiptsLast48hEmpty;
+
+  /// No description provided for @receiptFieldEmployer.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Employer'**
+  String get receiptFieldEmployer;
+
+  /// No description provided for @receiptFieldEmployee.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Employee'**
+  String get receiptFieldEmployee;
+
+  /// No description provided for @receiptFieldWhen.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Date and time'**
+  String get receiptFieldWhen;
+
+  /// No description provided for @receiptFieldCollector.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Collector'**
+  String get receiptFieldCollector;
+
+  /// No description provided for @receiptFieldHash.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Verification code (SHA-256)'**
+  String get receiptFieldHash;
+
   /// No description provided for @nsrLabel.
   ///
   /// In en_US, this message translates to:
@@ -1078,7 +1126,7 @@ abstract class AppLocalizations {
   /// No description provided for @punchPhotoOffline.
   ///
   /// In en_US, this message translates to:
-  /// **'No connection: the punch was kept; the photo is only sent with connection.'**
+  /// **'No connection: the punch was kept and the photo will be sent when the connection returns.'**
   String get punchPhotoOffline;
 
   /// No description provided for @punchPhotoSaved.
@@ -1704,12 +1752,6 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'A permission of Pulse was turned off. Allow it again to punch.'**
   String get permissionsLost;
-
-  /// No description provided for @locationRequired.
-  ///
-  /// In en_US, this message translates to:
-  /// **'Your location could not be read. Turn on the GPS and try again; the punch was not recorded.'**
-  String get locationRequired;
 
   /// No description provided for @punchPhotoRequired.
   ///

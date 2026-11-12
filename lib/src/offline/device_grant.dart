@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
@@ -204,6 +205,40 @@ class DeviceGrants {
       'X-Device-Timestamp': timestamp,
       'X-Device-Counter': '$counter',
       'X-Device-Signature': signature,
+    });
+  });
+
+  /// Sends the photo of a recorded mark signed by this device (no session needed). The signed
+  /// body hash is the SHA-256 of the raw JPEG, like the time clock does for its photo.
+  Future<void> sendPhoto(
+    String accountUUID,
+    String punchUUID,
+    String photoUUID,
+    Uint8List bytes,
+  ) => withDeviceLock(() async {
+    final state = await read(accountUUID);
+    if (state == null || !state.valid(DateTime.now().toUtc())) {
+      throw const PulseFailure('PULSE_DEVICE_INVALID');
+    }
+    // This route signs the counter but does not advance it: the last used value is sent and
+    // nothing is consumed (1 when the device never signed a mark).
+    final counter = state.counter < 1 ? 1 : state.counter;
+    final timestamp = _timestamp();
+    final signature = P256Key.fromPrivateBase64(state.privateKey).sign(
+      pulseDeviceSignatureMessage(
+        'POST',
+        '/pulse/device/punches/$punchUUID/photo',
+        timestamp,
+        '$counter',
+        sha256.convert(bytes).toString(),
+      ),
+    );
+    await api.uploadDevicePhoto(punchUUID, bytes, {
+      'X-Device-Id': state.deviceUUID,
+      'X-Device-Timestamp': timestamp,
+      'X-Device-Counter': '$counter',
+      'X-Device-Signature': signature,
+      'X-Photo-Id': photoUUID,
     });
   });
 }

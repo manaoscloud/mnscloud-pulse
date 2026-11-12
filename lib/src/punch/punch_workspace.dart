@@ -15,6 +15,26 @@ import '../timesheet/today_card.dart';
 import 'punch_labels.dart';
 import '../receipt/receipt.dart';
 
+/// Receipts are listed for this long after the mark.
+const receiptWindow = Duration(hours: 48);
+
+/// Marks with a receipt (NSR) recorded in the last 48 h before [now], newest first.
+List<Map<String, dynamic>> receiptsOfLast48h(
+  List<Map<String, dynamic>> punches,
+  DateTime now,
+) {
+  final since = now.subtract(receiptWindow);
+  final kept = <(DateTime, Map<String, dynamic>)>[];
+  for (final punch in punches) {
+    final at = DateTime.tryParse(punch['OccurredAt']?.toString() ?? '');
+    if (punch['NSR'] != null && at != null && !at.isBefore(since)) {
+      kept.add((at, punch));
+    }
+  }
+  kept.sort((a, b) => b.$1.compareTo(a.$1));
+  return [for (final (_, punch) in kept) punch];
+}
+
 /// Employee home: official time, the suggested next mark (every mark stays available), the
 /// delivery state of marks taken without connection and the recent marks with their receipt.
 class PunchWorkspace extends StatefulWidget {
@@ -53,12 +73,16 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     widget.account.timeClockAccountUUID,
   );
   List<Map<String, dynamic>> _punches = [];
+
+  /// Marks with receipt (NSR) of the last 48 hours, newest first.
+  List<Map<String, dynamic>> _receipts = [];
   List<QueuedPunch> _pending = [];
   bool _online = true;
   bool _busy = false;
   bool _flushing = false;
   bool _showOthers = false;
   bool _confirming = false;
+  bool _noLocation = false;
   String? _message;
   bool _messageError = false;
   Timer? _retry;
@@ -92,9 +116,9 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     await _reload();
   }
 
-  void _scheduleRetry() {
+  void _scheduleRetry({bool force = false}) {
     _retry?.cancel();
-    if (_pending.isEmpty || !mounted) return;
+    if ((_pending.isEmpty && !force) || !mounted) return;
     _retry = Timer(const Duration(seconds: 30), () => unawaited(_flush()));
   }
 
@@ -109,9 +133,23 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   Future<void> _reload() async {
     try {
       final items = await widget.api.listPunches();
+      var receipts = _receipts;
+      try {
+        receipts = receiptsOfLast48h(
+          await widget.api.listPunches(
+            limit: 200,
+            startAt: widget.clock.nowUtc().subtract(receiptWindow),
+          ),
+          widget.clock.nowUtc(),
+        );
+      } on PulseFailure catch (failure) {
+        if (failure.sessionEnded) rethrow;
+        // The recent list is enough; the receipts are read again at the next refresh.
+      }
       if (!mounted) return;
       setState(() {
         _punches = items;
+        _receipts = receipts;
         _online = true;
       });
     } on PulseFailure catch (failure) {
@@ -221,30 +259,35 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     setState(() {
       _busy = true;
       _message = null;
+      _noLocation = false;
       _showOthers = false;
     });
     final occurredAt = widget.clock.nowUtc();
-    final location = await (widget.locate ?? punchLocator)();
-    if (location == null) {
-      // Pulse records a mark only with the position of that moment (GPS off, refused, timeout).
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _message = 'locationRequired';
-        _messageError = true;
-      });
-      return;
+    PunchLocation? location;
+    try {
+      location = await (widget.locate ?? punchLocator)();
+    } catch (_) {
+      location = null;
     }
+    // A mark is never restricted for lack of location (Portaria MTP 671, art. 74): it is
+    // recorded without it and HR sees it flagged.
     final punch = QueuedPunch(
       idempotencyKey: uuidV4(),
       type: type,
       occurredAt: occurredAt,
-      latitude: location.latitude,
-      longitude: location.longitude,
-      accuracyMeters: location.accuracyMeters,
+      latitude: location?.latitude,
+      longitude: location?.longitude,
+      accuracyMeters: location?.accuracyMeters,
     );
     // Kept on the device before sending: a lost answer or no connection never loses the mark.
     await _queue.add(punch);
+    final photoUUID = uuidV4();
+    // The photo is kept as well until the API accepts it: it goes later when there is no
+    // connection (the API takes it for 24 h after the mark).
+    if (photo != null) {
+      await _queue.addPhoto(punch.idempotencyKey, photoUUID, photo);
+    }
+    if (mounted) setState(() => _noLocation = location == null);
     String message = 'punchSaved';
     bool error = false;
     if (!widget.api.signedIn) {
@@ -271,7 +314,13 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       _delivered.value++;
       final punchUUID = item['TimePunchUUID']?.toString();
       if (photo != null && punchUUID != null && punchUUID.isNotEmpty) {
-        message = await _sendPhoto(punchUUID, photo);
+        await _queue.bindPhoto(punch.idempotencyKey, punchUUID);
+        message = await _sendPhoto(
+          punch.idempotencyKey,
+          punchUUID,
+          photoUUID,
+          photo,
+        );
       }
     } on PulseFailure catch (failure) {
       if (_handleFailure(failure)) return;
@@ -286,6 +335,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         error = true;
       } else {
         await _queue.remove(punch.idempotencyKey);
+        await _queue.removePhoto(punch.idempotencyKey);
         message = 'requestError';
         error = true;
       }
@@ -301,13 +351,32 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     if (_online) await _reload();
   }
 
-  /// The mark is already recorded: a photo that does not go is reported, never retried later.
-  Future<String> _sendPhoto(String punchUUID, Uint8List photo) async {
+  /// The mark is already recorded: a photo that does not go for lack of connection stays on the
+  /// device and is sent by the next pass; one refused for good is dropped and reported.
+  Future<String> _sendPhoto(
+    String punchKey,
+    String punchUUID,
+    String photoUUID,
+    Uint8List photo,
+  ) async {
     try {
-      await widget.api.uploadPunchPhoto(punchUUID, uuidV4(), photo);
+      await widget.api.uploadPunchPhoto(punchUUID, photoUUID, photo);
+      await _queue.removePhoto(punchKey);
       return 'punchPhotoSaved';
     } on PulseFailure catch (failure) {
-      if (failure.sessionEnded) widget.onSessionEnded(failure.code);
+      if (photoAlreadyStored(failure)) {
+        await _queue.removePhoto(punchKey);
+        return 'punchPhotoSaved';
+      }
+      if (failure.sessionEnded) {
+        widget.onSessionEnded(failure.code);
+        return 'punchPhotoOffline';
+      }
+      if (photoUploadRetry(failure)) {
+        _scheduleRetry(force: true);
+        return 'punchPhotoOffline';
+      }
+      await _queue.removePhoto(punchKey);
       return 'punchPhotoFailed';
     } catch (_) {
       return 'punchPhotoFailed';
@@ -317,7 +386,6 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   String _text(String key) => switch (key) {
     'punchSaved' => l.punchSaved,
     'punchPhotoSaved' => l.punchPhotoSaved,
-    'locationRequired' => l.locationRequired,
     'punchPhotoFailed' => l.punchPhotoFailed,
     'punchPhotoOffline' => l.punchPhotoOffline,
     'punchSynced' => l.punchSynced,
@@ -351,7 +419,6 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final next = nextPunchType(_lastType);
-    final receipt = _punches.where((p) => p['NSR'] != null).firstOrNull;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -395,6 +462,18 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         ),
         TodayCard(api: widget.api, reload: _delivered),
         const SizedBox(height: 20),
+        if (_noLocation)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Semantics(
+              liveRegion: true,
+              child: Text(
+                l.punchNoLocationNotice,
+                key: const Key('punchNoLocationNotice'),
+                style: TextStyle(color: scheme.tertiary),
+              ),
+            ),
+          ),
         if (_message != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -456,33 +535,31 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
           style: Theme.of(context).textTheme.bodySmall
               ?.copyWith(color: scheme.onSurfaceVariant),
         ),
-        if (receipt != null) ...[
-          const SizedBox(height: 20),
+        const SizedBox(height: 20),
+        Text(l.receiptsLast48h, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        if (_receipts.isEmpty)
+          Text(
+            l.receiptsLast48hEmpty,
+            key: const Key('receiptsEmpty'),
+            style: TextStyle(color: scheme.onSurfaceVariant),
+          ),
+        for (final punch in _receipts)
           Card(
-            margin: EdgeInsets.zero,
+            margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
+              key: Key('receiptTile-${punch['NSR']}'),
               leading: const Icon(Icons.receipt_long_outlined),
-              title: Text(l.receipt),
-              subtitle: Text(
-                '${punchLabel(l, receipt['Type']?.toString() ?? '')} · ${l.nsrLabel(receipt['NSR'].toString())}\n'
-                '${_shortHash(receipt['Hash'])}…',
-              ),
-              isThreeLine: true,
+              title: Text(punchLabel(l, punch['Type']?.toString() ?? '')),
+              subtitle: Text(_whenText(context, punch['OccurredAt'])),
+              trailing: Text(l.nsrLabel(punch['NSR'].toString())),
+              onTap:
+                  widget.api.signedIn &&
+                      (punch['TimePunchUUID']?.toString() ?? '').isNotEmpty
+                  ? () => _openReceipt(punch['TimePunchUUID'].toString())
+                  : null,
             ),
           ),
-          if (widget.api.signedIn &&
-              (receipt['TimePunchUUID']?.toString() ?? '').isNotEmpty) ...[
-            const SizedBox(height: 8),
-            ReceiptActions(
-              key: ValueKey('receipt-${receipt['TimePunchUUID']}'),
-              load: () async => PunchReceipt.fromJson(
-                await widget.api.receipt(receipt['TimePunchUUID'].toString()),
-              ),
-              email: () =>
-                  widget.api.emailReceipt(receipt['TimePunchUUID'].toString()),
-            ),
-          ],
-        ],
         const SizedBox(height: 24),
         Text(l.recentPunches, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
@@ -523,10 +600,16 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     );
   }
 
-  String _shortHash(Object? hash) {
-    final text = hash?.toString() ?? '';
-    return text.length > 16 ? text.substring(0, 16) : text;
-  }
+  Future<void> _openReceipt(String punchUUID) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (_) => ReceiptSheet(
+      load: () async =>
+          PunchReceipt.fromJson(await widget.api.receipt(punchUUID)),
+      email: () => widget.api.emailReceipt(punchUUID),
+    ),
+  );
 
   IconData _icon(String type) => switch (type) {
     'clock_in' => Icons.login,

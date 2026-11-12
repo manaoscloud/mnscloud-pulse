@@ -9,12 +9,13 @@ import '../notifications/notifications_view.dart' show pushLocale;
 import '../pwa/pwa.dart';
 import 'device_permissions.dart';
 
-/// Pulse opens only with every permission it needs (location, the camera when the policy asks
-/// for a photo, notifications where the platform has them) and checks them again when the app
+/// Pulse opens only with the permissions it needs (the camera when the policy asks for a photo,
+/// notifications where the platform has them; location is asked but never required) and checks them again when the app
 /// comes back to the foreground and before every mark. One tap asks all that is missing; the
 /// browser or the system keeps the answer, so the employee is not asked at every punch.
 ///
 /// The server still decides what a mark is worth: a missing location or photo is flagged for HR.
+/// A mark is never refused for lack of location (Portaria MTP 671, art. 74).
 class PermissionGate extends StatefulWidget {
   const PermissionGate({
     super.key,
@@ -172,8 +173,7 @@ class PermissionGateState extends State<PermissionGate> {
         false;
     final unavailable =
         status != null &&
-        (status.location == PermissionState.unavailable ||
-            (needsCamera && status.camera == PermissionState.unavailable));
+        (needsCamera && status.camera == PermissionState.unavailable);
     return Scaffold(
       key: const Key('permissionGate'),
       appBar: AppBar(

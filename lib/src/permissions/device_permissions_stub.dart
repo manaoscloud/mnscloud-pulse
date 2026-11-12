@@ -6,7 +6,7 @@ const _none = DevicePermissionsStatus(
   notifications: PermissionState.unsupported,
 );
 
-/// Platforms without location cannot record a mark (Pulse requires the position).
+/// Platforms without location record the mark without it (flagged for HR).
 Future<DevicePermissionsStatus> checkPermissions() async => _none;
 
 Future<DevicePermissionsStatus> requestPermissions({
