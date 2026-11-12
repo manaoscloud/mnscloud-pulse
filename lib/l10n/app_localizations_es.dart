@@ -198,6 +198,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get receipt => 'Último comprobante';
 
   @override
+  String get punchNoLocationNotice =>
+      'Registro guardado sin ubicación; RR. HH. lo verá señalado.';
+
+  @override
+  String get receiptsLast48h => 'Comprobantes de las últimas 48 horas';
+
+  @override
+  String get receiptsLast48hEmpty =>
+      'Sin comprobantes en las últimas 48 horas.';
+
+  @override
+  String get receiptFieldEmployer => 'Empleador';
+
+  @override
+  String get receiptFieldEmployee => 'Trabajador';
+
+  @override
+  String get receiptFieldWhen => 'Fecha y hora';
+
+  @override
+  String get receiptFieldCollector => 'Colector';
+
+  @override
+  String get receiptFieldHash => 'Código de verificación (SHA-256)';
+
+  @override
   String nsrLabel(String nsr) {
     return 'NSR $nsr';
   }
@@ -545,7 +571,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get punchPhotoOffline =>
-      'Sin conexión: el registro se guardó; la foto solo se envía con conexión.';
+      'Sin conexión: el registro se guardó y la foto se enviará cuando vuelva la conexión.';
 
   @override
   String get punchPhotoSaved => 'Registro guardado con foto.';
@@ -900,10 +926,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get permissionsLost =>
       'Se desactivó un permiso de Pulse. Vuelve a permitirlo para fichar.';
-
-  @override
-  String get locationRequired =>
-      'No se pudo obtener tu ubicación. Activa el GPS e inténtalo de nuevo; el fichaje no se registró.';
 
   @override
   String get punchPhotoRequired =>
@@ -1319,6 +1341,32 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   String get receipt => 'Último comprobante';
 
   @override
+  String get punchNoLocationNotice =>
+      'Registro guardado sin ubicación; RR. HH. lo verá señalado.';
+
+  @override
+  String get receiptsLast48h => 'Comprobantes de las últimas 48 horas';
+
+  @override
+  String get receiptsLast48hEmpty =>
+      'Sin comprobantes en las últimas 48 horas.';
+
+  @override
+  String get receiptFieldEmployer => 'Empleador';
+
+  @override
+  String get receiptFieldEmployee => 'Trabajador';
+
+  @override
+  String get receiptFieldWhen => 'Fecha y hora';
+
+  @override
+  String get receiptFieldCollector => 'Colector';
+
+  @override
+  String get receiptFieldHash => 'Código de verificación (SHA-256)';
+
+  @override
   String nsrLabel(String nsr) {
     return 'NSR $nsr';
   }
@@ -1666,7 +1714,7 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get punchPhotoOffline =>
-      'Sin conexión: el registro se guardó; la foto solo se envía con conexión.';
+      'Sin conexión: el registro se guardó y la foto se enviará cuando vuelva la conexión.';
 
   @override
   String get punchPhotoSaved => 'Registro guardado con foto.';
@@ -2021,10 +2069,6 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   @override
   String get permissionsLost =>
       'Se desactivó un permiso de Pulse. Vuelve a permitirlo para fichar.';
-
-  @override
-  String get locationRequired =>
-      'No se pudo obtener tu ubicación. Activa el GPS e inténtalo de nuevo; el fichaje no se registró.';
 
   @override
   String get punchPhotoRequired =>

@@ -197,6 +197,31 @@ class AppLocalizationsPt extends AppLocalizations {
   String get receipt => 'Último comprovante';
 
   @override
+  String get punchNoLocationNotice =>
+      'Marcação registrada sem localização; o RH a verá sinalizada.';
+
+  @override
+  String get receiptsLast48h => 'Comprovantes das últimas 48 horas';
+
+  @override
+  String get receiptsLast48hEmpty => 'Nenhum comprovante nas últimas 48 horas.';
+
+  @override
+  String get receiptFieldEmployer => 'Empregador';
+
+  @override
+  String get receiptFieldEmployee => 'Trabalhador';
+
+  @override
+  String get receiptFieldWhen => 'Data e hora';
+
+  @override
+  String get receiptFieldCollector => 'Coletor';
+
+  @override
+  String get receiptFieldHash => 'Código de verificação (SHA-256)';
+
+  @override
   String nsrLabel(String nsr) {
     return 'NSR $nsr';
   }
@@ -546,7 +571,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get punchPhotoOffline =>
-      'Sem conexão: a marcação foi guardada; a foto só é enviada com conexão.';
+      'Sem conexão: a marcação foi guardada e a foto será enviada quando a conexão voltar.';
 
   @override
   String get punchPhotoSaved => 'Ponto registrado com foto.';
@@ -902,10 +927,6 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get permissionsLost =>
       'Uma permissão do Pulse foi desligada. Libere de novo para marcar o ponto.';
-
-  @override
-  String get locationRequired =>
-      'Não foi possível obter sua localização. Ative o GPS e tente de novo; a marcação não foi registrada.';
 
   @override
   String get punchPhotoRequired =>
@@ -1320,6 +1341,31 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get receipt => 'Último comprovante';
 
   @override
+  String get punchNoLocationNotice =>
+      'Marcação registrada sem localização; o RH a verá sinalizada.';
+
+  @override
+  String get receiptsLast48h => 'Comprovantes das últimas 48 horas';
+
+  @override
+  String get receiptsLast48hEmpty => 'Nenhum comprovante nas últimas 48 horas.';
+
+  @override
+  String get receiptFieldEmployer => 'Empregador';
+
+  @override
+  String get receiptFieldEmployee => 'Trabalhador';
+
+  @override
+  String get receiptFieldWhen => 'Data e hora';
+
+  @override
+  String get receiptFieldCollector => 'Coletor';
+
+  @override
+  String get receiptFieldHash => 'Código de verificação (SHA-256)';
+
+  @override
   String nsrLabel(String nsr) {
     return 'NSR $nsr';
   }
@@ -1669,7 +1715,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get punchPhotoOffline =>
-      'Sem conexão: a marcação foi guardada; a foto só é enviada com conexão.';
+      'Sem conexão: a marcação foi guardada e a foto será enviada quando a conexão voltar.';
 
   @override
   String get punchPhotoSaved => 'Ponto registrado com foto.';
@@ -2025,10 +2071,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get permissionsLost =>
       'Uma permissão do Pulse foi desligada. Libere de novo para marcar o ponto.';
-
-  @override
-  String get locationRequired =>
-      'Não foi possível obter sua localização. Ative o GPS e tente de novo; a marcação não foi registrada.';
 
   @override
   String get punchPhotoRequired =>

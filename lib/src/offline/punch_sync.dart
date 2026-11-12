@@ -6,9 +6,17 @@ import 'device_grant.dart';
 
 /// Outcome of one pass over the queue of an account.
 class FlushResult {
-  const FlushResult({this.sent = 0, this.offline = false, this.sessionEnded});
+  const FlushResult({
+    this.sent = 0,
+    this.photosSent = 0,
+    this.offline = false,
+    this.sessionEnded,
+  });
 
   final int sent;
+
+  /// Photos of recorded marks accepted by the API in this pass.
+  final int photosSent;
 
   /// No connection (or rate limited): the remaining marks wait for the next pass.
   final bool offline;
@@ -45,6 +53,7 @@ class PunchSync extends ChangeNotifier {
   Future<FlushResult> _flush(String accountUUID) async {
     final queue = PunchQueue(accountUUID);
     var sent = 0;
+    var photosSent = 0;
     var offline = false;
     String? sessionEnded;
     var useSession = api.signedIn && api.accountUUID == accountUUID;
@@ -55,10 +64,15 @@ class PunchSync extends ChangeNotifier {
       while (index < pending.length && (useSession || useDevice)) {
         final punch = pending[index];
         try {
-          if (useSession) {
-            await api.createPunch(punch.body(offline: true, source: source));
+          final item = useSession
+              ? await api.createPunch(punch.body(offline: true, source: source))
+              : await grants.send(accountUUID, punch, source);
+          final punchUUID = item['TimePunchUUID']?.toString();
+          if (punchUUID != null && punchUUID.isNotEmpty) {
+            await queue.bindPhoto(punch.idempotencyKey, punchUUID);
           } else {
-            await grants.send(accountUUID, punch, source);
+            // Recorded but not linkable: the photo has no destination.
+            await queue.removePhoto(punch.idempotencyKey);
           }
           await queue.remove(punch.idempotencyKey);
           sent++;
@@ -80,6 +94,7 @@ class PunchSync extends ChangeNotifier {
           } else if (failure.code == 'PULSE_INVALID_PUNCH') {
             // The API refused the mark itself; it can never be recorded as it is.
             await queue.remove(punch.idempotencyKey);
+            await queue.removePhoto(punch.idempotencyKey);
             index++;
           } else {
             // Access or module refused: the marks stay until access is back.
@@ -87,13 +102,89 @@ class PunchSync extends ChangeNotifier {
           }
         }
       }
+      if (!offline) {
+        final photos = await _uploadPhotos(
+          accountUUID,
+          useSession,
+          await grants.hasKey(accountUUID),
+        );
+        photosSent = photos.sent;
+        offline = photos.offline;
+        if (photos.sessionEnded != null) sessionEnded ??= photos.sessionEnded;
+      }
     } finally {
-      if (sent > 0) notifyListeners();
+      if (sent > 0 || photosSent > 0) notifyListeners();
     }
     return FlushResult(
       sent: sent,
+      photosSent: photosSent,
       offline: offline,
       sessionEnded: sessionEnded,
     );
+  }
+
+  /// Uploads the kept photos of recorded marks, oldest first, with the session or (without one)
+  /// signed by this device (an expired grant is enough). Accepted, already stored or definitively
+  /// refused photos are deleted; anything temporary keeps them for the next pass; photos recorded
+  /// more than 24 h ago are dropped.
+  Future<({int sent, bool offline, String? sessionEnded})> _uploadPhotos(
+    String accountUUID,
+    bool useSession,
+    bool canUseDevice,
+  ) async {
+    final queue = PunchQueue(accountUUID);
+    await queue.dropOldPhotos();
+    var sent = 0;
+    String? sessionEnded;
+    final photos = await queue.readyPhotos();
+    var index = 0;
+    while (index < photos.length) {
+      final photo = photos[index];
+      if (!useSession && !canUseDevice) break;
+      try {
+        if (useSession) {
+          await api.uploadPunchPhoto(
+            photo.punchUUID,
+            photo.photoUUID,
+            photo.bytes,
+          );
+        } else {
+          await grants.sendPhoto(
+            accountUUID,
+            photo.punchUUID,
+            photo.photoUUID,
+            photo.bytes,
+          );
+        }
+        await queue.removePhoto(photo.punchKey);
+        sent++;
+        index++;
+      } on PulseFailure catch (failure) {
+        if (photoAlreadyStored(failure)) {
+          await queue.removePhoto(photo.punchKey);
+          sent++;
+          index++;
+        } else if (useSession && failure.sessionEnded) {
+          // The same photo goes again signed by the device, when there is a key.
+          sessionEnded = failure.code;
+          useSession = false;
+        } else if (!useSession &&
+            failure.deviceRefused &&
+            failure.code != 'PULSE_DEVICE_CLOCK_SKEW') {
+          // Device key refused: keep the photos for a session; no more device tries this pass.
+          break;
+        } else if (photoUploadDefinitive(failure)) {
+          await queue.removePhoto(photo.punchKey);
+          index++;
+        } else {
+          return (
+            sent: sent,
+            offline: failure.code == 'networkError',
+            sessionEnded: sessionEnded,
+          );
+        }
+      }
+    }
+    return (sent: sent, offline: false, sessionEnded: sessionEnded);
   }
 }

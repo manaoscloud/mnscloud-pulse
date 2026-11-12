@@ -225,3 +225,103 @@ class _ReceiptActionsState extends State<ReceiptActions> {
     );
   }
 }
+
+/// Full receipt of one mark (art. 79 fields) with print and e-mail, opened from the personal
+/// list of the last 48 hours.
+class ReceiptSheet extends StatelessWidget {
+  const ReceiptSheet({super.key, required this.load, required this.email});
+
+  final Future<PunchReceipt> Function() load;
+  final Future<String?> Function() email;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    return SafeArea(
+      child: FutureBuilder<PunchReceipt>(
+        future: load(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                l.receiptFailed,
+                key: const Key('receiptSheetError'),
+                style: TextStyle(color: scheme.error),
+              ),
+            );
+          }
+          final r = snapshot.data;
+          if (r == null) {
+            return const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          Widget row(String label, String? value) =>
+              value == null || value.isEmpty
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                      SelectableText(value),
+                    ],
+                  ),
+                );
+          return SingleChildScrollView(
+            key: const Key('receiptSheet'),
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(r.title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                row(
+                  l.receiptFieldEmployer,
+                  [
+                    r.employerName,
+                    if ((r.employerDocument ?? '').isNotEmpty)
+                      r.employerDocument!,
+                  ].join(' · '),
+                ),
+                row(
+                  l.receiptFieldEmployee,
+                  [
+                    r.employeeName,
+                    if ((r.employeeDocument ?? '').isNotEmpty)
+                      r.employeeDocument!,
+                  ].join(' · '),
+                ),
+                if (r.typeLabel.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      r.typeLabel,
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                row(l.receiptFieldWhen, r.occurredAtText),
+                row('NSR', r.nsr),
+                row(l.receiptFieldCollector, r.collector),
+                row(l.receiptFieldHash, r.hash),
+                const SizedBox(height: 12),
+                ReceiptActions(
+                  load: () async => r,
+                  email: email,
+                  emailVisible: r.emailAllowed,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

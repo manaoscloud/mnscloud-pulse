@@ -10,6 +10,7 @@ import '../core/ids.dart';
 import '../core/location.dart';
 import '../core/punch_camera.dart';
 import '../core/pulse_api.dart';
+import '../core/punch_queue.dart';
 import '../core/server_clock.dart';
 import '../punch/punch_labels.dart';
 import '../receipt/receipt.dart';
@@ -64,6 +65,7 @@ class _KioskShellState extends State<KioskShell> {
   String? _type;
   Map<String, dynamic>? _receipt;
   bool _photoFailed = false;
+  bool _noLocation = false;
   bool _busy = false;
   bool _revoked = false;
   bool _offline = false;
@@ -99,6 +101,9 @@ class _KioskShellState extends State<KioskShell> {
     _flushing = true;
     try {
       final pending = await widget.client.flushQueue();
+      try {
+        await widget.client.uploadKeptPhotos();
+      } catch (_) {}
       if (mounted) setState(() => _pending = pending);
     } catch (_) {
       final pending = (await widget.client.queued()).length;
@@ -160,6 +165,7 @@ class _KioskShellState extends State<KioskShell> {
       _type = null;
       _receipt = null;
       _photoFailed = false;
+      _noLocation = false;
       _busy = false;
       _offlineMark = false;
       _codeController.clear();
@@ -262,19 +268,31 @@ class _KioskShellState extends State<KioskShell> {
     _touch();
   }
 
-  Future<void> _keepOffline(String type, PunchLocation location) async {
+  Future<void> _keepOffline(
+    String type,
+    PunchLocation? location,
+    Uint8List? photo,
+  ) async {
+    final key = uuidV4();
     final kept = await widget.client.enqueue(
       KioskQueuedMark(
-        idempotencyKey: uuidV4(),
+        idempotencyKey: key,
         loginCode: _codeController.text.trim(),
         pin: _pin,
         type: type,
         occurredAt: widget.client.clock.nowUtc().toIso8601String(),
-        latitude: location.latitude,
-        longitude: location.longitude,
-        accuracyMeters: location.accuracyMeters,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        accuracyMeters: location?.accuracyMeters,
       ),
     );
+    if (kept && photo != null) {
+      try {
+        await widget.client.keepPhoto(key, photo);
+      } catch (_) {
+        // The mark is kept; without the photo it goes flagged for HR.
+      }
+    }
     if (!mounted) return;
     if (!kept) {
       setState(() {
@@ -320,7 +338,7 @@ class _KioskShellState extends State<KioskShell> {
     });
     _idle?.cancel();
     Uint8List? photo;
-    if (_profile.photoRequired && !_offlineMark) {
+    if (_profile.photoRequired) {
       try {
         photo = await punchPhotoCapture(context);
       } catch (_) {
@@ -336,18 +354,17 @@ class _KioskShellState extends State<KioskShell> {
         return;
       }
     }
-    final location = await punchLocator();
-    if (location == null) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _message = l.locationRequired;
-      });
-      _touch();
-      return;
+    PunchLocation? location;
+    try {
+      location = await punchLocator();
+    } catch (_) {
+      location = null;
     }
+    // A mark is never refused for lack of location (Portaria MTP 671, art. 74): it is recorded
+    // without it and HR sees it flagged.
+    if (mounted) setState(() => _noLocation = location == null);
     if (_offlineMark) {
-      await _keepOffline(type, location);
+      await _keepOffline(type, location, photo);
       return;
     }
     try {
@@ -356,17 +373,30 @@ class _KioskShellState extends State<KioskShell> {
         pin: _pin,
         idempotencyKey: uuidV4(),
         type: type,
-        latitude: location.latitude,
-        longitude: location.longitude,
-        accuracyMeters: location.accuracyMeters,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        accuracyMeters: location?.accuracyMeters,
       );
       var photoFailed = false;
       final punchUUID = result.punch['TimePunchUUID']?.toString();
       if (photo != null && punchUUID != null && punchUUID.isNotEmpty) {
         try {
           await widget.client.uploadPhoto(punchUUID, uuidV4(), photo);
-        } catch (_) {
-          photoFailed = true;
+        } catch (error) {
+          // No connection or a server error: the photo stays on the device and goes later.
+          if (error is PulseFailure && photoUploadRetry(error)) {
+            try {
+              await widget.client.keepPhoto(
+                uuidV4(),
+                photo,
+                punchUUID: punchUUID,
+              );
+            } catch (_) {
+              photoFailed = true;
+            }
+          } else {
+            photoFailed = true;
+          }
         }
       }
       if (!mounted) return;
@@ -382,7 +412,7 @@ class _KioskShellState extends State<KioskShell> {
     } on PulseFailure catch (failure) {
       // The PIN was right a moment ago: a lost connection keeps the mark on this device.
       if (failure.code == 'networkError') {
-        await _keepOffline(type, location);
+        await _keepOffline(type, location, photo);
         return;
       }
       _fail(failure);
@@ -749,6 +779,16 @@ class _KioskShellState extends State<KioskShell> {
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (_noLocation)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              l.punchNoLocationNotice,
+              key: const Key('kioskNoLocationNotice'),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: theme.colorScheme.tertiary),
+            ),
+          ),
         const SizedBox(height: 16),
         Card(
           child: Padding(

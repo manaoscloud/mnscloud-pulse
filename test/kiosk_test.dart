@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:mnscloud_pulse/l10n/app_localizations.dart';
 import 'package:mnscloud_pulse/main.dart';
+import 'package:mnscloud_pulse/src/core/location.dart';
 import 'package:mnscloud_pulse/src/core/punch_camera.dart';
 import 'package:mnscloud_pulse/src/core/punch_queue.dart';
 import 'package:mnscloud_pulse/src/core/pulse_api.dart';
@@ -492,6 +493,8 @@ void main() {
       final api = KioskApi();
       final client = KioskClient(httpClient: api.client);
       await client.activate('K7QM2XWP', '24680');
+      punchPhotoCapture = (_) async => Uint8List.fromList(List.filled(16, 2));
+      addTearDown(() => punchPhotoCapture = capturePunchPhoto);
       api.down = true;
       await tester.pumpWidget(app(api.client));
       await settle(tester);
@@ -525,6 +528,14 @@ void main() {
       final kept = await client.queued();
       expect(kept.map((m) => m.type), ['clock_in', 'break_start']);
       expect(kept.first.latitude, -3.1);
+      // The photo is taken offline too and kept in the encrypted store until the mark is in.
+      final store = await PunchStore.open();
+      expect(store.accounts(), isEmpty);
+      expect(
+        store.readyPhotos(kioskPhotoOwner),
+        isEmpty,
+        reason: 'not bound to a recorded mark yet',
+      );
       // Connection back: the next delivery pass sends both; the API records one and refuses one.
       api.down = false;
       await tester.pump(const Duration(minutes: 1));
@@ -537,7 +548,57 @@ void main() {
       );
       expect(await client.queued(), isEmpty);
       expect(find.byKey(const Key('kioskPending')), findsNothing);
+      // Only the recorded mark's photo went (signed, to its punch); the refused one was dropped.
+      final photos = api.requests.where((r) => r.url.path.endsWith('/photo'));
+      expect(photos, hasLength(1));
+      expect(
+        photos.single.url.path,
+        contains('/kiosk/punches/off-${kept.first.idempotencyKey}/photo'),
+      );
+      expect(store.readyPhotos(kioskPhotoOwner), isEmpty);
       await tester.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets('without a position the time clock records the mark flagged', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final api = KioskApi();
+    await KioskClient(httpClient: api.client).activate('K7QM2XWP', '24680');
+    punchPhotoCapture = (_) async => Uint8List.fromList(List.filled(16, 1));
+    final previous = punchLocator;
+    punchLocator = () async => null;
+    addTearDown(() {
+      punchPhotoCapture = capturePunchPhoto;
+      punchLocator = previous;
+    });
+    await tester.pumpWidget(app(api.client));
+    await settle(tester);
+    await tester.enterText(
+      find.byKey(const Key('kioskLoginCode')),
+      'ABCD-EFGH',
+    );
+    await tester.tap(find.byKey(const Key('kioskCodeContinue')));
+    await settle(tester);
+    for (final d in ['4', '8', '2', '1']) {
+      await tester.tap(find.byKey(Key('kioskDigit$d')));
+      await tester.pump();
+    }
+    await tester.tap(find.byKey(const Key('kioskPinOk')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('kioskRecord')));
+    await settle(tester);
+    final sent = api.requests.singleWhere(
+      (r) => r.url.path.endsWith('/kiosk/punches'),
+    );
+    final body = jsonDecode(sent.body) as Map<String, dynamic>;
+    expect(body.containsKey('latitude'), isFalse);
+    expect(find.byKey(const Key('kioskSaved')), findsOneWidget);
+    expect(find.byKey(const Key('kioskNoLocationNotice')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
 }

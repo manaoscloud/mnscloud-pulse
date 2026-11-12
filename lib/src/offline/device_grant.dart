@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
@@ -89,6 +90,11 @@ class DeviceGrants {
 
   Future<void> _save(String accountUUID, DeviceGrantState state) =>
       _vault.write(_name(accountUUID), jsonEncode(state.toJson()));
+
+  /// True when this device holds a key for [accountUUID], even with an expired grant (the API
+  /// still takes photos of recorded marks from it).
+  Future<bool> hasKey(String accountUUID) async =>
+      await read(accountUUID) != null;
 
   /// True when queued marks of [accountUUID] can be sent without a session.
   Future<bool> available(String accountUUID) async =>
@@ -200,6 +206,38 @@ class DeviceGrants {
       ),
     );
     return api.createDevicePunch(body, {
+      'X-Device-Id': state.deviceUUID,
+      'X-Device-Timestamp': timestamp,
+      'X-Device-Counter': '$counter',
+      'X-Device-Signature': signature,
+    });
+  });
+
+  /// Sends the photo of a recorded mark signed by this device (no session needed). The signed
+  /// body hash is the SHA-256 of the raw JPEG, like the time clock does for its photo.
+  Future<void> sendPhoto(
+    String accountUUID,
+    String punchUUID,
+    String photoUUID,
+    Uint8List bytes,
+  ) => withDeviceLock(() async {
+    final state = await read(accountUUID);
+    // An expired grant still signs a photo: the API accepts it for a mark already recorded.
+    if (state == null) throw const PulseFailure('PULSE_DEVICE_INVALID');
+    // This route signs the counter but does not advance it: the last used value is sent and
+    // nothing is consumed (1 when the device never signed a mark).
+    final counter = state.counter < 1 ? 1 : state.counter;
+    final timestamp = _timestamp();
+    final signature = P256Key.fromPrivateBase64(state.privateKey).sign(
+      pulseDeviceSignatureMessage(
+        'POST',
+        '/pulse/device/punches/$punchUUID/photo?photoId=$photoUUID',
+        timestamp,
+        '$counter',
+        sha256.convert(bytes).toString(),
+      ),
+    );
+    await api.uploadDevicePhoto(punchUUID, photoUUID, bytes, {
       'X-Device-Id': state.deviceUUID,
       'X-Device-Timestamp': timestamp,
       'X-Device-Counter': '$counter',

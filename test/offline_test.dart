@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -327,6 +328,222 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(saved.last, isNull);
   });
+
+  group('photos kept for later', () {
+    final bytes = Uint8List.fromList(List.generate(64, (i) => i));
+
+    test(
+      'the store keeps a photo per mark and releases it once bound',
+      () async {
+        final store = await PunchStore.open();
+        store.addPhoto('account-1', 'key-1', 'photo-1', bytes);
+        store.addPhoto('account-1', 'key-1', 'photo-other', bytes);
+        store.addPhoto(kioskPhotoOwner, 'key-k', 'photo-k', bytes);
+        expect(store.readyPhotos('account-1'), isEmpty);
+        expect(store.accounts(), ['account-1']);
+        store.bindPhoto('key-1', 'punch-1');
+        final ready = store.readyPhotos('account-1').single;
+        expect(ready.punchUUID, 'punch-1');
+        expect(ready.photoUUID, 'photo-1');
+        expect(ready.bytes, bytes);
+        store.removePhoto('key-1');
+        expect(store.hasPhoto('key-1'), isFalse);
+        expect(store.hasPhoto('key-k'), isTrue);
+      },
+    );
+
+    test('the 24 hours count from the bound mark; unbound photos stay while queued', () async {
+      final store = await PunchStore.open();
+      final old = DateTime.now().subtract(const Duration(hours: 25));
+      store.addPhoto(
+        'account-1',
+        'old',
+        'p1',
+        bytes,
+        punchUUID: 'u1',
+        createdAt: old,
+      );
+      store.addPhoto('account-1', 'new', 'p2', bytes, punchUUID: 'u2');
+      // Created long ago but never bound: not dropped by age while its mark still waits.
+      final waiting = mark('clock_in', 5);
+      store.add('account-1', waiting);
+      store.addPhoto(
+        'account-1',
+        waiting.idempotencyKey,
+        'p3',
+        bytes,
+        createdAt: old,
+      );
+      store.addPhoto('account-1', 'gone', 'p4', bytes);
+      store.dropOldPhotos();
+      store.dropOrphanPhotos('account-1');
+      expect(store.hasPhoto('old'), isFalse);
+      expect(store.hasPhoto('new'), isTrue);
+      expect(store.hasPhoto(waiting.idempotencyKey), isTrue);
+      expect(store.hasPhoto('gone'), isFalse);
+    });
+
+    test('the upload decision deletes only 400/404/413', () {
+      bool retry(String code, [int? status]) =>
+          photoUploadRetry(PulseFailure(code, status: status));
+      for (final keep in [
+        ('networkError', null),
+        ('requestError', 500),
+        ('requestError', 503),
+        ('requestError', 408),
+        ('PULSE_RATE_LIMITED', 429),
+        ('PULSE_ACCESS_DENIED', 403),
+        ('HR_STORAGE_NOT_CONFIGURED', 409),
+        ('HR_STORAGE_UNAVAILABLE', 503),
+        ('PULSE_MODULE_UNAVAILABLE', 403),
+        ('PULSE_DEVICE_CLOCK_SKEW', 401),
+        ('PULSE_DEVICE_INVALID', 401),
+      ]) {
+        expect(retry(keep.$1, keep.$2), isTrue, reason: keep.$1);
+      }
+      for (final drop in [
+        ('PULSE_PUNCH_NOT_FOUND', 404),
+        ('requestError', 400),
+        ('requestError', 413),
+      ]) {
+        expect(retry(drop.$1, drop.$2), isFalse, reason: drop.$1);
+      }
+      expect(
+        photoAlreadyStored(const PulseFailure('PULSE_PUNCH_PHOTO_EXISTS')),
+        isTrue,
+      );
+    });
+
+    Future<DeviceGrants> grantsFor(
+      PulseApi api,
+      int counter, {
+      int expiredDays = 3,
+    }) async {
+      await vault.write(
+        'pulse.device.account-1',
+        jsonEncode(
+          DeviceGrantState(
+            deviceUUID: 'device-1',
+            privateKey: _photoKey.privateBase64,
+            counter: counter,
+            expiresAt: DateTime.now().toUtc().add(Duration(days: expiredDays)),
+          ).toJson(),
+        ),
+      );
+      return DeviceGrants(api: api, clock: ServerClock(), vault: vault);
+    }
+
+    test(
+      'without a session the photo goes to the device route, signed',
+      () async {
+        final requests = <http.Request>[];
+        final client = MockClient((request) async {
+          requests.add(request);
+          if (request.url.path.endsWith('/photo')) return json({'data': {}});
+          return json({
+            'data': {
+              'item': {'TimePunchUUID': 'punch-9', 'Duplicate': 0},
+            },
+          });
+        });
+        final api = PulseApi(
+          client: client,
+          baseUrl: 'https://pulse.test/api/v1',
+        );
+        final grants = await grantsFor(api, 4);
+        final sync = PunchSync(api: api, grants: grants, source: 'mobile');
+        final queue = PunchQueue('account-1');
+        final punch = mark('clock_in', 5);
+        await queue.add(punch);
+        await queue.addPhoto(punch.idempotencyKey, 'photo-uuid', bytes);
+        final result = await sync.flush('account-1');
+        expect(result.sent, 1);
+        expect(result.photosSent, 1);
+        final photo = requests.last;
+        expect(photo.url.path, '/api/v1/pulse/device/punches/punch-9/photo');
+        expect(photo.headers['content-type'], 'image/jpeg');
+        expect(photo.url.queryParameters, {'photoId': 'photo-uuid'});
+        expect(photo.headers.containsKey('X-Photo-Id'), isFalse);
+        expect(photo.headers['X-Device-Id'], 'device-1');
+        expect(photo.headers['authorization'], isNull);
+        expect(photo.bodyBytes, bytes);
+        // The punch used counter 5; the photo route signs it again without consuming one.
+        expect(photo.headers['X-Device-Counter'], '5');
+        final message = [
+          'MNSCLOUD-PULSE-DEVICE-V1',
+          'POST',
+          '/pulse/device/punches/punch-9/photo?photoId=photo-uuid',
+          photo.headers['X-Device-Timestamp']!,
+          '5',
+          sha256.convert(bytes).toString(),
+        ].join('\n');
+        expect(
+          _photoKey.verify(message, photo.headers['X-Device-Signature']!),
+          isTrue,
+        );
+        expect((await grants.read('account-1'))!.counter, 5);
+        expect(await queue.readyPhotos(), isEmpty);
+      },
+    );
+
+    test(
+      'with a session the photo uses the session route; retry and drop rules',
+      () async {
+        var status = 200;
+        var code = 'requestError';
+        var photoCalls = 0;
+        final client = MockClient((request) async {
+          if (request.url.path.endsWith('/auth/signin')) return json(session());
+          if (request.url.path.endsWith('/photo')) {
+            photoCalls++;
+            expect(request.url.path, '/api/v1/pulse/punches/punch-9/photo');
+            return status == 200
+                ? json({'data': {}})
+                : json({'code': code}, status);
+          }
+          return json({
+            'data': {
+              'item': {'TimePunchUUID': 'punch-9', 'Duplicate': 0},
+            },
+          });
+        });
+        final api = PulseApi(
+          client: client,
+          baseUrl: 'https://pulse.test/api/v1',
+        );
+        await api.signIn('ABCD-EFGH', 'secret');
+        final grants = DeviceGrants(
+          api: api,
+          clock: ServerClock(),
+          vault: vault,
+        );
+        final sync = PunchSync(api: api, grants: grants, source: 'mobile');
+        final queue = PunchQueue('account-1');
+        final punch = mark('clock_in', 5);
+        await queue.add(punch);
+        await queue.addPhoto(punch.idempotencyKey, 'photo-uuid', bytes);
+        // Server error: the photo stays and the pass reports no connection.
+        status = 503;
+        var result = await sync.flush('account-1');
+        expect(result.sent, 1);
+        expect(result.photosSent, 0);
+        expect(await queue.readyPhotos(), hasLength(1));
+        // Already stored (409): same as sent.
+        status = 409;
+        code = 'PULSE_PUNCH_PHOTO_EXISTS';
+        result = await sync.flush('account-1');
+        expect(result.photosSent, 1);
+        expect(await queue.readyPhotos(), isEmpty);
+        // A definitive refusal drops it (404 mark not found).
+        await queue.addPhoto('other', 'photo-2', bytes, punchUUID: 'punch-9');
+        status = 404;
+        code = 'PULSE_PUNCH_NOT_FOUND';
+        await sync.flush('account-1');
+        expect(await queue.readyPhotos(), isEmpty);
+        expect(photoCalls, 3);
+      },
+    );
+  });
 }
 
 class _Store implements RefreshTokenStore {
@@ -339,3 +556,5 @@ class _Store implements RefreshTokenStore {
   @override
   Future<void> write(String? token) async => saved.add(token);
 }
+
+final _photoKey = P256Key.generate();

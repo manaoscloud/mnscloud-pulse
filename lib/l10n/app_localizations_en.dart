@@ -196,6 +196,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receipt => 'Last receipt';
 
   @override
+  String get punchNoLocationNotice =>
+      'Punch recorded without location; HR will see it flagged.';
+
+  @override
+  String get receiptsLast48h => 'Receipts of the last 48 hours';
+
+  @override
+  String get receiptsLast48hEmpty => 'No receipts in the last 48 hours.';
+
+  @override
+  String get receiptFieldEmployer => 'Employer';
+
+  @override
+  String get receiptFieldEmployee => 'Employee';
+
+  @override
+  String get receiptFieldWhen => 'Date and time';
+
+  @override
+  String get receiptFieldCollector => 'Collector';
+
+  @override
+  String get receiptFieldHash => 'Verification code (SHA-256)';
+
+  @override
   String nsrLabel(String nsr) {
     return 'NSR $nsr';
   }
@@ -545,7 +570,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get punchPhotoOffline =>
-      'No connection: the punch was kept; the photo is only sent with connection.';
+      'No connection: the punch was kept and the photo will be sent when the connection returns.';
 
   @override
   String get punchPhotoSaved => 'Punch saved with photo.';
@@ -896,10 +921,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get permissionsLost =>
       'A permission of Pulse was turned off. Allow it again to punch.';
-
-  @override
-  String get locationRequired =>
-      'Your location could not be read. Turn on the GPS and try again; the punch was not recorded.';
 
   @override
   String get punchPhotoRequired =>
@@ -1310,6 +1331,31 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   String get receipt => 'Last receipt';
 
   @override
+  String get punchNoLocationNotice =>
+      'Punch recorded without location; HR will see it flagged.';
+
+  @override
+  String get receiptsLast48h => 'Receipts of the last 48 hours';
+
+  @override
+  String get receiptsLast48hEmpty => 'No receipts in the last 48 hours.';
+
+  @override
+  String get receiptFieldEmployer => 'Employer';
+
+  @override
+  String get receiptFieldEmployee => 'Employee';
+
+  @override
+  String get receiptFieldWhen => 'Date and time';
+
+  @override
+  String get receiptFieldCollector => 'Collector';
+
+  @override
+  String get receiptFieldHash => 'Verification code (SHA-256)';
+
+  @override
   String nsrLabel(String nsr) {
     return 'NSR $nsr';
   }
@@ -1659,7 +1705,7 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get punchPhotoOffline =>
-      'No connection: the punch was kept; the photo is only sent with connection.';
+      'No connection: the punch was kept and the photo will be sent when the connection returns.';
 
   @override
   String get punchPhotoSaved => 'Punch saved with photo.';
@@ -2010,10 +2056,6 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   @override
   String get permissionsLost =>
       'A permission of Pulse was turned off. Allow it again to punch.';
-
-  @override
-  String get locationRequired =>
-      'Your location could not be read. Turn on the GPS and try again; the punch was not recorded.';
 
   @override
   String get punchPhotoRequired =>

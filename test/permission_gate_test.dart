@@ -162,29 +162,64 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets(
-    'a permission turned off blocks the next punch and opens the gate',
-    (tester) async {
-      final punches = <Map<String, dynamic>>[];
-      final fake = FakePermissions(GrantedPermissions.status);
-      devicePermissions = fake;
-      await tester.pumpWidget(app(client(punches)));
-      await settle(tester);
-      fake.current = const DevicePermissionsStatus(
-        location: PermissionState.denied,
-        camera: PermissionState.granted,
-        notifications: PermissionState.granted,
-      );
-      await tester.tap(find.byKey(const Key('nextPunch')));
-      await settle(tester);
-      expect(find.byKey(const Key('confirmPunchDialog')), findsNothing);
-      expect(find.byKey(const Key('permissionGate')), findsOneWidget);
-      expect(find.byKey(const Key('permissionsLost')), findsOneWidget);
-      expect(find.textContaining('A permission is blocked'), findsOneWidget);
-      expect(punches, isEmpty);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
+  testWidgets('a camera turned off blocks the next punch and opens the gate', (
+    tester,
+  ) async {
+    final punches = <Map<String, dynamic>>[];
+    final fake = FakePermissions(GrantedPermissions.status);
+    devicePermissions = fake;
+    await tester.pumpWidget(app(client(punches, mode: 'required')));
+    await settle(tester);
+    fake.current = const DevicePermissionsStatus(
+      location: PermissionState.granted,
+      camera: PermissionState.denied,
+      notifications: PermissionState.granted,
+    );
+    await tester.tap(find.byKey(const Key('nextPunch')));
+    await settle(tester);
+    expect(find.byKey(const Key('confirmPunchDialog')), findsNothing);
+    expect(find.byKey(const Key('permissionGate')), findsOneWidget);
+    expect(find.byKey(const Key('permissionsLost')), findsOneWidget);
+    expect(punches, isEmpty);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('location turned off never closes the app or blocks a punch', (
+    tester,
+  ) async {
+    final punches = <Map<String, dynamic>>[];
+    final fake = FakePermissions(GrantedPermissions.status);
+    devicePermissions = fake;
+    await tester.pumpWidget(app(client(punches)));
+    await settle(tester);
+    fake.current = const DevicePermissionsStatus(
+      location: PermissionState.denied,
+      camera: PermissionState.granted,
+      notifications: PermissionState.granted,
+    );
+    await tester.tap(find.byKey(const Key('nextPunch')));
+    await settle(tester);
+    expect(find.byKey(const Key('permissionGate')), findsNothing);
+    expect(find.byKey(const Key('confirmPunchDialog')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  test('readiness ignores location but keeps the camera and notifications', () {
+    const noLocation = DevicePermissionsStatus(
+      location: PermissionState.denied,
+      camera: PermissionState.granted,
+      notifications: PermissionState.granted,
+    );
+    expect(noLocation.ready(needsCamera: true), isTrue);
+    expect(noLocation.blockedInSettings(needsCamera: true), isFalse);
+    const noCamera = DevicePermissionsStatus(
+      location: PermissionState.granted,
+      camera: PermissionState.denied,
+      notifications: PermissionState.granted,
+    );
+    expect(noCamera.ready(needsCamera: true), isFalse);
+    expect(noCamera.ready(needsCamera: false), isTrue);
+  });
 
   testWidgets(
     'the requests title keeps its width beside the new request button',

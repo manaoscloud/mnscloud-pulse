@@ -22,8 +22,10 @@ enum PermissionState {
   unsupported,
 }
 
-/// What Pulse needs before it opens and before every mark: location always, the camera when
-/// the employee policy asks for a photo, notifications where the platform has them.
+/// What Pulse needs before it opens and before every mark: the camera when the employee policy
+/// asks for a photo, notifications where the platform has them. Location is always asked but never
+/// required: a mark is never restricted (Portaria MTP 671, art. 74), one without location is
+/// recorded and flagged for HR.
 class DevicePermissionsStatus {
   const DevicePermissionsStatus({
     required this.location,
@@ -40,6 +42,7 @@ class DevicePermissionsStatus {
       camera == PermissionState.granted ||
       camera == PermissionState.unsupported;
 
+  /// Informational only: it never keeps the app closed.
   bool get locationReady => location == PermissionState.granted;
 
   bool get notificationsReady =>
@@ -47,16 +50,13 @@ class DevicePermissionsStatus {
       notifications == PermissionState.unsupported;
 
   bool ready({required bool needsCamera, bool needsNotifications = true}) =>
-      locationReady &&
-      cameraReady(needsCamera) &&
-      (!needsNotifications || notificationsReady);
+      cameraReady(needsCamera) && (!needsNotifications || notificationsReady);
 
   /// Something only the settings can fix (the browser or the system does not ask again).
   bool blockedInSettings({
     required bool needsCamera,
     bool needsNotifications = true,
   }) =>
-      location == PermissionState.denied ||
       (needsCamera && camera == PermissionState.denied) ||
       (needsNotifications && notifications == PermissionState.denied);
 }

@@ -7,7 +7,10 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/pulse_api.dart';
+import '../core/ids.dart';
+import '../core/punch_queue.dart';
 import '../core/server_clock.dart';
+import '../offline/punch_database.dart';
 import '../offline/device_lock.dart';
 import '../offline/p256.dart';
 import '../offline/secret_vault.dart';
@@ -238,6 +241,10 @@ class KioskClient {
   /// Leaves the kiosk mode on this device: the key and the undelivered marks are forgotten (HR
   /// revokes the kiosk in the App).
   Future<void> forget() async {
+    try {
+      final store = await PunchStore.open();
+      store.removeOwnerPhotos(kioskPhotoOwner);
+    } catch (_) {}
     await _vault.delete(_queueKey);
     await _vault.delete(_stateKey);
   }
@@ -280,10 +287,29 @@ class KioskClient {
       if (marks.isEmpty) return 0;
       final mark = marks.first;
       try {
-        await _signed('POST', '/kiosk/offline-punches', json: mark.toJson());
+        final data = await _signed(
+          'POST',
+          '/kiosk/offline-punches',
+          json: mark.toJson(),
+        );
+        final punchUUID =
+            ((data['data'] as Map?)?['item'] as Map?)?['TimePunchUUID']
+                ?.toString();
+        final store = await PunchStore.open();
+        if (punchUUID != null && punchUUID.isNotEmpty) {
+          store.bindPhoto(mark.idempotencyKey, punchUUID);
+        } else {
+          // Refused by the API (wrong PIN): there is no mark to attach the photo to.
+          store.removePhoto(mark.idempotencyKey);
+        }
+        await persistPunchDatabase();
       } on PulseFailure catch (failure) {
         // A malformed mark can never be delivered: it leaves the queue.
-        if (failure.code != 'PULSE_INVALID_PUNCH') return marks.length;
+        if (failure.code != 'PULSE_INVALID_PUNCH') {
+          return marks.length;
+        }
+        final store = await PunchStore.open();
+        store.removePhoto(mark.idempotencyKey);
       }
       await withDeviceLock(() async {
         final current = await queued();
@@ -294,6 +320,45 @@ class KioskClient {
         );
       });
     }
+  }
+
+  /// Keeps the photo of an offline mark in the encrypted store until the mark is delivered.
+  Future<void> keepPhoto(
+    String idempotencyKey,
+    Uint8List bytes, {
+    String? punchUUID,
+  }) async {
+    final store = await PunchStore.open();
+    store.addPhoto(
+      kioskPhotoOwner,
+      idempotencyKey,
+      uuidV4(),
+      bytes,
+      punchUUID: punchUUID,
+    );
+    await persistPunchDatabase();
+  }
+
+  /// Uploads the kept photos of delivered offline marks; a network or server failure keeps them,
+  /// a definitive refusal and photos older than 24 h drop them.
+  Future<void> uploadKeptPhotos() async {
+    final store = await PunchStore.open();
+    store.dropOldPhotos();
+    store.dropOrphanPhotos(
+      kioskPhotoOwner,
+      liveKeys: {for (final mark in await queued()) mark.idempotencyKey},
+    );
+    for (final photo in store.readyPhotos(kioskPhotoOwner)) {
+      try {
+        await uploadPhoto(photo.punchUUID, photo.photoUUID, photo.bytes);
+      } on PulseFailure catch (failure) {
+        // Temporary refusals (network, 5xx, 403, storage, rate limit, revoked kiosk) keep the
+        // photo for the next pass; only a definitive 400/404/413 drops it.
+        if (!photoUploadDefinitive(failure)) break;
+      }
+      store.removePhoto(photo.punchKey);
+    }
+    await persistPunchDatabase();
   }
 
   /// Local administrator PIN (unlocks leaving the kiosk mode); never sent anywhere.
@@ -538,7 +603,20 @@ class KioskClient {
         ?.toString();
   }
 
+  /// Photo of a recorded mark. One the API already holds counts as sent.
   Future<void> uploadPhoto(
+    String punchUUID,
+    String photoUUID,
+    Uint8List bytes,
+  ) async {
+    try {
+      await _uploadPhoto(punchUUID, photoUUID, bytes);
+    } on PulseFailure catch (failure) {
+      if (!photoAlreadyStored(failure)) rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> _uploadPhoto(
     String punchUUID,
     String photoUUID,
     Uint8List bytes,

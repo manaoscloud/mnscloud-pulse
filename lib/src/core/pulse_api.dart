@@ -377,6 +377,41 @@ class PulseApi {
     return item is Map<String, dynamic> ? item : const {};
   }
 
+  /// The photo of a recorded mark sent without a session: [bytes] is exactly the signed body
+  /// (image/jpeg) and [headers] carry the device, time, counter and signature.
+  Future<void> uploadDevicePhoto(
+    String punchUUID,
+    String photoUUID,
+    Uint8List bytes,
+    Map<String, String> headers,
+  ) async {
+    final request = http.Request(
+      'POST',
+      Uri.parse(
+        '$_base/pulse/device/punches/$punchUUID/photo?photoId=${Uri.encodeQueryComponent(photoUUID)}',
+      ),
+    );
+    request.headers.addAll(clientHeaders(platform: _platform));
+    request.headers.addAll(headers);
+    request.headers['content-type'] = 'image/jpeg';
+    request.bodyBytes = bytes;
+    late http.Response response;
+    try {
+      final streamed = await (_client?.send(request) ?? request.send()).timeout(
+        const Duration(seconds: 60),
+      );
+      response = await http.Response.fromStream(streamed);
+    } catch (_) {
+      throw const PulseFailure('networkError');
+    }
+    Map<String, dynamic> data = {};
+    try {
+      final decoded = response.body.isEmpty ? null : jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) data = decoded;
+    } catch (_) {}
+    _checked(response.statusCode, data);
+  }
+
   /// Receipt of an own mark (Portaria 671 art. 79).
   Future<Map<String, dynamic>> receipt(String punchUUID) async {
     final data = await call('GET', '/pulse/punches/$punchUUID/receipt');
@@ -405,8 +440,20 @@ class PulseApi {
     );
   }
 
-  Future<List<Map<String, dynamic>>> listPunches({int limit = 30}) async {
-    final data = await call('GET', '/pulse/punches?limit=$limit');
+  /// Own marks, newest first; [startAt] and [endAt] bound the official time (UTC).
+  Future<List<Map<String, dynamic>>> listPunches({
+    int limit = 30,
+    DateTime? startAt,
+    DateTime? endAt,
+  }) async {
+    final query = [
+      'limit=$limit',
+      if (startAt != null)
+        'startAt=${Uri.encodeQueryComponent(startAt.toUtc().toIso8601String())}',
+      if (endAt != null)
+        'endAt=${Uri.encodeQueryComponent(endAt.toUtc().toIso8601String())}',
+    ].join('&');
+    final data = await call('GET', '/pulse/punches?$query');
     final items = (data['data'] as Map<String, dynamic>?)?['items'];
     return items is List
         ? items.whereType<Map<String, dynamic>>().toList()
