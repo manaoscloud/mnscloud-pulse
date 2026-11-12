@@ -352,40 +352,76 @@ void main() {
       },
     );
 
-    test('photos older than 24 hours are dropped', () async {
+    test('the 24 hours count from the bound mark; unbound photos stay while queued', () async {
       final store = await PunchStore.open();
+      final old = DateTime.now().subtract(const Duration(hours: 25));
       store.addPhoto(
         'account-1',
         'old',
         'p1',
         bytes,
         punchUUID: 'u1',
-        createdAt: DateTime.now().subtract(const Duration(hours: 25)),
+        createdAt: old,
       );
       store.addPhoto('account-1', 'new', 'p2', bytes, punchUUID: 'u2');
-      store.dropOldPhotos();
-      expect(store.readyPhotos('account-1').map((p) => p.punchKey), ['new']);
-    });
-
-    test('the upload decision keeps on network, 5xx, 408 and 429 only', () {
-      bool retry(String code, [int? status]) =>
-          photoUploadRetry(PulseFailure(code, status: status));
-      expect(retry('networkError'), isTrue);
-      expect(retry('requestError', 500), isTrue);
-      expect(retry('requestError', 503), isTrue);
-      expect(retry('requestError', 408), isTrue);
-      expect(retry('PULSE_RATE_LIMITED', 429), isTrue);
-      expect(retry('PULSE_DEVICE_CLOCK_SKEW', 401), isTrue);
-      expect(retry('PULSE_PUNCH_NOT_FOUND', 404), isFalse);
-      expect(retry('requestError', 400), isFalse);
-      expect(retry('requestError', 413), isFalse);
-      expect(
-        photoAlreadyStored(const PulseFailure('PULSE_PUNCH_PHOTO_EXISTS')),
-        isTrue,
+      // Created long ago but never bound: not dropped by age while its mark still waits.
+      final waiting = mark('clock_in', 5);
+      store.add('account-1', waiting);
+      store.addPhoto(
+        'account-1',
+        waiting.idempotencyKey,
+        'p3',
+        bytes,
+        createdAt: old,
       );
+      store.addPhoto('account-1', 'gone', 'p4', bytes);
+      store.dropOldPhotos();
+      store.dropOrphanPhotos('account-1');
+      expect(store.hasPhoto('old'), isFalse);
+      expect(store.hasPhoto('new'), isTrue);
+      expect(store.hasPhoto(waiting.idempotencyKey), isTrue);
+      expect(store.hasPhoto('gone'), isFalse);
     });
 
-    Future<DeviceGrants> grantsFor(PulseApi api, int counter) async {
+    test(
+      'the upload decision deletes only 400/404/413 and invalid devices',
+      () {
+        bool retry(String code, [int? status]) =>
+            photoUploadRetry(PulseFailure(code, status: status));
+        for (final keep in [
+          ('networkError', null),
+          ('requestError', 500),
+          ('requestError', 503),
+          ('requestError', 408),
+          ('PULSE_RATE_LIMITED', 429),
+          ('PULSE_ACCESS_DENIED', 403),
+          ('HR_STORAGE_NOT_CONFIGURED', 409),
+          ('HR_STORAGE_UNAVAILABLE', 503),
+          ('PULSE_MODULE_UNAVAILABLE', 403),
+          ('PULSE_DEVICE_CLOCK_SKEW', 401),
+        ]) {
+          expect(retry(keep.$1, keep.$2), isTrue, reason: keep.$1);
+        }
+        for (final drop in [
+          ('PULSE_PUNCH_NOT_FOUND', 404),
+          ('requestError', 400),
+          ('requestError', 413),
+          ('PULSE_DEVICE_INVALID', 401),
+        ]) {
+          expect(retry(drop.$1, drop.$2), isFalse, reason: drop.$1);
+        }
+        expect(
+          photoAlreadyStored(const PulseFailure('PULSE_PUNCH_PHOTO_EXISTS')),
+          isTrue,
+        );
+      },
+    );
+
+    Future<DeviceGrants> grantsFor(
+      PulseApi api,
+      int counter, {
+      int expiredDays = 3,
+    }) async {
       await vault.write(
         'pulse.device.account-1',
         jsonEncode(
@@ -393,7 +429,7 @@ void main() {
             deviceUUID: 'device-1',
             privateKey: _photoKey.privateBase64,
             counter: counter,
-            expiresAt: DateTime.now().toUtc().add(const Duration(days: 3)),
+            expiresAt: DateTime.now().toUtc().add(Duration(days: expiredDays)),
           ).toJson(),
         ),
       );
@@ -429,7 +465,8 @@ void main() {
         final photo = requests.last;
         expect(photo.url.path, '/api/v1/pulse/device/punches/punch-9/photo');
         expect(photo.headers['content-type'], 'image/jpeg');
-        expect(photo.headers['X-Photo-Id'], 'photo-uuid');
+        expect(photo.url.queryParameters, {'photoId': 'photo-uuid'});
+        expect(photo.headers.containsKey('X-Photo-Id'), isFalse);
         expect(photo.headers['X-Device-Id'], 'device-1');
         expect(photo.headers['authorization'], isNull);
         expect(photo.bodyBytes, bytes);
@@ -438,7 +475,7 @@ void main() {
         final message = [
           'MNSCLOUD-PULSE-DEVICE-V1',
           'POST',
-          '/pulse/device/punches/punch-9/photo',
+          '/pulse/device/punches/punch-9/photo?photoId=photo-uuid',
           photo.headers['X-Device-Timestamp']!,
           '5',
           sha256.convert(bytes).toString(),

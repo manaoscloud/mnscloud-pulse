@@ -344,16 +344,17 @@ class KioskClient {
   Future<void> uploadKeptPhotos() async {
     final store = await PunchStore.open();
     store.dropOldPhotos();
+    store.dropOrphanPhotos(
+      kioskPhotoOwner,
+      liveKeys: {for (final mark in await queued()) mark.idempotencyKey},
+    );
     for (final photo in store.readyPhotos(kioskPhotoOwner)) {
       try {
         await uploadPhoto(photo.punchUUID, photo.photoUUID, photo.bytes);
       } on PulseFailure catch (failure) {
-        // Offline, rate limited, server error or a refused kiosk: kept for the next pass.
-        if (photoUploadRetry(failure) ||
-            failure.sessionEnded ||
-            failure.code.startsWith('PULSE_KIOSK_')) {
-          break;
-        }
+        // Temporary refusals (network, 5xx, 403, storage, rate limit, revoked kiosk) keep the
+        // photo for the next pass; only a definitive 400/404/413 drops it.
+        if (!photoUploadDefinitive(failure)) break;
       }
       store.removePhoto(photo.punchKey);
     }

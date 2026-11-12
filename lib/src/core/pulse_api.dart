@@ -381,12 +381,15 @@ class PulseApi {
   /// (image/jpeg) and [headers] carry the device, time, counter and signature.
   Future<void> uploadDevicePhoto(
     String punchUUID,
+    String photoUUID,
     Uint8List bytes,
     Map<String, String> headers,
   ) async {
     final request = http.Request(
       'POST',
-      Uri.parse('$_base/pulse/device/punches/$punchUUID/photo'),
+      Uri.parse(
+        '$_base/pulse/device/punches/$punchUUID/photo?photoId=${Uri.encodeQueryComponent(photoUUID)}',
+      ),
     );
     request.headers.addAll(clientHeaders(platform: _platform));
     request.headers.addAll(headers);

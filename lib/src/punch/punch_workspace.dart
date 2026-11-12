@@ -308,13 +308,19 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       final item = await widget.api.createPunch(
         punch.body(offline: false, source: _source),
       );
+      final punchUUID = item['TimePunchUUID']?.toString();
+      final linked = punchUUID != null && punchUUID.isNotEmpty;
+      // Bound before the mark leaves the queue, so the photo is never seen as orphaned.
+      if (linked) {
+        await _queue.bindPhoto(punch.idempotencyKey, punchUUID);
+      } else {
+        await _queue.removePhoto(punch.idempotencyKey);
+      }
       await _queue.remove(punch.idempotencyKey);
       if (item['Duplicate'] == 1) message = 'punchSynced';
       _online = true;
       _delivered.value++;
-      final punchUUID = item['TimePunchUUID']?.toString();
-      if (photo != null && punchUUID != null && punchUUID.isNotEmpty) {
-        await _queue.bindPhoto(punch.idempotencyKey, punchUUID);
+      if (photo != null && linked) {
         message = await _sendPhoto(
           punch.idempotencyKey,
           punchUUID,
@@ -369,6 +375,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         return 'punchPhotoSaved';
       }
       if (failure.sessionEnded) {
+        // Kept: the device grant or the next session sends it.
         widget.onSessionEnded(failure.code);
         return 'punchPhotoOffline';
       }

@@ -77,18 +77,20 @@ class PendingPhoto {
   final DateTime createdAt;
 }
 
-/// What to do with a kept photo after an upload attempt: keep it and retry later, or drop it.
-/// A network error, a server error (5xx), 408 and 429 retry; any other refusal is definitive.
-bool photoUploadRetry(PulseFailure failure) {
-  if (failure.code == 'networkError' ||
-      failure.code == 'PULSE_RATE_LIMITED' ||
-      failure.code == 'PULSE_DEVICE_CLOCK_SKEW') {
+/// A refusal that no retry can fix: the mark is not found (404), the photo is malformed (400) or
+/// too large (413), or this device key is invalid or revoked. Everything else (network, 5xx, 403,
+/// 408, 429, clock skew, storage or module unavailable, session ended) keeps the photo.
+bool photoUploadDefinitive(PulseFailure failure) {
+  if (failure.code.startsWith('PULSE_DEVICE_') &&
+      failure.code != 'PULSE_DEVICE_CLOCK_SKEW') {
     return true;
   }
   final status = failure.status;
-  if (status == null) return failure.versionUnsupported;
-  return status >= 500 || status == 408 || status == 429;
+  return status == 400 || status == 404 || status == 413;
 }
+
+/// Keep the photo and try again later.
+bool photoUploadRetry(PulseFailure failure) => !photoUploadDefinitive(failure);
 
 /// The API already holds a photo for that mark (a retry after a lost answer): same as accepted.
 bool photoAlreadyStored(PulseFailure failure) =>
@@ -111,6 +113,7 @@ class PunchStore {
         punch_key TEXT PRIMARY KEY,
         owner TEXT NOT NULL,
         punch_uuid TEXT,
+        bound_at TEXT,
         photo_uuid TEXT NOT NULL,
         content_type TEXT NOT NULL,
         bytes BLOB NOT NULL,
@@ -206,12 +209,15 @@ class PunchStore {
     DateTime? createdAt,
   }) => _db.execute(
     'INSERT OR IGNORE INTO pending_punch_photo '
-    '(punch_key, owner, punch_uuid, photo_uuid, content_type, bytes, created_at) '
-    'VALUES (?, ?, ?, ?, ?, ?, ?)',
+    '(punch_key, owner, punch_uuid, bound_at, photo_uuid, content_type, bytes, created_at) '
+    'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     [
       punchKey,
       owner,
       punchUUID,
+      punchUUID == null
+          ? null
+          : (createdAt ?? DateTime.now()).toUtc().toIso8601String(),
       photoUUID,
       contentType,
       bytes,
@@ -221,8 +227,8 @@ class PunchStore {
 
   /// The mark of [punchKey] was recorded as [punchUUID]: its photo can go.
   void bindPhoto(String punchKey, String punchUUID) => _db.execute(
-    'UPDATE pending_punch_photo SET punch_uuid = ? WHERE punch_key = ?',
-    [punchUUID, punchKey],
+    'UPDATE pending_punch_photo SET punch_uuid = ?, bound_at = ? WHERE punch_key = ?',
+    [punchUUID, DateTime.now().toUtc().toIso8601String(), punchKey],
   );
 
   bool hasPhoto(String punchKey) => _db.select(
@@ -256,11 +262,34 @@ class PunchStore {
   void removeOwnerPhotos(String owner) =>
       _db.execute('DELETE FROM pending_punch_photo WHERE owner = ?', [owner]);
 
-  /// Drops the photos older than [maxAge] (the API refuses them), bound or not.
+  /// Drops the photos whose mark was recorded more than [maxAge] ago (the API refuses them).
+  /// Photos still waiting for their mark are never dropped here.
   void dropOldPhotos({Duration maxAge = pendingPhotoMaxAge, DateTime? now}) =>
-      _db.execute('DELETE FROM pending_punch_photo WHERE created_at < ?', [
-        (now ?? DateTime.now()).toUtc().subtract(maxAge).toIso8601String(),
-      ]);
+      _db.execute(
+        'DELETE FROM pending_punch_photo WHERE bound_at IS NOT NULL AND bound_at < ?',
+        [(now ?? DateTime.now()).toUtc().subtract(maxAge).toIso8601String()],
+      );
+
+  /// Drops the unbound photos of [owner] whose mark is no longer waiting ([liveKeys], or the
+  /// account queue when null): the mark was discarded or refused, so the photo has no destination.
+  void dropOrphanPhotos(String owner, {Set<String>? liveKeys}) {
+    final live =
+        liveKeys ??
+        {
+          for (final row in _db.select(
+            'SELECT idempotency_key FROM pending_punch WHERE account_uuid = ?',
+            [owner],
+          ))
+            row['idempotency_key'] as String,
+        };
+    for (final row in _db.select(
+      'SELECT punch_key FROM pending_punch_photo WHERE owner = ? AND punch_uuid IS NULL',
+      [owner],
+    )) {
+      final key = row['punch_key'] as String;
+      if (!live.contains(key)) removePhoto(key);
+    }
+  }
 
   void add(String accountUUID, QueuedPunch punch) => _db.execute(
     'INSERT OR IGNORE INTO pending_punch (idempotency_key, account_uuid, item, occurred_at, created_at) '
@@ -356,7 +385,9 @@ class PunchQueue {
       (await _store()).readyPhotos(accountUUID);
 
   Future<void> dropOldPhotos() async {
-    (await _store()).dropOldPhotos();
+    final store = await _store();
+    store.dropOldPhotos();
+    store.dropOrphanPhotos(accountUUID);
     await persistPunchDatabase();
   }
 }

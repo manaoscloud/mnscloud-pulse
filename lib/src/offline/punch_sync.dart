@@ -70,6 +70,9 @@ class PunchSync extends ChangeNotifier {
           final punchUUID = item['TimePunchUUID']?.toString();
           if (punchUUID != null && punchUUID.isNotEmpty) {
             await queue.bindPhoto(punch.idempotencyKey, punchUUID);
+          } else {
+            // Recorded but not linkable: the photo has no destination.
+            await queue.removePhoto(punch.idempotencyKey);
           }
           await queue.remove(punch.idempotencyKey);
           sent++;
@@ -100,7 +103,11 @@ class PunchSync extends ChangeNotifier {
         }
       }
       if (!offline) {
-        final photos = await _uploadPhotos(accountUUID, useSession, useDevice);
+        final photos = await _uploadPhotos(
+          accountUUID,
+          useSession,
+          await grants.hasKey(accountUUID),
+        );
         photosSent = photos.sent;
         offline = photos.offline;
         if (photos.sessionEnded != null) sessionEnded ??= photos.sessionEnded;
@@ -117,19 +124,23 @@ class PunchSync extends ChangeNotifier {
   }
 
   /// Uploads the kept photos of recorded marks, oldest first, with the session or (without one)
-  /// signed by this device. Accepted or definitively refused photos are deleted; a network or
-  /// server failure keeps them for the next pass; photos older than 24 h are dropped.
+  /// signed by this device (an expired grant is enough). Accepted, already stored or definitively
+  /// refused photos are deleted; anything temporary keeps them for the next pass; photos recorded
+  /// more than 24 h ago are dropped.
   Future<({int sent, bool offline, String? sessionEnded})> _uploadPhotos(
     String accountUUID,
     bool useSession,
-    bool useDevice,
+    bool canUseDevice,
   ) async {
     final queue = PunchQueue(accountUUID);
     await queue.dropOldPhotos();
     var sent = 0;
     String? sessionEnded;
-    for (final photo in await queue.readyPhotos()) {
-      if (!useSession && !useDevice) break;
+    final photos = await queue.readyPhotos();
+    var index = 0;
+    while (index < photos.length) {
+      final photo = photos[index];
+      if (!useSession && !canUseDevice) break;
       try {
         if (useSession) {
           await api.uploadPunchPhoto(
@@ -147,61 +158,25 @@ class PunchSync extends ChangeNotifier {
         }
         await queue.removePhoto(photo.punchKey);
         sent++;
+        index++;
       } on PulseFailure catch (failure) {
         if (photoAlreadyStored(failure)) {
           await queue.removePhoto(photo.punchKey);
           sent++;
-          continue;
-        }
-        if (failure.code == 'PULSE_DEVICE_CLOCK_SKEW') {
-          return (sent: sent, offline: false, sessionEnded: sessionEnded);
-        }
-        if (useSession && failure.sessionEnded) {
+          index++;
+        } else if (useSession && failure.sessionEnded) {
+          // The same photo goes again signed by the device, when there is a key.
           sessionEnded = failure.code;
           useSession = false;
-          if (!useDevice) break;
-          try {
-            await grants.sendPhoto(
-              accountUUID,
-              photo.punchUUID,
-              photo.photoUUID,
-              photo.bytes,
-            );
-            await queue.removePhoto(photo.punchKey);
-            sent++;
-          } on PulseFailure catch (again) {
-            if (photoAlreadyStored(again)) {
-              await queue.removePhoto(photo.punchKey);
-              sent++;
-            } else if (again.code == 'PULSE_DEVICE_CLOCK_SKEW') {
-              return (sent: sent, offline: false, sessionEnded: sessionEnded);
-            } else if (again.deviceRefused) {
-              await grants.invalidate(accountUUID);
-              useDevice = false;
-            } else if (photoUploadRetry(again)) {
-              return (
-                sent: sent,
-                offline: again.code == 'networkError',
-                sessionEnded: sessionEnded,
-              );
-            } else {
-              await queue.removePhoto(photo.punchKey);
-            }
-          }
-        } else if (!useSession && failure.deviceRefused) {
-          await grants.invalidate(accountUUID);
-          useDevice = false;
-        } else if (failure.sessionEnded || failure.deviceRefused) {
-          break;
-        } else if (photoUploadRetry(failure)) {
+        } else if (photoUploadDefinitive(failure)) {
+          await queue.removePhoto(photo.punchKey);
+          index++;
+        } else {
           return (
             sent: sent,
             offline: failure.code == 'networkError',
             sessionEnded: sessionEnded,
           );
-        } else {
-          // Refused for good (the mark is not the employee's, the photo is not an image, too late).
-          await queue.removePhoto(photo.punchKey);
         }
       }
     }
