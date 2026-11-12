@@ -159,11 +159,15 @@ String timesheetHtml(
       : <String, dynamic>{};
   String e(Object? v) => escapeHtml(v?.toString() ?? '');
   String dash(String v) => v.isEmpty ? '—' : escapeHtml(v);
+  String night(Map<String, dynamic> m) =>
+      formatMinutes(minutesOf(m['NightReducedMinutes'] ?? m['NightMinutes']));
   String min(Object? v, {bool signed = false}) =>
       formatMinutes(minutesOf(v), signed: signed);
-  final period = data['month'] != null && header.periodFrom.isEmpty
-      ? e(data['month'])
-      : '${dateText(header.periodFrom)} – ${dateText(header.periodTo)}';
+  final period = escapeHtml(
+    data['month'] != null && header.periodFrom.isEmpty
+        ? data['month'].toString()
+        : '${dateText(header.periodFrom)} – ${dateText(header.periodTo)}',
+  );
   final weekdays = l.tspWeekdays.split('|');
 
   final scheduleRows = StringBuffer();
@@ -234,7 +238,7 @@ String timesheetHtml(
       '<td>${marks.isEmpty ? '—' : marks.join(' ')}</td>'
       '<td class="n">${min(day['ExpectedMinutes'])}</td><td class="n">${min(day['WorkedMinutes'])}</td>'
       '<td class="n">${formatMinutes(overtime)}</td><td class="n">${min(day['AbsenceMinutes'])}</td>'
-      '<td class="n">${min(day['LateMinutes'])}</td><td class="n">${min(day['NightMinutes'])}</td>'
+      '<td class="n">${min(day['LateMinutes'])}</td><td class="n">${night(day)}</td>'
       '<td class="n">${min(day['BalanceMinutes'], signed: true)}</td><td>${e(flags)}</td></tr>',
     );
   }
@@ -278,7 +282,7 @@ String timesheetHtml(
 ${scheduleRows.isEmpty ? '' : '<h2>${e(l.tspSchedules)}</h2><table>$scheduleRows</table>'}
 <h2>${e(l.tspDays)}</h2>
 <table><thead><tr>$headRow</tr></thead><tbody>$dayRows</tbody>
-<tfoot><tr><th colspan="3">${e(l.tspTotals)}</th><th class="n">${min(totals['ExpectedMinutes'])}</th><th class="n">${min(totals['WorkedMinutes'])}</th><th class="n">${formatMinutes(totalOvertime)}</th><th class="n">${min(totals['AbsenceMinutes'])}</th><th class="n">${min(totals['LateMinutes'])}</th><th class="n">${min(totals['NightMinutes'])}</th><th class="n">${min(totals['BalanceMinutes'], signed: true)}</th><th></th></tr></tfoot></table>
+<tfoot><tr><th colspan="3">${e(l.tspTotals)}</th><th class="n">${min(totals['ExpectedMinutes'])}</th><th class="n">${min(totals['WorkedMinutes'])}</th><th class="n">${formatMinutes(totalOvertime)}</th><th class="n">${min(totals['AbsenceMinutes'])}</th><th class="n">${min(totals['LateMinutes'])}</th><th class="n">${night(totals)}</th><th class="n">${min(totals['BalanceMinutes'], signed: true)}</th><th></th></tr></tfoot></table>
 $legendHtml
 <div class="foot"><span>${e(l.tspIssuedAt)}: ${e(issued)}$tz</span><span>${e(l.tspPeriod)}: $period</span></div>
 </body></html>''';
