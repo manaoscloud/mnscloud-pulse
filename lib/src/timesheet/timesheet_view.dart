@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../core/pulse_api.dart';
 import '../core/server_clock.dart';
+import '../punch/punch_labels.dart';
+import '../receipt/receipt_print.dart';
 import 'timesheet_labels.dart';
+import 'timesheet_print.dart';
 
 /// Monthly timesheet of the employee: totals and the consolidated days with their marks. The API
 /// computes every value; the client only shows them (results, never the rules behind them).
@@ -15,11 +18,19 @@ class TimesheetView extends StatefulWidget {
     required this.api,
     required this.clock,
     required this.onSessionEnded,
+    this.printer = printReceiptHtml,
+    this.printAvailable,
   });
 
   final PulseApi api;
   final ServerClock clock;
   final void Function(String code) onSessionEnded;
+
+  /// Opens the browser print dialog with the page (web only); tests replace it.
+  final Future<void> Function(String html) printer;
+
+  /// Overrides [receiptPrintAvailable] (tests).
+  final bool? printAvailable;
 
   @override
   State<TimesheetView> createState() => _TimesheetViewState();
@@ -81,6 +92,13 @@ class _TimesheetViewState extends State<TimesheetView> {
     }
   }
 
+  Future<void> _print() async {
+    final data = _data;
+    if (data == null) return;
+    final language = Localizations.localeOf(context).toLanguageTag();
+    await widget.printer(timesheetHtml(data, l, language: language));
+  }
+
   void _shift(int months) {
     final next = DateTime(_month.year, _month.month + months);
     if (next.isAfter(_currentMonth)) return;
@@ -134,6 +152,7 @@ class _TimesheetViewState extends State<TimesheetView> {
               ),
             ),
           if (data != null) ...[
+            _HeaderCard(header: TimesheetHeader.fromJson(data['header'])),
             _Totals(
               totals: data['totals'] is Map<String, dynamic>
                   ? data['totals'] as Map<String, dynamic>
@@ -204,6 +223,13 @@ class _TimesheetViewState extends State<TimesheetView> {
           onPressed: _loading ? null : _load,
           icon: const Icon(Icons.refresh),
         ),
+        if (widget.printAvailable ?? receiptPrintAvailable)
+          IconButton(
+            key: const Key('printTimesheet'),
+            tooltip: l.tspPrint,
+            onPressed: _loading || _data == null ? null : _print,
+            icon: const Icon(Icons.print_outlined),
+          ),
       ],
     );
   }
@@ -299,8 +325,11 @@ class _DayTile extends StatelessWidget {
     final times = [
       for (final p in punches)
         if ((p['LocalTime']?.toString() ?? '').isNotEmpty)
-          p['LocalTime'].toString(),
+          isDisregarded(p) ? 'D ${p['LocalTime']}' : p['LocalTime'].toString(),
+      for (final a in adjustmentsOf(day))
+        if (a.included && a.localTime.isNotEmpty) 'I ${a.localTime}',
     ];
+    final treatments = adjustmentsOf(day);
     final flags = [
       for (final flag in (day['Flags'] as List?) ?? const [])
         ?flagLabel(l, flag.toString()),
@@ -338,6 +367,16 @@ class _DayTile extends StatelessWidget {
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
+                  for (final a in treatments)
+                    Text(
+                      '${a.marker} ${a.localTime} ${punchLabel(l, a.punchType)}'
+                      '${a.reason.isEmpty ? '' : ' · ${a.reason}'}',
+                      key: ValueKey(
+                        'treatment-${day['Date']}-${a.marker}-${a.localTime}',
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
                   if (flags.isNotEmpty) ...[
                     const SizedBox(height: 6),
                     Wrap(
@@ -390,6 +429,42 @@ class _DayTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Art. 84 header: employer, employee and admission. Left out when the API sends no header.
+class _HeaderCard extends StatelessWidget {
+  const _HeaderCard({required this.header});
+  final TimesheetHeader header;
+
+  @override
+  Widget build(BuildContext context) {
+    if (header.isEmpty) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context)!;
+    final scheme = Theme.of(context).colorScheme;
+    String join(String a, String b) =>
+        [a, b].where((v) => v.isNotEmpty).join(' · ');
+    final lines = [
+      join(header.employerName, header.employerDocument),
+      join(header.employeeName, header.employeeDocument),
+      join(
+        header.positionName,
+        header.hireDate.isEmpty
+            ? ''
+            : '${l.tspHireDate} ${dateText(header.hireDate)}',
+      ),
+    ].where((v) => v.isNotEmpty);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        key: const Key('timesheetHeader'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final line in lines)
+            Text(line, style: TextStyle(color: scheme.onSurfaceVariant)),
+        ],
       ),
     );
   }

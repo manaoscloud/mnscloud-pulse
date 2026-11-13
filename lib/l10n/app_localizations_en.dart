@@ -1138,6 +1138,116 @@ class AppLocalizationsEn extends AppLocalizations {
   String kioskExitPending(int count) {
     return '$count marks not sent yet are lost when leaving.';
   }
+
+  @override
+  String get tspPrint => 'Print / PDF';
+
+  @override
+  String get tspTitle => 'Timesheet';
+
+  @override
+  String get tspEmployer => 'Employer (legal name)';
+
+  @override
+  String get tspEmployerDocument => 'Tax ID';
+
+  @override
+  String get tspEmployee => 'Employee';
+
+  @override
+  String get tspCpf => 'CPF';
+
+  @override
+  String get tspHireDate => 'Hire date';
+
+  @override
+  String get tspPosition => 'Position';
+
+  @override
+  String get tspDepartment => 'Department';
+
+  @override
+  String get tspPeriod => 'Period';
+
+  @override
+  String get tspSchedules => 'Contractual schedules';
+
+  @override
+  String get tspKindWeekly => 'Weekly';
+
+  @override
+  String get tspKindCycle => 'Cycle';
+
+  @override
+  String get tspCycleDay => 'Cycle day';
+
+  @override
+  String get tspWeekdays =>
+      'Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday';
+
+  @override
+  String get tspDays => 'Marks per day';
+
+  @override
+  String get tspDate => 'Date';
+
+  @override
+  String get tspDayCol => 'Day';
+
+  @override
+  String get tspMarks => 'Marks (NSR)';
+
+  @override
+  String get tspExpected => 'Expected';
+
+  @override
+  String get tspWorked => 'Worked';
+
+  @override
+  String get tspOvertime => 'Overtime';
+
+  @override
+  String get tspAbsence => 'Absence';
+
+  @override
+  String get tspLate => 'Late';
+
+  @override
+  String get tspNight => 'Night';
+
+  @override
+  String get tspBalance => 'Balance';
+
+  @override
+  String get tspIssues => 'Issues';
+
+  @override
+  String get tspTotals => 'Totals';
+
+  @override
+  String get tspLegend => 'Treatment legend';
+
+  @override
+  String get tspLegendText =>
+      'I = mark included by a treatment; D = disregarded mark (struck through).';
+
+  @override
+  String get tspTime => 'Time';
+
+  @override
+  String get tspType => 'Type';
+
+  @override
+  String get tspReason => 'Reason';
+
+  @override
+  String get tspIssuedAt => 'Issued at';
+
+  @override
+  String get tspIncluded => 'Included';
+
+  @override
+  String get tspDisregarded => 'Disregarded';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2273,4 +2383,114 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   String kioskExitPending(int count) {
     return '$count marks not sent yet are lost when leaving.';
   }
+
+  @override
+  String get tspPrint => 'Print / PDF';
+
+  @override
+  String get tspTitle => 'Timesheet';
+
+  @override
+  String get tspEmployer => 'Employer (legal name)';
+
+  @override
+  String get tspEmployerDocument => 'Tax ID';
+
+  @override
+  String get tspEmployee => 'Employee';
+
+  @override
+  String get tspCpf => 'CPF';
+
+  @override
+  String get tspHireDate => 'Hire date';
+
+  @override
+  String get tspPosition => 'Position';
+
+  @override
+  String get tspDepartment => 'Department';
+
+  @override
+  String get tspPeriod => 'Period';
+
+  @override
+  String get tspSchedules => 'Contractual schedules';
+
+  @override
+  String get tspKindWeekly => 'Weekly';
+
+  @override
+  String get tspKindCycle => 'Cycle';
+
+  @override
+  String get tspCycleDay => 'Cycle day';
+
+  @override
+  String get tspWeekdays =>
+      'Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday';
+
+  @override
+  String get tspDays => 'Marks per day';
+
+  @override
+  String get tspDate => 'Date';
+
+  @override
+  String get tspDayCol => 'Day';
+
+  @override
+  String get tspMarks => 'Marks (NSR)';
+
+  @override
+  String get tspExpected => 'Expected';
+
+  @override
+  String get tspWorked => 'Worked';
+
+  @override
+  String get tspOvertime => 'Overtime';
+
+  @override
+  String get tspAbsence => 'Absence';
+
+  @override
+  String get tspLate => 'Late';
+
+  @override
+  String get tspNight => 'Night';
+
+  @override
+  String get tspBalance => 'Balance';
+
+  @override
+  String get tspIssues => 'Issues';
+
+  @override
+  String get tspTotals => 'Totals';
+
+  @override
+  String get tspLegend => 'Treatment legend';
+
+  @override
+  String get tspLegendText =>
+      'I = mark included by a treatment; D = disregarded mark (struck through).';
+
+  @override
+  String get tspTime => 'Time';
+
+  @override
+  String get tspType => 'Type';
+
+  @override
+  String get tspReason => 'Reason';
+
+  @override
+  String get tspIssuedAt => 'Issued at';
+
+  @override
+  String get tspIncluded => 'Included';
+
+  @override
+  String get tspDisregarded => 'Disregarded';
 }
