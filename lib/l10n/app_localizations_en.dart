@@ -1292,6 +1292,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employmentAssign => 'Assign employment and send';
+
+  @override
+  String get tspTotalsOmitted =>
+      'Totals per employment are not available yet: you have another employment this month.';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2581,4 +2585,8 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get employmentAssign => 'Assign employment and send';
+
+  @override
+  String get tspTotalsOmitted =>
+      'Totals per employment are not available yet: you have another employment this month.';
 }

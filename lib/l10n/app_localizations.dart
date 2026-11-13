@@ -2406,6 +2406,12 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Assign employment and send'**
   String get employmentAssign;
+
+  /// No description provided for @tspTotalsOmitted.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Totals per employment are not available yet: you have another employment this month.'**
+  String get tspTotalsOmitted;
 }
 
 class _AppLocalizationsDelegate

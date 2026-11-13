@@ -383,5 +383,6 @@
   "tspTermination": "Termination",
   "kioskEmploymentRequired": "You have more than one employment. Punch on a time clock of your company or in the Pulse app.",
   "employmentWaiting": "{count, plural, =1{1 punch is waiting for an employment} other{{count} punches are waiting for an employment}}",
-  "employmentAssign": "Assign employment and send"
+  "employmentAssign": "Assign employment and send",
+  "tspTotalsOmitted": "Totals per employment are not available yet: you have another employment this month."
 }

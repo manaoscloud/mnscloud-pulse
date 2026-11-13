@@ -186,11 +186,23 @@ class _TimesheetViewState extends State<TimesheetView> {
             ),
           if (data != null) ...[
             _HeaderCard(header: TimesheetHeader.fromJson(data['header'])),
-            _Totals(
-              totals: data['totals'] is Map<String, dynamic>
-                  ? data['totals'] as Map<String, dynamic>
-                  : const {},
-            ),
+            if (totalsOmitted(data))
+              Card(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    l.tspTotalsOmitted,
+                    key: const Key('totalsOmitted'),
+                  ),
+                ),
+              )
+            else
+              _Totals(
+                totals: data['totals'] is Map<String, dynamic>
+                    ? data['totals'] as Map<String, dynamic>
+                    : const {},
+              ),
             if (unassigned > 0)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
@@ -219,7 +231,8 @@ class _TimesheetViewState extends State<TimesheetView> {
                   style: TextStyle(color: scheme.onSurfaceVariant),
                 ),
               ),
-            for (final day in days) _DayTile(day: day),
+            for (final day in days)
+              _DayTile(day: day, omitted: totalsOmitted(data)),
           ],
         ],
       ),
@@ -344,7 +357,8 @@ class _Totals extends StatelessWidget {
 /// One consolidated day: date, what the day is, the marks in order, worked time, balance and
 /// short labels of anything to review.
 class _DayTile extends StatelessWidget {
-  const _DayTile({required this.day});
+  const _DayTile({required this.day, this.omitted = false});
+  final bool omitted;
   final Map<String, dynamic> day;
 
   @override
@@ -441,25 +455,26 @@ class _DayTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  formatMinutes(minutesOf(day['WorkedMinutes'])),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+            if (!omitted)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatMinutes(minutesOf(day['WorkedMinutes'])),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-                Text(
-                  formatMinutes(balance, signed: true),
-                  style: TextStyle(
-                    color: balanceColor(scheme, balance),
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                  Text(
+                    formatMinutes(balance, signed: true),
+                    style: TextStyle(
+                      color: balanceColor(scheme, balance),
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
       ),
