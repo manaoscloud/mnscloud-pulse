@@ -85,10 +85,14 @@ Map<String, dynamic> fullBody() => {
 
 class _FakeApi extends PulseApi {
   @override
-  Future<Map<String, dynamic>> timesheet(String month) async => fullBody();
+  Future<Map<String, dynamic>> timesheet(
+    String month, {
+    String? employmentUUID,
+  }) async => fullBody();
 }
 
 void main() {
+  totalsOmittedTests();
   test('html escapes every API value', () {
     final html = timesheetHtml(fullBody(), l, language: 'en');
     expect(html, isNot(contains('<script>')));
@@ -194,4 +198,65 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('printTimesheet')), findsNothing);
   });
+}
+
+void totalsOmittedTests() {
+  Map<String, dynamic> omittedBody() => {
+    'header': <String, dynamic>{},
+    'totalsScope': 'omitted',
+    'totalsNotice': 'x',
+    'days': [
+      {
+        'Date': '2026-10-01',
+        'DayKind': 'work',
+        'WorkedMinutes': null,
+        'BalanceMinutes': null,
+        'ExpectedMinutes': null,
+        'OvertimeMinutes': null,
+        'punches': <Object>[],
+      },
+    ],
+    'totals': {'WorkDays': 1, 'WorkedMinutes': null, 'BalanceMinutes': null},
+    'unassignedPunches': <Object>[],
+  };
+
+  test('omitted totals print dashes and the fixed notice, never zeros', () {
+    final html = timesheetHtml(omittedBody(), l, language: 'en');
+    expect(html, contains(l.tspTotalsOmitted));
+    expect(html, isNot(contains('00:00')));
+  });
+
+  testWidgets('omitted totals are hidden on screen with the notice', (
+    tester,
+  ) async {
+    final api = _OmittedApi(omittedBody());
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: TimesheetView(
+            api: api,
+            clock: ServerClock(),
+            onSessionEnded: (_) {},
+            printAvailable: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('totalsOmitted')), findsOneWidget);
+    expect(find.byKey(const Key('totalWorked')), findsNothing);
+    expect(find.text('00:00'), findsNothing);
+  });
+}
+
+class _OmittedApi extends PulseApi {
+  _OmittedApi(this.body);
+  final Map<String, dynamic> body;
+  @override
+  Future<Map<String, dynamic>> timesheet(
+    String month, {
+    String? employmentUUID,
+  }) async => body;
 }

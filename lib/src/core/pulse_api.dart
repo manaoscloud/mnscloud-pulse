@@ -38,6 +38,94 @@ class PulseFailure implements Exception {
   String toString() => 'PulseFailure($code)';
 }
 
+/// One employment in force of the employee (company, location and registration number), as the
+/// API lists it in `account.employments`.
+class PulseEmployment {
+  const PulseEmployment({
+    required this.employmentUUID,
+    this.companyUUID = '',
+    this.companyName = '',
+    this.locationUUID = '',
+    this.locationName = '',
+    this.registrationNumber = '',
+    this.hireDate = '',
+    this.terminationDate = '',
+  });
+
+  factory PulseEmployment.fromJson(Map<String, dynamic> json) {
+    String text(String key) => json[key]?.toString() ?? '';
+    return PulseEmployment(
+      employmentUUID: text('employmentUUID'),
+      companyUUID: text('companyUUID'),
+      companyName: text('companyName'),
+      locationUUID: text('locationUUID'),
+      locationName: text('locationName'),
+      registrationNumber: text('registrationNumber'),
+      hireDate: text('hireDate'),
+      terminationDate: text('terminationDate'),
+    );
+  }
+
+  final String employmentUUID;
+  final String companyUUID;
+  final String companyName;
+  final String locationUUID;
+  final String locationName;
+  final String registrationNumber;
+  final String hireDate;
+
+  /// YYYY-MM-DD of the end of the employment; empty while it is in force.
+  final String terminationDate;
+
+  /// In force on [day] (YYYY-MM-DD): hired by then and not ended before.
+  bool inForceOn(String day) =>
+      (hireDate.isEmpty || hireDate.compareTo(day) <= 0) &&
+      (terminationDate.isEmpty || terminationDate.compareTo(day) >= 0);
+
+  /// Overlaps the month `YYYY-MM`.
+  bool overlapsMonth(String month) =>
+      (hireDate.isEmpty || hireDate.substring(0, 7).compareTo(month) <= 0) &&
+      (terminationDate.isEmpty ||
+          terminationDate.substring(0, 7).compareTo(month) >= 0);
+
+  Map<String, dynamic> toJson() => {
+    'employmentUUID': employmentUUID,
+    'companyUUID': companyUUID,
+    'companyName': companyName,
+    'locationUUID': locationUUID,
+    'locationName': locationName,
+    'registrationNumber': registrationNumber,
+    'hireDate': hireDate,
+    'terminationDate': terminationDate.isEmpty ? null : terminationDate,
+  };
+
+  /// `Company · Location · Reg. 123`, leaving out what is empty.
+  String label(String registrationPrefix) => [
+    companyName,
+    locationName,
+    if (registrationNumber.isNotEmpty)
+      '$registrationPrefix $registrationNumber',
+  ].where((part) => part.isNotEmpty).join(' · ');
+}
+
+/// YYYY-MM-DD of a moment in the device's local time.
+String localDay(DateTime moment) {
+  final local = moment.toLocal();
+  String two(int v) => v.toString().padLeft(2, '0');
+  return '${local.year.toString().padLeft(4, '0')}-${two(local.month)}-${two(local.day)}';
+}
+
+extension PulseEmployments on List<PulseEmployment> {
+  /// The employments in force on the local day of [moment].
+  List<PulseEmployment> inForceAt(DateTime moment) {
+    final day = localDay(moment);
+    return [
+      for (final e in this)
+        if (e.inForceOn(day)) e,
+    ];
+  }
+}
+
 /// Signed-in employee as returned by the API (never stored on the device).
 class PulseAccount {
   const PulseAccount({
@@ -47,6 +135,7 @@ class PulseAccount {
     this.employeeName,
     this.companyName,
     this.hrAccountName,
+    this.employments = const [],
   });
 
   factory PulseAccount.fromJson(Map<String, dynamic> json) => PulseAccount(
@@ -56,6 +145,12 @@ class PulseAccount {
     employeeName: json['employeeName']?.toString(),
     companyName: json['companyName']?.toString(),
     hrAccountName: json['hrAccountName']?.toString(),
+    employments: [
+      for (final item in (json['employments'] as List?) ?? const [])
+        if (item is Map<String, dynamic> &&
+            (item['employmentUUID']?.toString() ?? '').isNotEmpty)
+          PulseEmployment.fromJson(item),
+    ],
   );
 
   final String timeClockAccountUUID;
@@ -67,6 +162,18 @@ class PulseAccount {
   /// Customer HR account (resale) of the time clock account; null for the reseller's own HR.
   final String? hrAccountName;
 
+  /// Employments in force; empty when the API lists none (the server then picks by itself).
+  final List<PulseEmployment> employments;
+
+  Map<String, dynamic> toJson() => {
+    'timeClockAccountUUID': timeClockAccountUUID,
+    'loginCode': loginCode,
+    'employeeName': employeeName,
+    'companyName': companyName,
+    'hrAccountName': hrAccountName,
+    'employments': [for (final e in employments) e.toJson()],
+  };
+
   PulseAccount passwordChanged() => PulseAccount(
     timeClockAccountUUID: timeClockAccountUUID,
     loginCode: loginCode,
@@ -74,6 +181,7 @@ class PulseAccount {
     employeeName: employeeName,
     companyName: companyName,
     hrAccountName: hrAccountName,
+    employments: employments,
   );
 }
 
@@ -254,6 +362,7 @@ class PulseApi {
       raw is Map<String, dynamic> ? raw : const {},
     );
     _accountUUID = account.timeClockAccountUUID;
+    employmentsNow = account.employments;
     onSession?.call(account);
     return account;
   }
@@ -274,6 +383,25 @@ class PulseApi {
       );
 
   PulseAccount? _restored;
+
+  /// Employments in force as of the last session answer or [me]; null before any.
+  List<PulseEmployment>? employmentsNow;
+
+  /// Reads the signed-in employee again (`/pulse/auth/me`), to learn the employments in force.
+  /// Null when it could not be read.
+  Future<PulseAccount?> me() async {
+    try {
+      final data = await call('GET', '/pulse/auth/me');
+      final item = (data['data'] as Map<String, dynamic>?)?['item'];
+      if (item is! Map<String, dynamic>) return null;
+      final account = PulseAccount.fromJson(item);
+      employmentsNow = account.employments;
+      onSession?.call(account);
+      return account;
+    } on PulseFailure {
+      return null;
+    }
+  }
 
   /// Rotates the refresh token (cookie on the web). False when there is no live session.
   Future<bool> refresh() {
@@ -492,8 +620,14 @@ class PulseApi {
   }
 
   /// Monthly timesheet (`month` is YYYY-MM): consolidated days with their marks and the totals.
-  Future<Map<String, dynamic>> timesheet(String month) async {
-    final data = await call('GET', '/pulse/timesheet?month=$month');
+  Future<Map<String, dynamic>> timesheet(
+    String month, {
+    String? employmentUUID,
+  }) async {
+    final employment = employmentUUID == null || employmentUUID.isEmpty
+        ? ''
+        : '&employmentUUID=${Uri.encodeQueryComponent(employmentUUID)}';
+    final data = await call('GET', '/pulse/timesheet?month=$month$employment');
     final body = data['data'];
     if (body is! Map<String, dynamic>) throw const PulseFailure('requestError');
     return body;

@@ -64,3 +64,8 @@ String dayKindLabel(
 /// YYYY-MM of a month.
 String monthKey(DateTime month) =>
     '${month.year.toString().padLeft(4, '0')}-${month.month.toString().padLeft(2, '0')}';
+
+/// The API left the minute totals out (`totalsScope: omitted`): the employee has another
+/// employment in the month, so totals per employment are not available yet.
+bool totalsOmitted(Map<String, dynamic>? data) =>
+    data?['totalsScope'] == 'omitted';

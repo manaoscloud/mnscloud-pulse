@@ -21,6 +21,7 @@ class PunchReceipt {
     this.employeeDocument,
     this.offline = false,
     this.emailAllowed = false,
+    this.outsideGeofence = false,
   });
 
   factory PunchReceipt.fromJson(Map<String, dynamic> json) => PunchReceipt(
@@ -39,6 +40,8 @@ class PunchReceipt {
     employeeDocument: json['EmployeeDocument']?.toString(),
     collector: json['Collector']?.toString() ?? '',
     emailAllowed: json['EmailAllowed'] == true,
+    outsideGeofence:
+        json['OutsideGeofence'] == true || json['OutsideGeofence'] == 1,
   );
 
   final String title;
@@ -54,6 +57,9 @@ class PunchReceipt {
   final String? employeeDocument;
   final String collector;
   final bool emailAllowed;
+
+  /// The mark was taken outside the geofence of its location.
+  final bool outsideGeofence;
 }
 
 String _escape(String value) => value
@@ -311,6 +317,15 @@ class ReceiptSheet extends StatelessWidget {
                 row('NSR', r.nsr),
                 row(l.receiptFieldCollector, r.collector),
                 row(l.receiptFieldHash, r.hash),
+                if (r.outsideGeofence)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      l.outsideGeofence,
+                      key: const Key('receiptOutsideGeofence'),
+                      style: TextStyle(color: scheme.error),
+                    ),
+                  ),
                 const SizedBox(height: 12),
                 ReceiptActions(
                   load: () async => r,

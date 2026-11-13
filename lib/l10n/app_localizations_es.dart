@@ -1256,6 +1256,57 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tspDisregarded => 'Desconsiderado';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Tienes más de un vínculo. Elige el vínculo de este fichaje y ficha de nuevo.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo no es válido para ti ahora. Elige otro y ficha de nuevo.';
+
+  @override
+  String get outsideGeofence => 'Fuera de la cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'N.º de matrícula';
+
+  @override
+  String get tspTermination => 'Baja';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Tienes más de un vínculo. Ficha en un reloj de tu empresa o en la app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichajes esperan un vínculo',
+      one: '1 fichaje espera un vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Asignar vínculo y enviar';
+
+  @override
+  String get tspTotalsOmitted =>
+      'Los totales por vínculo aún no están disponibles: tienes otro vínculo este mes.';
+
+  @override
+  String get employmentAll => 'Todos los vínculos';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2509,4 +2560,55 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get tspDisregarded => 'Desconsiderado';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Tienes más de un vínculo. Elige el vínculo de este fichaje y ficha de nuevo.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo no es válido para ti ahora. Elige otro y ficha de nuevo.';
+
+  @override
+  String get outsideGeofence => 'Fuera de la cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'N.º de matrícula';
+
+  @override
+  String get tspTermination => 'Baja';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Tienes más de un vínculo. Ficha en un reloj de tu empresa o en la app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichajes esperan un vínculo',
+      one: '1 fichaje espera un vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Asignar vínculo y enviar';
+
+  @override
+  String get tspTotalsOmitted =>
+      'Los totales por vínculo aún no están disponibles: tienes otro vínculo este mes.';
+
+  @override
+  String get employmentAll => 'Todos los vínculos';
 }

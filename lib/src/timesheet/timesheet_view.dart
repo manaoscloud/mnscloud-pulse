@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../core/employment_choice.dart';
 import '../core/pulse_api.dart';
 import '../core/server_clock.dart';
 import '../punch/punch_labels.dart';
@@ -20,7 +21,11 @@ class TimesheetView extends StatefulWidget {
     required this.onSessionEnded,
     this.printer = printReceiptHtml,
     this.printAvailable,
+    this.employments = const [],
   });
+
+  /// Employments in force of the account: a selector shows when there is more than one.
+  final List<PulseEmployment> employments;
 
   final PulseApi api;
   final ServerClock clock;
@@ -43,6 +48,7 @@ class _TimesheetViewState extends State<TimesheetView> {
   bool _loading = false;
   bool _visible = false;
   int _request = 0;
+  String? _employmentUUID;
 
   AppLocalizations get l => AppLocalizations.of(context)!;
 
@@ -52,6 +58,12 @@ class _TimesheetViewState extends State<TimesheetView> {
   }
 
   bool get _isCurrentMonth => !_month.isBefore(_currentMonth);
+
+  /// Employments that overlap the month on screen; the selector shows when there are several.
+  List<PulseEmployment> get _monthEmployments => [
+    for (final e in widget.employments)
+      if (e.overlapsMonth(monthKey(_month))) e,
+  ];
 
   @override
   void didChangeDependencies() {
@@ -73,7 +85,10 @@ class _TimesheetViewState extends State<TimesheetView> {
       _error = null;
     });
     try {
-      final data = await widget.api.timesheet(monthKey(_month));
+      final data = await widget.api.timesheet(
+        monthKey(_month),
+        employmentUUID: _monthEmployments.length > 1 ? _employmentUUID : null,
+      );
       if (!mounted || request != _request) return;
       setState(() {
         _data = data;
@@ -104,6 +119,13 @@ class _TimesheetViewState extends State<TimesheetView> {
     if (next.isAfter(_currentMonth)) return;
     setState(() {
       _month = next;
+      if (!widget.employments.any(
+        (e) =>
+            e.employmentUUID == _employmentUUID &&
+            e.overlapsMonth(monthKey(next)),
+      )) {
+        _employmentUUID = null;
+      }
       _data = null;
     });
     unawaited(_load());
@@ -131,6 +153,23 @@ class _TimesheetViewState extends State<TimesheetView> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           _header(context),
+          if (_monthEmployments.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: EmploymentSelector(
+                key: const Key('timesheetEmployment'),
+                employments: _monthEmployments,
+                selected: _employmentUUID,
+                allLabel: l.employmentAll,
+                onChanged: (uuid) {
+                  setState(() {
+                    _employmentUUID = uuid.isEmpty ? null : uuid;
+                    _data = null;
+                  });
+                  unawaited(_load());
+                },
+              ),
+            ),
           if (_loading && data == null)
             const Padding(
               padding: EdgeInsets.only(top: 8),
@@ -153,11 +192,23 @@ class _TimesheetViewState extends State<TimesheetView> {
             ),
           if (data != null) ...[
             _HeaderCard(header: TimesheetHeader.fromJson(data['header'])),
-            _Totals(
-              totals: data['totals'] is Map<String, dynamic>
-                  ? data['totals'] as Map<String, dynamic>
-                  : const {},
-            ),
+            if (totalsOmitted(data))
+              Card(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    l.tspTotalsOmitted,
+                    key: const Key('totalsOmitted'),
+                  ),
+                ),
+              )
+            else
+              _Totals(
+                totals: data['totals'] is Map<String, dynamic>
+                    ? data['totals'] as Map<String, dynamic>
+                    : const {},
+              ),
             if (unassigned > 0)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
@@ -186,7 +237,8 @@ class _TimesheetViewState extends State<TimesheetView> {
                   style: TextStyle(color: scheme.onSurfaceVariant),
                 ),
               ),
-            for (final day in days) _DayTile(day: day),
+            for (final day in days)
+              _DayTile(day: day, omitted: totalsOmitted(data)),
           ],
         ],
       ),
@@ -311,7 +363,8 @@ class _Totals extends StatelessWidget {
 /// One consolidated day: date, what the day is, the marks in order, worked time, balance and
 /// short labels of anything to review.
 class _DayTile extends StatelessWidget {
-  const _DayTile({required this.day});
+  const _DayTile({required this.day, this.omitted = false});
+  final bool omitted;
   final Map<String, dynamic> day;
 
   @override
@@ -408,25 +461,26 @@ class _DayTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  formatMinutes(minutesOf(day['WorkedMinutes'])),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+            if (!omitted)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    formatMinutes(minutesOf(day['WorkedMinutes'])),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-                Text(
-                  formatMinutes(balance, signed: true),
-                  style: TextStyle(
-                    color: balanceColor(scheme, balance),
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                  Text(
+                    formatMinutes(balance, signed: true),
+                    style: TextStyle(
+                      color: balanceColor(scheme, balance),
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
       ),
@@ -449,6 +503,12 @@ class _HeaderCard extends StatelessWidget {
     final lines = [
       join(header.employerName, header.employerDocument),
       join(header.employeeName, header.employeeDocument),
+      join(
+        header.registrationNumber.isEmpty
+            ? ''
+            : '${l.tspRegistration}: ${header.registrationNumber}',
+        header.locationName,
+      ),
       join(
         header.positionName,
         header.hireDate.isEmpty

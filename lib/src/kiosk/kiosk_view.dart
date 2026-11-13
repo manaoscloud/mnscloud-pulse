@@ -179,6 +179,7 @@ class _KioskShellState extends State<KioskShell> {
     'PULSE_KIOSK_PIN_NOT_SET' => l.kioskPinNotSet,
     'PULSE_ACCESS_DENIED' => l.accessDenied,
     'PULSE_RATE_LIMITED' => l.rateLimited,
+    'PULSE_EMPLOYMENT_REQUIRED' => l.kioskEmploymentRequired,
     'PULSE_MODULE_UNAVAILABLE' => l.moduleUnavailable,
     'networkError' => l.kioskOffline,
     _ => l.requestError,

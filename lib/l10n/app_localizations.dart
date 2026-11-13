@@ -2340,6 +2340,84 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Disregarded'**
   String get tspDisregarded;
+
+  /// No description provided for @employmentLabel.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Employment'**
+  String get employmentLabel;
+
+  /// No description provided for @employmentRegistrationShort.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Reg.'**
+  String get employmentRegistrationShort;
+
+  /// No description provided for @employmentRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You have more than one employment. Choose the employment of this punch and punch again.'**
+  String get employmentRequired;
+
+  /// No description provided for @employmentInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This employment is not valid for you now. Choose another one and punch again.'**
+  String get employmentInvalid;
+
+  /// No description provided for @outsideGeofence.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Outside the geofence'**
+  String get outsideGeofence;
+
+  /// No description provided for @tspLocation.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Location'**
+  String get tspLocation;
+
+  /// No description provided for @tspRegistration.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Registration no.'**
+  String get tspRegistration;
+
+  /// No description provided for @tspTermination.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Termination'**
+  String get tspTermination;
+
+  /// No description provided for @kioskEmploymentRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You have more than one employment. Punch on a time clock of your company or in the Pulse app.'**
+  String get kioskEmploymentRequired;
+
+  /// No description provided for @employmentWaiting.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count, plural, =1{1 punch is waiting for an employment} other{{count} punches are waiting for an employment}}'**
+  String employmentWaiting(int count);
+
+  /// No description provided for @employmentAssign.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Assign employment and send'**
+  String get employmentAssign;
+
+  /// No description provided for @tspTotalsOmitted.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Totals per employment are not available yet: you have another employment this month.'**
+  String get tspTotalsOmitted;
+
+  /// No description provided for @employmentAll.
+  ///
+  /// In en_US, this message translates to:
+  /// **'All employments'**
+  String get employmentAll;
 }
 
 class _AppLocalizationsDelegate

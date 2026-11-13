@@ -19,6 +19,8 @@ class QueuedPunch {
     this.latitude,
     this.longitude,
     this.accuracyMeters,
+    this.employmentUUID,
+    this.needsEmployment = false,
   });
 
   factory QueuedPunch.fromJson(Map<String, dynamic> json) => QueuedPunch(
@@ -28,6 +30,8 @@ class QueuedPunch {
     latitude: (json['latitude'] as num?)?.toDouble(),
     longitude: (json['longitude'] as num?)?.toDouble(),
     accuracyMeters: (json['accuracyMeters'] as num?)?.toDouble(),
+    employmentUUID: _nonEmpty(json['employmentUUID']),
+    needsEmployment: json['needsEmployment'] == true,
   );
 
   final String idempotencyKey;
@@ -37,6 +41,34 @@ class QueuedPunch {
   final double? longitude;
   final double? accuracyMeters;
 
+  /// Employment the mark belongs to (chosen at the tap when the employee has several).
+  final String? employmentUUID;
+
+  /// The API refused the mark for its employment and the employee has several: it waits on the
+  /// device, never resent, until one is assigned.
+  final bool needsEmployment;
+
+  QueuedPunch withEmployment(String? employmentUUID) => QueuedPunch(
+    idempotencyKey: idempotencyKey,
+    type: type,
+    occurredAt: occurredAt,
+    latitude: latitude,
+    longitude: longitude,
+    accuracyMeters: accuracyMeters,
+    employmentUUID: employmentUUID,
+  );
+
+  QueuedPunch waitingForEmployment() => QueuedPunch(
+    idempotencyKey: idempotencyKey,
+    type: type,
+    occurredAt: occurredAt,
+    latitude: latitude,
+    longitude: longitude,
+    accuracyMeters: accuracyMeters,
+    employmentUUID: employmentUUID,
+    needsEmployment: true,
+  );
+
   Map<String, dynamic> toJson() => {
     'idempotencyKey': idempotencyKey,
     'type': type,
@@ -44,12 +76,23 @@ class QueuedPunch {
     if (latitude != null) 'latitude': latitude,
     if (longitude != null) 'longitude': longitude,
     if (accuracyMeters != null) 'accuracyMeters': accuracyMeters,
+    if (employmentUUID != null) 'employmentUUID': employmentUUID,
+    if (needsEmployment) 'needsEmployment': true,
   };
 
   /// Body of POST /pulse/punches. A first attempt is online (server clock); a mark sent from the
   /// queue later is offline and keeps the corrected device time of the tap.
   Map<String, dynamic> body({required bool offline, required String source}) =>
-      {...toJson(), 'offline': offline, 'source': source};
+      {
+        ...toJson()..remove('needsEmployment'),
+        'offline': offline,
+        'source': source,
+      };
+}
+
+String? _nonEmpty(Object? value) {
+  final text = value?.toString() ?? '';
+  return text.isEmpty ? null : text;
 }
 
 /// Owner of the photos of the shared time clock in [PunchStore] (accounts use their own uuid).
@@ -299,6 +342,11 @@ class PunchStore {
     ],
   );
 
+  void update(String accountUUID, QueuedPunch punch) => _db.execute(
+    'UPDATE pending_punch SET item = ? WHERE idempotency_key = ? AND account_uuid = ?',
+    [jsonEncode(punch.toJson()), punch.idempotencyKey, accountUUID],
+  );
+
   void remove(String idempotencyKey) => _db.execute(
     'DELETE FROM pending_punch WHERE idempotency_key = ?',
     [idempotencyKey],
@@ -339,6 +387,11 @@ class PunchQueue {
 
   Future<void> add(QueuedPunch punch) async {
     (await _store()).add(accountUUID, punch);
+    await persistPunchDatabase();
+  }
+
+  Future<void> update(QueuedPunch punch) async {
+    (await _store()).update(accountUUID, punch);
     await persistPunchDatabase();
   }
 

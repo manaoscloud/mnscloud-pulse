@@ -1256,6 +1256,57 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tspDisregarded => 'Desconsiderada';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Você tem mais de um vínculo. Escolha o vínculo desta marcação e marque novamente.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo não é válido para você agora. Escolha outro e marque novamente.';
+
+  @override
+  String get outsideGeofence => 'Fora da cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'Matrícula';
+
+  @override
+  String get tspTermination => 'Desligamento';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Você tem mais de um vínculo. Marque o ponto em um relógio de ponto da sua empresa ou no app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcações aguardam um vínculo',
+      one: '1 marcação aguarda um vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Atribuir vínculo e enviar';
+
+  @override
+  String get tspTotalsOmitted =>
+      'Totais por vínculo ainda não disponíveis: você tem outro vínculo neste mês.';
+
+  @override
+  String get employmentAll => 'Todos os vínculos';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2509,4 +2560,55 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get tspDisregarded => 'Desconsiderada';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Você tem mais de um vínculo. Escolha o vínculo desta marcação e marque novamente.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo não é válido para você agora. Escolha outro e marque novamente.';
+
+  @override
+  String get outsideGeofence => 'Fora da cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'Matrícula';
+
+  @override
+  String get tspTermination => 'Desligamento';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Você tem mais de um vínculo. Marque o ponto em um relógio de ponto da sua empresa ou no app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcações aguardam um vínculo',
+      one: '1 marcação aguarda um vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Atribuir vínculo e enviar';
+
+  @override
+  String get tspTotalsOmitted =>
+      'Totais por vínculo ainda não disponíveis: você tem outro vínculo neste mês.';
+
+  @override
+  String get employmentAll => 'Todos os vínculos';
 }

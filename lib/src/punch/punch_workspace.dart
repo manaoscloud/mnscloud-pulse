@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../core/employment_choice.dart';
 import '../core/ids.dart';
 import '../core/location.dart';
 import '../core/punch_camera.dart';
@@ -34,6 +35,12 @@ List<Map<String, dynamic>> receiptsOfLast48h(
   kept.sort((a, b) => b.$1.compareTo(a.$1));
   return [for (final (_, punch) in kept) punch];
 }
+
+/// The API flagged the mark as taken outside the geofence of its location.
+bool isOutsideGeofence(Map<String, dynamic> punch) =>
+    punch['OutsideGeofence'] == true ||
+    punch['OutsideGeofence'] == 1 ||
+    ((punch['Flags'] as List?)?.contains('outside_geofence') ?? false);
 
 /// Employee home: official time, the suggested next mark (every mark stays available), the
 /// delivery state of marks taken without connection and the recent marks with their receipt.
@@ -87,6 +94,23 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   bool _messageError = false;
   Timer? _retry;
 
+  /// Employment of the next mark; chosen by the employee when there are several.
+  String? _employmentUUID;
+
+  /// Employment chosen in the banner for the marks waiting for one.
+  String? _assignUUID;
+
+  /// Employments in force: the latest the API told, else the ones of the session.
+  List<PulseEmployment> get _allEmployments =>
+      widget.api.employmentsNow ?? widget.account.employments;
+
+  /// Only the ones in force today feed the selector and the single-employment rule.
+  List<PulseEmployment> get _employments =>
+      _allEmployments.inForceAt(widget.clock.nowUtc());
+
+  /// Marks already tried for an automatic assignment (never in a loop).
+  final _autoTried = <String>{};
+
   /// Bumped when a mark reaches the API, so the today summary reads the new state.
   final _delivered = ValueNotifier<int>(0);
 
@@ -97,6 +121,8 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   void initState() {
     super.initState();
     widget.sync.addListener(_synced);
+    _employmentUUID = EmploymentChoice.resolve(_employments, null);
+    unawaited(_loadEmployment());
     unawaited(_start());
   }
 
@@ -108,10 +134,35 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     super.dispose();
   }
 
+  Future<void> _loadEmployment() async {
+    final employments = _employments;
+    if (employments.length < 2) return;
+    final saved = await EmploymentChoice.read(
+      widget.account.timeClockAccountUUID,
+    );
+    if (!mounted) return;
+    setState(
+      () => _employmentUUID = EmploymentChoice.resolve(employments, saved),
+    );
+  }
+
+  void _chooseEmployment(String uuid) {
+    setState(() {
+      _employmentUUID = uuid;
+      if (_message == 'employmentRequired' || _message == 'employmentInvalid') {
+        _message = null;
+      }
+    });
+    unawaited(
+      EmploymentChoice.write(widget.account.timeClockAccountUUID, uuid),
+    );
+  }
+
   Future<void> _start() async {
     final serverTime = await widget.api.serverTime();
     if (serverTime != null) widget.clock.accept(serverTime);
     _pending = await _queue.load();
+    await _autoAssign();
     await _flush();
     await _reload();
   }
@@ -278,6 +329,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       latitude: location?.latitude,
       longitude: location?.longitude,
       accuracyMeters: location?.accuracyMeters,
+      employmentUUID: _employments.length > 1 ? _employmentUUID : null,
     );
     // Kept on the device before sending: a lost answer or no connection never loses the mark.
     await _queue.add(punch);
@@ -339,6 +391,31 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       } else if (failure.code == 'PULSE_RATE_LIMITED') {
         message = 'rateLimited';
         error = true;
+      } else if (failure.code == 'PULSE_EMPLOYMENT_REQUIRED' ||
+          failure.code == 'PULSE_EMPLOYMENT_INVALID') {
+        // Never dropped: the account is read again; with at most one employment the mark goes
+        // without one, with several it waits on the device for the employee to assign it.
+        final fresh = await widget.api.me();
+        final forDay = fresh?.employments.inForceAt(punch.occurredAt);
+        if (forDay != null && forDay.length <= 1) {
+          await _queue.update(
+            punch.withEmployment(
+              forDay.isEmpty ? null : forDay.first.employmentUUID,
+            ),
+          );
+          await _flush();
+          _pending = await _queue.load();
+          message =
+              _pending.any((p) => p.idempotencyKey == punch.idempotencyKey)
+              ? 'punchQueued'
+              : 'punchSaved';
+        } else {
+          await _queue.update(punch.waitingForEmployment());
+          message = failure.code == 'PULSE_EMPLOYMENT_REQUIRED'
+              ? 'employmentRequired'
+              : 'employmentInvalid';
+          error = true;
+        }
       } else {
         await _queue.remove(punch.idempotencyKey);
         await _queue.removePhoto(punch.idempotencyKey);
@@ -354,6 +431,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       _messageError = error;
     });
     _scheduleRetry();
+    await _autoAssign();
     if (_online) await _reload();
   }
 
@@ -398,6 +476,8 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     'punchSynced' => l.punchSynced,
     'punchQueued' => l.punchQueued,
     'rateLimited' => l.rateLimited,
+    'employmentRequired' => l.employmentRequired,
+    'employmentInvalid' => l.employmentInvalid,
     _ => l.requestError,
   };
 
@@ -436,13 +516,27 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         ),
         Text(
           [
-            widget.account.companyName,
-            if (widget.account.hrAccountName != widget.account.companyName)
+            if (_employments.length == 1)
+              _employments.first.label(l.employmentRegistrationShort)
+            else
+              widget.account.companyName,
+            if (_employments.length != 1 &&
+                widget.account.hrAccountName != widget.account.companyName)
               widget.account.hrAccountName,
             widget.account.loginCode,
           ].whereType<String>().where((part) => part.isNotEmpty).join(' · '),
           style: TextStyle(color: scheme.onSurfaceVariant),
         ),
+        if (_employments.length > 1) ...[
+          const SizedBox(height: 12),
+          EmploymentSelector(
+            key: const Key('punchEmployment'),
+            employments: _employments,
+            selected: _employmentUUID,
+            enabled: !_busy,
+            onChanged: _chooseEmployment,
+          ),
+        ],
         const SizedBox(height: 20),
         _OfficialClock(clock: widget.clock),
         const SizedBox(height: 8),
@@ -467,6 +561,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
             ],
           ],
         ),
+        if (_waiting.isNotEmpty) _assignBanner(context),
         TodayCard(api: widget.api, reload: _delivered),
         const SizedBox(height: 20),
         if (_noLocation)
@@ -559,7 +654,20 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
               leading: const Icon(Icons.receipt_long_outlined),
               title: Text(punchLabel(l, punch['Type']?.toString() ?? '')),
               subtitle: Text(_whenText(context, punch['OccurredAt'])),
-              trailing: Text(l.nsrLabel(punch['NSR'].toString())),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(l.nsrLabel(punch['NSR'].toString())),
+                  if (isOutsideGeofence(punch))
+                    Text(
+                      l.outsideGeofence,
+                      key: Key('outsideGeofence-${punch['NSR']}'),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: scheme.error),
+                    ),
+                ],
+              ),
               onTap:
                   widget.api.signedIn &&
                       (punch['TimePunchUUID']?.toString() ?? '').isNotEmpty
@@ -598,6 +706,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
                   l.sentLater,
                 if (punch['NSR'] != null) l.nsrLabel(punch['NSR'].toString()),
                 if (punch['HasPhoto'] == true) l.withPhoto,
+                if (isOutsideGeofence(punch)) l.outsideGeofence,
               ].join('\n'),
               textAlign: TextAlign.end,
               style: Theme.of(context).textTheme.bodySmall,
@@ -605,6 +714,91 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
           ),
       ],
     );
+  }
+
+  List<QueuedPunch> get _waiting => [
+    for (final p in _pending)
+      if (p.needsEmployment) p,
+  ];
+
+  /// Marks the API could not place in an employment: the employee assigns one and they go.
+  Widget _assignBanner(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    // Offered: the employments in force on the local day of every waiting mark.
+    final employments = [
+      for (final e in _allEmployments)
+        if (_waiting.every((p) => e.inForceOn(localDay(p.occurredAt)))) e,
+    ];
+    final chosen = employments.any((e) => e.employmentUUID == _assignUUID)
+        ? _assignUUID
+        : EmploymentChoice.resolve(employments, _employmentUUID);
+    return Card(
+      key: const Key('employmentBanner'),
+      color: scheme.errorContainer,
+      margin: const EdgeInsets.only(top: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l.employmentWaiting(_waiting.length),
+              style: TextStyle(color: scheme.onErrorContainer),
+            ),
+            for (final p in _waiting)
+              Text(
+                '${punchLabel(l, p.type)} · ${_when(context, p.occurredAt)}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            const SizedBox(height: 8),
+            if (employments.length > 1)
+              EmploymentSelector(
+                key: const Key('assignEmployment'),
+                employments: employments,
+                selected: chosen,
+                onChanged: (uuid) => setState(() => _assignUUID = uuid),
+              ),
+            const SizedBox(height: 8),
+            FilledButton(
+              key: const Key('assignEmploymentSend'),
+              onPressed: _busy || chosen == null ? null : () => _assign(chosen),
+              child: Text(l.employmentAssign),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// A waiting mark whose day has exactly one employment in force gets it and goes again.
+  Future<void> _autoAssign() async {
+    var changed = false;
+    for (final p in _waiting) {
+      if (!_autoTried.add(p.idempotencyKey)) continue;
+      final forDay = _allEmployments.inForceAt(p.occurredAt);
+      if (forDay.length == 1) {
+        await _queue.update(p.withEmployment(forDay.first.employmentUUID));
+        changed = true;
+      }
+    }
+    if (!changed) return;
+    await _flush();
+    _pending = await _queue.load();
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _assign(String employmentUUID) async {
+    setState(() => _busy = true);
+    try {
+      for (final p in _waiting) {
+        await _queue.update(p.withEmployment(employmentUUID));
+      }
+      await _flush();
+      _pending = await _queue.load();
+      if (_online) await _reload();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _openReceipt(String punchUUID) => showModalBottomSheet<void>(

@@ -60,9 +60,15 @@ class PunchSync extends ChangeNotifier {
     var useDevice = await grants.available(accountUUID);
     final pending = await queue.load();
     var index = 0;
+    final retriedWithout = <String>{};
     try {
       while (index < pending.length && (useSession || useDevice)) {
         final punch = pending[index];
+        if (punch.needsEmployment) {
+          // Waits for the employee to assign an employment: never resent in a loop.
+          index++;
+          continue;
+        }
         try {
           final item = useSession
               ? await api.createPunch(punch.body(offline: true, source: source))
@@ -91,6 +97,25 @@ class PunchSync extends ChangeNotifier {
             // The marks wait for a session (and a new registration).
             await grants.invalidate(accountUUID);
             useDevice = false;
+          } else if (failure.code == 'PULSE_EMPLOYMENT_REQUIRED' ||
+              failure.code == 'PULSE_EMPLOYMENT_INVALID') {
+            // Never dropped: with at most one employment now the mark goes again without one,
+            // with several it waits (marked) for the employee to assign it.
+            final employments =
+                useSession && retriedWithout.add(punch.idempotencyKey)
+                ? (await api.me())?.employments.inForceAt(punch.occurredAt)
+                : null;
+            if (employments != null && employments.length <= 1) {
+              // One in force on the mark's day: assigned; none: sent without.
+              final fixed = punch.withEmployment(
+                employments.isEmpty ? null : employments.first.employmentUUID,
+              );
+              await queue.update(fixed);
+              pending[index] = fixed;
+            } else {
+              await queue.update(punch.waitingForEmployment());
+              index++;
+            }
           } else if (failure.code == 'PULSE_INVALID_PUNCH') {
             // The API refused the mark itself; it can never be recorded as it is.
             await queue.remove(punch.idempotencyKey);
