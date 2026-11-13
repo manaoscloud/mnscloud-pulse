@@ -380,5 +380,8 @@
   "outsideGeofence": "Fuera de la cerca",
   "tspLocation": "Local",
   "tspRegistration": "N.º de matrícula",
-  "tspTermination": "Baja"
+  "tspTermination": "Baja",
+  "kioskEmploymentRequired": "Tienes más de un vínculo. Ficha en un reloj de tu empresa o en la app Pulse.",
+  "employmentWaiting": "{count, plural, =1{1 fichaje espera un vínculo} other{{count} fichajes esperan un vínculo}}",
+  "employmentAssign": "Asignar vínculo y enviar"
 }

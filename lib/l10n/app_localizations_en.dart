@@ -1274,6 +1274,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tspTermination => 'Termination';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'You have more than one employment. Punch on a time clock of your company or in the Pulse app.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punches are waiting for an employment',
+      one: '1 punch is waiting for an employment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Assign employment and send';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2545,4 +2563,22 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get tspTermination => 'Termination';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'You have more than one employment. Punch on a time clock of your company or in the Pulse app.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count punches are waiting for an employment',
+      one: '1 punch is waiting for an employment',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Assign employment and send';
 }

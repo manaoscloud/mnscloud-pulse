@@ -72,6 +72,16 @@ class PulseEmployment {
   final String registrationNumber;
   final String hireDate;
 
+  Map<String, dynamic> toJson() => {
+    'employmentUUID': employmentUUID,
+    'companyUUID': companyUUID,
+    'companyName': companyName,
+    'locationUUID': locationUUID,
+    'locationName': locationName,
+    'registrationNumber': registrationNumber,
+    'hireDate': hireDate,
+  };
+
   /// `Company · Location · Reg. 123`, leaving out what is empty.
   String label(String registrationPrefix) => [
     companyName,
@@ -119,6 +129,15 @@ class PulseAccount {
 
   /// Employments in force; empty when the API lists none (the server then picks by itself).
   final List<PulseEmployment> employments;
+
+  Map<String, dynamic> toJson() => {
+    'timeClockAccountUUID': timeClockAccountUUID,
+    'loginCode': loginCode,
+    'employeeName': employeeName,
+    'companyName': companyName,
+    'hrAccountName': hrAccountName,
+    'employments': [for (final e in employments) e.toJson()],
+  };
 
   PulseAccount passwordChanged() => PulseAccount(
     timeClockAccountUUID: timeClockAccountUUID,
@@ -308,6 +327,7 @@ class PulseApi {
       raw is Map<String, dynamic> ? raw : const {},
     );
     _accountUUID = account.timeClockAccountUUID;
+    employmentsNow = account.employments;
     onSession?.call(account);
     return account;
   }
@@ -328,6 +348,25 @@ class PulseApi {
       );
 
   PulseAccount? _restored;
+
+  /// Employments in force as of the last session answer or [me]; null before any.
+  List<PulseEmployment>? employmentsNow;
+
+  /// Reads the signed-in employee again (`/pulse/auth/me`), to learn the employments in force.
+  /// Null when it could not be read.
+  Future<PulseAccount?> me() async {
+    try {
+      final data = await call('GET', '/pulse/auth/me');
+      final item = (data['data'] as Map<String, dynamic>?)?['item'];
+      if (item is! Map<String, dynamic>) return null;
+      final account = PulseAccount.fromJson(item);
+      employmentsNow = account.employments;
+      onSession?.call(account);
+      return account;
+    } on PulseFailure {
+      return null;
+    }
+  }
 
   /// Rotates the refresh token (cookie on the web). False when there is no live session.
   Future<bool> refresh() {

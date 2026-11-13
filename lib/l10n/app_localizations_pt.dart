@@ -1282,6 +1282,24 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tspTermination => 'Desligamento';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Você tem mais de um vínculo. Marque o ponto em um relógio de ponto da sua empresa ou no app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcações aguardam um vínculo',
+      one: '1 marcação aguarda um vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Atribuir vínculo e enviar';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2561,4 +2579,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get tspTermination => 'Desligamento';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Você tem mais de um vínculo. Marque o ponto em um relógio de ponto da sua empresa ou no app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count marcações aguardam um vínculo',
+      one: '1 marcação aguarda um vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Atribuir vínculo e enviar';
 }

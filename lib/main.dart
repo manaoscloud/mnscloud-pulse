@@ -251,18 +251,7 @@ class _PulseShellState extends State<PulseShell> {
   void _sessionOpened(PulseAccount account) {
     if (account.mustChangePassword) return;
     unawaited(_grants.ensure(account.timeClockAccountUUID));
-    unawaited(
-      _vault.write(
-        _profileKey,
-        jsonEncode({
-          'timeClockAccountUUID': account.timeClockAccountUUID,
-          'loginCode': account.loginCode,
-          'employeeName': account.employeeName,
-          'companyName': account.companyName,
-          'hrAccountName': account.hrAccountName,
-        }),
-      ),
-    );
+    unawaited(_vault.write(_profileKey, jsonEncode(account.toJson())));
     unawaited(pwaPersistStorage());
     if (_offlineEntry && mounted) {
       setState(() {

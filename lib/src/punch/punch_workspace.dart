@@ -97,6 +97,13 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   /// Employment of the next mark; chosen by the employee when there are several.
   String? _employmentUUID;
 
+  /// Employment chosen in the banner for the marks waiting for one.
+  String? _assignUUID;
+
+  /// Employments in force: the latest the API told, else the ones of the session.
+  List<PulseEmployment> get _employments =>
+      widget.api.employmentsNow ?? widget.account.employments;
+
   /// Bumped when a mark reaches the API, so the today summary reads the new state.
   final _delivered = ValueNotifier<int>(0);
 
@@ -124,7 +131,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   }
 
   Future<void> _loadEmployment() async {
-    final employments = widget.account.employments;
+    final employments = _employments;
     if (employments.length < 2) return;
     final saved = await EmploymentChoice.read(
       widget.account.timeClockAccountUUID,
@@ -317,7 +324,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       latitude: location?.latitude,
       longitude: location?.longitude,
       accuracyMeters: location?.accuracyMeters,
-      employmentUUID: _employmentUUID,
+      employmentUUID: _employments.length > 1 ? _employmentUUID : null,
     );
     // Kept on the device before sending: a lost answer or no connection never loses the mark.
     await _queue.add(punch);
@@ -381,13 +388,24 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         error = true;
       } else if (failure.code == 'PULSE_EMPLOYMENT_REQUIRED' ||
           failure.code == 'PULSE_EMPLOYMENT_INVALID') {
-        // Nothing was recorded: the employee chooses the employment and punches again.
-        await _queue.remove(punch.idempotencyKey);
-        await _queue.removePhoto(punch.idempotencyKey);
-        message = failure.code == 'PULSE_EMPLOYMENT_REQUIRED'
-            ? 'employmentRequired'
-            : 'employmentInvalid';
-        error = true;
+        // Never dropped: the account is read again; with at most one employment the mark goes
+        // without one, with several it waits on the device for the employee to assign it.
+        final fresh = await widget.api.me();
+        if (fresh != null && fresh.employments.length <= 1) {
+          await _queue.update(punch.withEmployment(null));
+          await _flush();
+          _pending = await _queue.load();
+          message =
+              _pending.any((p) => p.idempotencyKey == punch.idempotencyKey)
+              ? 'punchQueued'
+              : 'punchSaved';
+        } else {
+          await _queue.update(punch.waitingForEmployment());
+          message = failure.code == 'PULSE_EMPLOYMENT_REQUIRED'
+              ? 'employmentRequired'
+              : 'employmentInvalid';
+          error = true;
+        }
       } else {
         await _queue.remove(punch.idempotencyKey);
         await _queue.removePhoto(punch.idempotencyKey);
@@ -534,6 +552,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
             ],
           ],
         ),
+        if (_waiting.isNotEmpty) _assignBanner(context),
         TodayCard(api: widget.api, reload: _delivered),
         const SizedBox(height: 20),
         if (_noLocation)
@@ -686,6 +705,70 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
           ),
       ],
     );
+  }
+
+  List<QueuedPunch> get _waiting => [
+    for (final p in _pending)
+      if (p.needsEmployment) p,
+  ];
+
+  /// Marks the API could not place in an employment: the employee assigns one and they go.
+  Widget _assignBanner(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final employments = _employments;
+    final chosen = employments.any((e) => e.employmentUUID == _assignUUID)
+        ? _assignUUID
+        : EmploymentChoice.resolve(employments, _employmentUUID);
+    return Card(
+      key: const Key('employmentBanner'),
+      color: scheme.errorContainer,
+      margin: const EdgeInsets.only(top: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l.employmentWaiting(_waiting.length),
+              style: TextStyle(color: scheme.onErrorContainer),
+            ),
+            for (final p in _waiting)
+              Text(
+                '${punchLabel(l, p.type)} · ${_when(context, p.occurredAt)}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            const SizedBox(height: 8),
+            if (employments.length > 1)
+              EmploymentSelector(
+                key: const Key('assignEmployment'),
+                employments: employments,
+                selected: chosen,
+                onChanged: (uuid) => setState(() => _assignUUID = uuid),
+              ),
+            const SizedBox(height: 8),
+            FilledButton(
+              key: const Key('assignEmploymentSend'),
+              onPressed: _busy || chosen == null ? null : () => _assign(chosen),
+              child: Text(l.employmentAssign),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _assign(String employmentUUID) async {
+    setState(() => _busy = true);
+    try {
+      for (final p in _waiting) {
+        await _queue.update(p.withEmployment(employmentUUID));
+      }
+      await _flush();
+      _pending = await _queue.load();
+      if (_online) await _reload();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _openReceipt(String punchUUID) => showModalBottomSheet<void>(

@@ -380,5 +380,8 @@
   "outsideGeofence": "Fora da cerca",
   "tspLocation": "Local",
   "tspRegistration": "Matrícula",
-  "tspTermination": "Desligamento"
+  "tspTermination": "Desligamento",
+  "kioskEmploymentRequired": "Você tem mais de um vínculo. Marque o ponto em um relógio de ponto da sua empresa ou no app Pulse.",
+  "employmentWaiting": "{count, plural, =1{1 marcação aguarda um vínculo} other{{count} marcações aguardam um vínculo}}",
+  "employmentAssign": "Atribuir vínculo e enviar"
 }

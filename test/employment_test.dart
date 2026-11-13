@@ -13,6 +13,7 @@ import 'package:mnscloud_pulse/src/core/server_clock.dart';
 import 'package:mnscloud_pulse/src/offline/device_lock.dart';
 import 'package:mnscloud_pulse/src/offline/secret_vault.dart';
 import 'package:mnscloud_pulse/src/punch/punch_workspace.dart';
+import 'package:mnscloud_pulse/src/receipt/receipt.dart';
 import 'package:mnscloud_pulse/src/timesheet/timesheet_print.dart';
 import 'package:mnscloud_pulse/src/timesheet/timesheet_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -115,6 +116,22 @@ void main() {
     expect(EmploymentChoice.resolve(const [], '2'), isNull);
   });
 
+  test('kiosk employment message exists in every language', () {
+    for (final locale in ['en', 'es', 'pt']) {
+      final t = lookupAppLocalizations(Locale(locale));
+      expect(t.kioskEmploymentRequired, isNotEmpty);
+      expect(t.employmentWaiting(2), contains('2'));
+    }
+  });
+
+  test('receipt carries the outside geofence flag', () {
+    expect(
+      PunchReceipt.fromJson({'OutsideGeofence': 1}).outsideGeofence,
+      isTrue,
+    );
+    expect(PunchReceipt.fromJson({}).outsideGeofence, isFalse);
+  });
+
   test('outside geofence is read from the field or the flag', () {
     expect(isOutsideGeofence({'OutsideGeofence': 1}), isTrue);
     expect(
@@ -140,89 +157,219 @@ void main() {
     expect(header.terminationDate, '2026-10-31');
   });
 
+  /// API double: [refuse] is the code POST /punches answers with while not empty; /auth/me
+  /// answers [meEmployments] (null: unreachable).
+  MockClient employmentClient({
+    required List<Map<String, dynamic>> employments,
+    required List<Map<String, dynamic>> bodies,
+    required String Function() refuse,
+    List<Map<String, dynamic>>? Function()? meEmployments,
+    List<Map<String, dynamic>> listed = const [],
+  }) => MockClient((request) async {
+    final path = request.url.path;
+    if (path.endsWith('/auth/refresh')) return json(session(employments));
+    if (path.endsWith('/auth/me')) {
+      final fresh = meEmployments?.call();
+      if (fresh == null) return json({'code': 'requestError'}, 500);
+      return json({
+        'data': {'item': session(fresh)['data']['account']},
+      });
+    }
+    if (path.endsWith('/time')) {
+      return json({
+        'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
+      });
+    }
+    if (path.endsWith('/punches') && request.method == 'POST') {
+      final body = jsonDecode(request.body) as Map<String, dynamic>;
+      bodies.add(body);
+      if (refuse().isNotEmpty) {
+        return json({
+          'code': refuse(),
+          'fields': ['employmentUUID'],
+        }, 409);
+      }
+      return json({
+        'data': {
+          'item': {'Type': body['type'], 'NSR': 1, 'Duplicate': 0},
+        },
+      });
+    }
+    if (path.endsWith('/punches')) {
+      return json({
+        'data': {'items': listed},
+      });
+    }
+    return json({'code': 'requestError'}, 400);
+  });
+
+  final two = [
+    employment('1', 'Acme', 'HQ'),
+    employment('2', 'Beta', 'Branch'),
+  ];
+
+  Future<void> punchOnce(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('nextPunch')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('confirmPunch')));
+    await settle(tester);
+  }
+
   testWidgets(
-    'several employments: choice is sent, remembered and errors guide',
+    'several employments: choice is sent, remembered and shows the marker',
     (tester) async {
       final bodies = <Map<String, dynamic>>[];
-      var refuse = 'PULSE_EMPLOYMENT_REQUIRED';
-      final client = MockClient((request) async {
-        final path = request.url.path;
-        if (path.endsWith('/auth/refresh')) {
-          return json(
-            session([
-              employment('1', 'Acme', 'HQ'),
-              employment('2', 'Beta', 'Branch'),
-            ]),
-          );
-        }
-        if (path.endsWith('/time')) {
-          return json({
-            'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
-          });
-        }
-        if (path.endsWith('/punches') && request.method == 'POST') {
-          final body = jsonDecode(request.body) as Map<String, dynamic>;
-          bodies.add(body);
-          if (refuse.isNotEmpty) {
-            return json({
-              'code': refuse,
-              'fields': ['employmentUUID'],
-            }, 409);
-          }
-          return json({
-            'data': {
-              'item': {'Type': body['type'], 'NSR': 1, 'Duplicate': 0},
-            },
-          });
-        }
-        if (path.endsWith('/punches')) {
-          return json({
-            'data': {
-              'items': [
-                {
-                  'Type': 'clock_in',
-                  'OccurredAt': DateTime.now().toUtc().toIso8601String(),
-                  'NSR': 7,
-                  'Flags': ['outside_geofence'],
-                  'OutsideGeofence': 1,
-                },
-              ],
-            },
-          });
-        }
-        return json({'code': 'requestError'}, 400);
-      });
-      await tester.pumpWidget(app(client));
+      await tester.pumpWidget(
+        app(
+          employmentClient(
+            employments: two,
+            bodies: bodies,
+            refuse: () => '',
+            listed: [
+              {
+                'Type': 'clock_in',
+                'OccurredAt': DateTime.now().toUtc().toIso8601String(),
+                'NSR': 7,
+                'Flags': ['outside_geofence'],
+                'OutsideGeofence': 1,
+              },
+            ],
+          ),
+        ),
+      );
       await settle(tester);
       expect(find.byKey(const Key('punchEmployment')), findsOneWidget);
       expect(find.text('Outside the geofence'), findsWidgets);
-
-      await tester.tap(find.byKey(const Key('nextPunch')));
-      await settle(tester);
-      await tester.tap(find.byKey(const Key('confirmPunch')));
-      await settle(tester);
-      expect(bodies.single['employmentUUID'], '1');
-      expect(find.textContaining('Choose the employment'), findsOneWidget);
-      expect(await PunchQueue('account-1').load(), isEmpty);
-
       await tester.tap(find.byKey(const Key('punchEmployment')));
       await settle(tester);
       await tester.tap(find.textContaining('Beta').last);
       await settle(tester);
-      refuse = 'PULSE_EMPLOYMENT_INVALID';
-      await tester.tap(find.byKey(const Key('nextPunch')));
-      await settle(tester);
-      await tester.tap(find.byKey(const Key('confirmPunch')));
-      await settle(tester);
-      expect(bodies.last['employmentUUID'], '2');
-      expect(find.textContaining('not valid for you'), findsOneWidget);
+      await punchOnce(tester);
+      expect(bodies.single['employmentUUID'], '2');
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('pulse.employment.account-1'), '2');
       await tester.pumpWidget(const SizedBox());
     },
   );
 
-  testWidgets('one employment is shown read-only and still sent', (
+  testWidgets(
+    'EMPLOYMENT_REQUIRED keeps the mark, shows the banner and assigns later',
+    (tester) async {
+      final bodies = <Map<String, dynamic>>[];
+      var refuse = 'PULSE_EMPLOYMENT_REQUIRED';
+      await tester.pumpWidget(
+        app(
+          employmentClient(
+            employments: two,
+            bodies: bodies,
+            refuse: () => refuse,
+            meEmployments: () => two,
+          ),
+        ),
+      );
+      await settle(tester);
+      await punchOnce(tester);
+      expect(find.textContaining('more than one employment'), findsOneWidget);
+      final queued = await PunchQueue('account-1').load();
+      expect(queued, hasLength(1));
+      expect(queued.single.needsEmployment, isTrue);
+      expect(find.byKey(const Key('employmentBanner')), findsOneWidget);
+
+      // Waiting marks are not resent by the periodic pass.
+      final sent = bodies.length;
+      await tester.pump(const Duration(seconds: 31));
+      await settle(tester);
+      expect(bodies.length, sent);
+
+      refuse = '';
+      await tester.ensureVisible(find.byKey(const Key('assignEmploymentSend')));
+      await tester.tap(find.byKey(const Key('assignEmploymentSend')));
+      await settle(tester);
+      expect(bodies.last['employmentUUID'], '1');
+      expect(await PunchQueue('account-1').load(), isEmpty);
+      expect(find.byKey(const Key('employmentBanner')), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'EMPLOYMENT_INVALID with one employment left retries without it',
+    (tester) async {
+      final bodies = <Map<String, dynamic>>[];
+      await tester.pumpWidget(
+        app(
+          employmentClient(
+            employments: two,
+            bodies: bodies,
+            refuse: () => bodies.length == 1 ? 'PULSE_EMPLOYMENT_INVALID' : '',
+            meEmployments: () => [employment('1', 'Acme', 'HQ')],
+          ),
+        ),
+      );
+      await settle(tester);
+      await punchOnce(tester);
+      expect(bodies, hasLength(2));
+      expect(bodies.first['employmentUUID'], '1');
+      expect(bodies.last.containsKey('employmentUUID'), isFalse);
+      expect(await PunchQueue('account-1').load(), isEmpty);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets('a queued mark waiting for an employment is never resent', (
+    tester,
+  ) async {
+    await PunchQueue('account-1').add(
+      QueuedPunch(
+        idempotencyKey: 'waiting-1',
+        type: 'clock_in',
+        occurredAt: DateTime.now().toUtc().subtract(const Duration(hours: 1)),
+        needsEmployment: true,
+      ),
+    );
+    final bodies = <Map<String, dynamic>>[];
+    await tester.pumpWidget(
+      app(employmentClient(employments: two, bodies: bodies, refuse: () => '')),
+    );
+    await settle(tester);
+    await tester.pump(const Duration(seconds: 31));
+    await settle(tester);
+    expect(bodies, isEmpty);
+    expect(find.byKey(const Key('employmentBanner')), findsOneWidget);
+    final kept = (await PunchQueue('account-1').load()).single;
+    expect(kept.needsEmployment, isTrue);
+    expect(
+      kept.body(offline: true, source: 'web').containsKey('needsEmployment'),
+      isFalse,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('the offline profile keeps the employments', (tester) async {
+    final bodies = <Map<String, dynamic>>[];
+    await tester.pumpWidget(
+      app(employmentClient(employments: two, bodies: bodies, refuse: () => '')),
+    );
+    await settle(tester);
+    final raw = await SecretVault.instance.read('pulse.offline.profile');
+    final stored = PulseAccount.fromJson(
+      jsonDecode(raw!) as Map<String, dynamic>,
+    );
+    expect(stored.employments.map((e) => e.employmentUUID), ['1', '2']);
+    expect(stored.employments.first.registrationNumber, 'R1');
+    await tester.pumpWidget(const SizedBox());
+
+    // A cold start without connection restores the selector from the profile.
+    await tester.pumpWidget(
+      app(MockClient((_) async => throw http.ClientException('offline'))),
+    );
+    await settle(tester);
+    expect(find.byKey(const Key('offlineEntry')), findsOneWidget);
+    expect(find.byKey(const Key('punchEmployment')), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('one employment is shown read-only and sends no employmentUUID', (
     tester,
   ) async {
     final bodies = <Map<String, dynamic>>[];
@@ -260,7 +407,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byKey(const Key('confirmPunch')));
     await settle(tester);
-    expect(bodies.single['employmentUUID'], '1');
+    expect(bodies.single.containsKey('employmentUUID'), isFalse);
     await tester.pumpWidget(const SizedBox());
   });
 

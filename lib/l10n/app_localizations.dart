@@ -2388,6 +2388,24 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Termination'**
   String get tspTermination;
+
+  /// No description provided for @kioskEmploymentRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You have more than one employment. Punch on a time clock of your company or in the Pulse app.'**
+  String get kioskEmploymentRequired;
+
+  /// No description provided for @employmentWaiting.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count, plural, =1{1 punch is waiting for an employment} other{{count} punches are waiting for an employment}}'**
+  String employmentWaiting(int count);
+
+  /// No description provided for @employmentAssign.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Assign employment and send'**
+  String get employmentAssign;
 }
 
 class _AppLocalizationsDelegate

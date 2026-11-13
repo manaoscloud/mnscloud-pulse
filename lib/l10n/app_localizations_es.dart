@@ -1282,6 +1282,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tspTermination => 'Baja';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Tienes más de un vínculo. Ficha en un reloj de tu empresa o en la app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichajes esperan un vínculo',
+      one: '1 fichaje espera un vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Asignar vínculo y enviar';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2561,4 +2579,22 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get tspTermination => 'Baja';
+
+  @override
+  String get kioskEmploymentRequired =>
+      'Tienes más de un vínculo. Ficha en un reloj de tu empresa o en la app Pulse.';
+
+  @override
+  String employmentWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fichajes esperan un vínculo',
+      one: '1 fichaje espera un vínculo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get employmentAssign => 'Asignar vínculo y enviar';
 }
