@@ -103,10 +103,13 @@ class PunchSync extends ChangeNotifier {
             // with several it waits (marked) for the employee to assign it.
             final employments =
                 useSession && retriedWithout.add(punch.idempotencyKey)
-                ? (await api.me())?.employments
+                ? (await api.me())?.employments.inForceAt(punch.occurredAt)
                 : null;
             if (employments != null && employments.length <= 1) {
-              final fixed = punch.withEmployment(null);
+              // One in force on the mark's day: assigned; none: sent without.
+              final fixed = punch.withEmployment(
+                employments.isEmpty ? null : employments.first.employmentUUID,
+              );
               await queue.update(fixed);
               pending[index] = fixed;
             } else {

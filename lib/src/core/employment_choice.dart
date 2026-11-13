@@ -47,6 +47,7 @@ class EmploymentSelector extends StatelessWidget {
     required this.selected,
     required this.onChanged,
     this.enabled = true,
+    this.allLabel,
   });
 
   final List<PulseEmployment> employments;
@@ -54,15 +55,20 @@ class EmploymentSelector extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final bool enabled;
 
+  /// When set, a first option with this text means "no employment filter" (value `''`).
+  final String? allLabel;
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context)!;
     return DropdownButtonFormField<String>(
       key: ValueKey('employment-$selected'),
-      initialValue: selected,
+      initialValue: selected ?? (allLabel == null ? null : ''),
       isExpanded: true,
       decoration: InputDecoration(labelText: l.employmentLabel),
       items: [
+        if (allLabel != null)
+          DropdownMenuItem(value: '', child: Text(allLabel!)),
         for (final employment in employments)
           DropdownMenuItem(
             value: employment.employmentUUID,

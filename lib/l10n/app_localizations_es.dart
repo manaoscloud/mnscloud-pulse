@@ -1304,6 +1304,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tspTotalsOmitted =>
       'Los totales por vínculo aún no están disponibles: tienes otro vínculo este mes.';
+
+  @override
+  String get employmentAll => 'Todos los vínculos';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2605,4 +2608,7 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
   @override
   String get tspTotalsOmitted =>
       'Los totales por vínculo aún no están disponibles: tienes otro vínculo este mes.';
+
+  @override
+  String get employmentAll => 'Todos los vínculos';
 }

@@ -49,6 +49,7 @@ class PulseEmployment {
     this.locationName = '',
     this.registrationNumber = '',
     this.hireDate = '',
+    this.terminationDate = '',
   });
 
   factory PulseEmployment.fromJson(Map<String, dynamic> json) {
@@ -61,6 +62,7 @@ class PulseEmployment {
       locationName: text('locationName'),
       registrationNumber: text('registrationNumber'),
       hireDate: text('hireDate'),
+      terminationDate: text('terminationDate'),
     );
   }
 
@@ -72,6 +74,20 @@ class PulseEmployment {
   final String registrationNumber;
   final String hireDate;
 
+  /// YYYY-MM-DD of the end of the employment; empty while it is in force.
+  final String terminationDate;
+
+  /// In force on [day] (YYYY-MM-DD): hired by then and not ended before.
+  bool inForceOn(String day) =>
+      (hireDate.isEmpty || hireDate.compareTo(day) <= 0) &&
+      (terminationDate.isEmpty || terminationDate.compareTo(day) >= 0);
+
+  /// Overlaps the month `YYYY-MM`.
+  bool overlapsMonth(String month) =>
+      (hireDate.isEmpty || hireDate.substring(0, 7).compareTo(month) <= 0) &&
+      (terminationDate.isEmpty ||
+          terminationDate.substring(0, 7).compareTo(month) >= 0);
+
   Map<String, dynamic> toJson() => {
     'employmentUUID': employmentUUID,
     'companyUUID': companyUUID,
@@ -80,6 +96,7 @@ class PulseEmployment {
     'locationName': locationName,
     'registrationNumber': registrationNumber,
     'hireDate': hireDate,
+    'terminationDate': terminationDate.isEmpty ? null : terminationDate,
   };
 
   /// `Company · Location · Reg. 123`, leaving out what is empty.
@@ -89,6 +106,24 @@ class PulseEmployment {
     if (registrationNumber.isNotEmpty)
       '$registrationPrefix $registrationNumber',
   ].where((part) => part.isNotEmpty).join(' · ');
+}
+
+/// YYYY-MM-DD of a moment in the device's local time.
+String localDay(DateTime moment) {
+  final local = moment.toLocal();
+  String two(int v) => v.toString().padLeft(2, '0');
+  return '${local.year.toString().padLeft(4, '0')}-${two(local.month)}-${two(local.day)}';
+}
+
+extension PulseEmployments on List<PulseEmployment> {
+  /// The employments in force on the local day of [moment].
+  List<PulseEmployment> inForceAt(DateTime moment) {
+    final day = localDay(moment);
+    return [
+      for (final e in this)
+        if (e.inForceOn(day)) e,
+    ];
+  }
 }
 
 /// Signed-in employee as returned by the API (never stored on the device).

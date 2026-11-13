@@ -59,13 +59,11 @@ class _TimesheetViewState extends State<TimesheetView> {
 
   bool get _isCurrentMonth => !_month.isBefore(_currentMonth);
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.employments.length > 1) {
-      _employmentUUID = widget.employments.first.employmentUUID;
-    }
-  }
+  /// Employments that overlap the month on screen; the selector shows when there are several.
+  List<PulseEmployment> get _monthEmployments => [
+    for (final e in widget.employments)
+      if (e.overlapsMonth(monthKey(_month))) e,
+  ];
 
   @override
   void didChangeDependencies() {
@@ -89,7 +87,7 @@ class _TimesheetViewState extends State<TimesheetView> {
     try {
       final data = await widget.api.timesheet(
         monthKey(_month),
-        employmentUUID: widget.employments.length > 1 ? _employmentUUID : null,
+        employmentUUID: _monthEmployments.length > 1 ? _employmentUUID : null,
       );
       if (!mounted || request != _request) return;
       setState(() {
@@ -121,6 +119,13 @@ class _TimesheetViewState extends State<TimesheetView> {
     if (next.isAfter(_currentMonth)) return;
     setState(() {
       _month = next;
+      if (!widget.employments.any(
+        (e) =>
+            e.employmentUUID == _employmentUUID &&
+            e.overlapsMonth(monthKey(next)),
+      )) {
+        _employmentUUID = null;
+      }
       _data = null;
     });
     unawaited(_load());
@@ -148,16 +153,17 @@ class _TimesheetViewState extends State<TimesheetView> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           _header(context),
-          if (widget.employments.length > 1)
+          if (_monthEmployments.length > 1)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: EmploymentSelector(
                 key: const Key('timesheetEmployment'),
-                employments: widget.employments,
+                employments: _monthEmployments,
                 selected: _employmentUUID,
+                allLabel: l.employmentAll,
                 onChanged: (uuid) {
                   setState(() {
-                    _employmentUUID = uuid;
+                    _employmentUUID = uuid.isEmpty ? null : uuid;
                     _data = null;
                   });
                   unawaited(_load());

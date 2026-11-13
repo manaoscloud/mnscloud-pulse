@@ -523,5 +523,6 @@
   "employmentWaiting": "{count, plural, =1{1 punch is waiting for an employment} other{{count} punches are waiting for an employment}}",
   "employmentAssign": "Assign employment and send",
   "@employmentWaiting": {"placeholders": {"count": {"type": "int"}}},
-  "tspTotalsOmitted": "Totals per employment are not available yet: you have another employment this month."
+  "tspTotalsOmitted": "Totals per employment are not available yet: you have another employment this month.",
+  "employmentAll": "All employments"
 }

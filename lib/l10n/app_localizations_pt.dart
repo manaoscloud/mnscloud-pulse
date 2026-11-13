@@ -1304,6 +1304,9 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get tspTotalsOmitted =>
       'Totais por vínculo ainda não disponíveis: você tem outro vínculo neste mês.';
+
+  @override
+  String get employmentAll => 'Todos os vínculos';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2605,4 +2608,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get tspTotalsOmitted =>
       'Totais por vínculo ainda não disponíveis: você tem outro vínculo neste mês.';
+
+  @override
+  String get employmentAll => 'Todos os vínculos';
 }

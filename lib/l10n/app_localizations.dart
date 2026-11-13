@@ -2412,6 +2412,12 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Totals per employment are not available yet: you have another employment this month.'**
   String get tspTotalsOmitted;
+
+  /// No description provided for @employmentAll.
+  ///
+  /// In en_US, this message translates to:
+  /// **'All employments'**
+  String get employmentAll;
 }
 
 class _AppLocalizationsDelegate

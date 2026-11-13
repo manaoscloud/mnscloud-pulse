@@ -384,5 +384,6 @@
   "kioskEmploymentRequired": "Tienes más de un vínculo. Ficha en un reloj de tu empresa o en la app Pulse.",
   "employmentWaiting": "{count, plural, =1{1 fichaje espera un vínculo} other{{count} fichajes esperan un vínculo}}",
   "employmentAssign": "Asignar vínculo y enviar",
-  "tspTotalsOmitted": "Los totales por vínculo aún no están disponibles: tienes otro vínculo este mes."
+  "tspTotalsOmitted": "Los totales por vínculo aún no están disponibles: tienes otro vínculo este mes.",
+  "employmentAll": "Todos los vínculos"
 }

@@ -1296,6 +1296,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tspTotalsOmitted =>
       'Totals per employment are not available yet: you have another employment this month.';
+
+  @override
+  String get employmentAll => 'All employments';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2589,4 +2592,7 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   @override
   String get tspTotalsOmitted =>
       'Totals per employment are not available yet: you have another employment this month.';
+
+  @override
+  String get employmentAll => 'All employments';
 }

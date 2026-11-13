@@ -101,8 +101,15 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   String? _assignUUID;
 
   /// Employments in force: the latest the API told, else the ones of the session.
-  List<PulseEmployment> get _employments =>
+  List<PulseEmployment> get _allEmployments =>
       widget.api.employmentsNow ?? widget.account.employments;
+
+  /// Only the ones in force today feed the selector and the single-employment rule.
+  List<PulseEmployment> get _employments =>
+      _allEmployments.inForceAt(widget.clock.nowUtc());
+
+  /// Marks already tried for an automatic assignment (never in a loop).
+  final _autoTried = <String>{};
 
   /// Bumped when a mark reaches the API, so the today summary reads the new state.
   final _delivered = ValueNotifier<int>(0);
@@ -114,10 +121,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   void initState() {
     super.initState();
     widget.sync.addListener(_synced);
-    _employmentUUID = EmploymentChoice.resolve(
-      widget.account.employments,
-      null,
-    );
+    _employmentUUID = EmploymentChoice.resolve(_employments, null);
     unawaited(_loadEmployment());
     unawaited(_start());
   }
@@ -158,6 +162,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     final serverTime = await widget.api.serverTime();
     if (serverTime != null) widget.clock.accept(serverTime);
     _pending = await _queue.load();
+    await _autoAssign();
     await _flush();
     await _reload();
   }
@@ -391,8 +396,13 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         // Never dropped: the account is read again; with at most one employment the mark goes
         // without one, with several it waits on the device for the employee to assign it.
         final fresh = await widget.api.me();
-        if (fresh != null && fresh.employments.length <= 1) {
-          await _queue.update(punch.withEmployment(null));
+        final forDay = fresh?.employments.inForceAt(punch.occurredAt);
+        if (forDay != null && forDay.length <= 1) {
+          await _queue.update(
+            punch.withEmployment(
+              forDay.isEmpty ? null : forDay.first.employmentUUID,
+            ),
+          );
           await _flush();
           _pending = await _queue.load();
           message =
@@ -421,6 +431,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       _messageError = error;
     });
     _scheduleRetry();
+    await _autoAssign();
     if (_online) await _reload();
   }
 
@@ -505,24 +516,22 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         ),
         Text(
           [
-            if (widget.account.employments.length == 1)
-              widget.account.employments.first.label(
-                l.employmentRegistrationShort,
-              )
+            if (_employments.length == 1)
+              _employments.first.label(l.employmentRegistrationShort)
             else
               widget.account.companyName,
-            if (widget.account.employments.length != 1 &&
+            if (_employments.length != 1 &&
                 widget.account.hrAccountName != widget.account.companyName)
               widget.account.hrAccountName,
             widget.account.loginCode,
           ].whereType<String>().where((part) => part.isNotEmpty).join(' · '),
           style: TextStyle(color: scheme.onSurfaceVariant),
         ),
-        if (widget.account.employments.length > 1) ...[
+        if (_employments.length > 1) ...[
           const SizedBox(height: 12),
           EmploymentSelector(
             key: const Key('punchEmployment'),
-            employments: widget.account.employments,
+            employments: _employments,
             selected: _employmentUUID,
             enabled: !_busy,
             onChanged: _chooseEmployment,
@@ -715,7 +724,11 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   /// Marks the API could not place in an employment: the employee assigns one and they go.
   Widget _assignBanner(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final employments = _employments;
+    // Offered: the employments in force on the local day of every waiting mark.
+    final employments = [
+      for (final e in _allEmployments)
+        if (_waiting.every((p) => e.inForceOn(localDay(p.occurredAt)))) e,
+    ];
     final chosen = employments.any((e) => e.employmentUUID == _assignUUID)
         ? _assignUUID
         : EmploymentChoice.resolve(employments, _employmentUUID);
@@ -755,6 +768,23 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         ),
       ),
     );
+  }
+
+  /// A waiting mark whose day has exactly one employment in force gets it and goes again.
+  Future<void> _autoAssign() async {
+    var changed = false;
+    for (final p in _waiting) {
+      if (!_autoTried.add(p.idempotencyKey)) continue;
+      final forDay = _allEmployments.inForceAt(p.occurredAt);
+      if (forDay.length == 1) {
+        await _queue.update(p.withEmployment(forDay.first.employmentUUID));
+        changed = true;
+      }
+    }
+    if (!changed) return;
+    await _flush();
+    _pending = await _queue.load();
+    if (mounted) setState(() {});
   }
 
   Future<void> _assign(String employmentUUID) async {
