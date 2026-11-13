@@ -372,5 +372,13 @@
   "tspReason": "Motivo",
   "tspIssuedAt": "Emitido el",
   "tspIncluded": "Incluido",
-  "tspDisregarded": "Desconsiderado"
+  "tspDisregarded": "Desconsiderado",
+  "employmentLabel": "Vínculo",
+  "employmentRegistrationShort": "Mat.",
+  "employmentRequired": "Tienes más de un vínculo. Elige el vínculo de este fichaje y ficha de nuevo.",
+  "employmentInvalid": "Este vínculo no es válido para ti ahora. Elige otro y ficha de nuevo.",
+  "outsideGeofence": "Fuera de la cerca",
+  "tspLocation": "Local",
+  "tspRegistration": "N.º de matrícula",
+  "tspTermination": "Baja"
 }

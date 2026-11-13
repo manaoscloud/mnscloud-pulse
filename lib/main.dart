@@ -651,6 +651,7 @@ class _PulseShellState extends State<PulseShell> {
                           api: _api,
                           clock: _clock,
                           onSessionEnded: _sessionEnded,
+                          employments: account.employments,
                         )
                       : const SizedBox.shrink(),
                 ),

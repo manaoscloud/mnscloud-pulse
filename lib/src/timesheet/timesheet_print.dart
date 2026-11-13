@@ -13,6 +13,9 @@ class TimesheetHeader {
     this.hireDate = '',
     this.positionName = '',
     this.departmentName = '',
+    this.registrationNumber = '',
+    this.locationName = '',
+    this.terminationDate = '',
     this.periodFrom = '',
     this.periodTo = '',
     this.issuedAt = '',
@@ -35,6 +38,9 @@ class TimesheetHeader {
       hireDate: text(employee, 'HireDate'),
       positionName: text(employee, 'PositionName'),
       departmentName: text(employee, 'DepartmentName'),
+      registrationNumber: text(employee, 'RegistrationNumber'),
+      locationName: text(employee, 'LocationName'),
+      terminationDate: text(employee, 'TerminationDate'),
       periodFrom: text(period, 'From'),
       periodTo: text(period, 'To'),
       issuedAt: text(map, 'IssuedAt'),
@@ -54,6 +60,9 @@ class TimesheetHeader {
   final String hireDate;
   final String positionName;
   final String departmentName;
+  final String registrationNumber;
+  final String locationName;
+  final String terminationDate;
   final String periodFrom;
   final String periodTo;
   final String issuedAt;
@@ -278,6 +287,8 @@ String timesheetHtml(
 <tr><th>${e(l.tspEmployee)}</th><td>${dash(header.employeeName)}</td><th>${e(l.tspCpf)}</th><td>${dash(header.employeeDocument)}</td></tr>
 <tr><th>${e(l.tspHireDate)}</th><td>${dash(dateText(header.hireDate))}</td><th>${e(l.tspPosition)}</th><td>${dash(header.positionName)}</td></tr>
 <tr><th>${e(l.tspPeriod)}</th><td>$period</td><th>${e(l.tspDepartment)}</th><td>${dash(header.departmentName)}</td></tr>
+<tr><th>${e(l.tspRegistration)}</th><td>${dash(header.registrationNumber)}</td><th>${e(l.tspLocation)}</th><td>${dash(header.locationName)}</td></tr>
+${header.terminationDate.isEmpty ? '' : '<tr><th>${e(l.tspTermination)}</th><td>${e(dateText(header.terminationDate))}</td><th></th><td></td></tr>'}
 </table>
 ${scheduleRows.isEmpty ? '' : '<h2>${e(l.tspSchedules)}</h2><table>$scheduleRows</table>'}
 <h2>${e(l.tspDays)}</h2>

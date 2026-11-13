@@ -372,5 +372,13 @@
   "tspReason": "Motivo",
   "tspIssuedAt": "Emitido em",
   "tspIncluded": "Incluída",
-  "tspDisregarded": "Desconsiderada"
+  "tspDisregarded": "Desconsiderada",
+  "employmentLabel": "Vínculo",
+  "employmentRegistrationShort": "Mat.",
+  "employmentRequired": "Você tem mais de um vínculo. Escolha o vínculo desta marcação e marque novamente.",
+  "employmentInvalid": "Este vínculo não é válido para você agora. Escolha outro e marque novamente.",
+  "outsideGeofence": "Fora da cerca",
+  "tspLocation": "Local",
+  "tspRegistration": "Matrícula",
+  "tspTermination": "Desligamento"
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../core/employment_choice.dart';
 import '../core/pulse_api.dart';
 import '../core/server_clock.dart';
 import '../punch/punch_labels.dart';
@@ -20,7 +21,11 @@ class TimesheetView extends StatefulWidget {
     required this.onSessionEnded,
     this.printer = printReceiptHtml,
     this.printAvailable,
+    this.employments = const [],
   });
+
+  /// Employments in force of the account: a selector shows when there is more than one.
+  final List<PulseEmployment> employments;
 
   final PulseApi api;
   final ServerClock clock;
@@ -43,6 +48,7 @@ class _TimesheetViewState extends State<TimesheetView> {
   bool _loading = false;
   bool _visible = false;
   int _request = 0;
+  String? _employmentUUID;
 
   AppLocalizations get l => AppLocalizations.of(context)!;
 
@@ -52,6 +58,14 @@ class _TimesheetViewState extends State<TimesheetView> {
   }
 
   bool get _isCurrentMonth => !_month.isBefore(_currentMonth);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.employments.length > 1) {
+      _employmentUUID = widget.employments.first.employmentUUID;
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -73,7 +87,10 @@ class _TimesheetViewState extends State<TimesheetView> {
       _error = null;
     });
     try {
-      final data = await widget.api.timesheet(monthKey(_month));
+      final data = await widget.api.timesheet(
+        monthKey(_month),
+        employmentUUID: widget.employments.length > 1 ? _employmentUUID : null,
+      );
       if (!mounted || request != _request) return;
       setState(() {
         _data = data;
@@ -131,6 +148,22 @@ class _TimesheetViewState extends State<TimesheetView> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         children: [
           _header(context),
+          if (widget.employments.length > 1)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: EmploymentSelector(
+                key: const Key('timesheetEmployment'),
+                employments: widget.employments,
+                selected: _employmentUUID,
+                onChanged: (uuid) {
+                  setState(() {
+                    _employmentUUID = uuid;
+                    _data = null;
+                  });
+                  unawaited(_load());
+                },
+              ),
+            ),
           if (_loading && data == null)
             const Padding(
               padding: EdgeInsets.only(top: 8),
@@ -449,6 +482,12 @@ class _HeaderCard extends StatelessWidget {
     final lines = [
       join(header.employerName, header.employerDocument),
       join(header.employeeName, header.employeeDocument),
+      join(
+        header.registrationNumber.isEmpty
+            ? ''
+            : '${l.tspRegistration}: ${header.registrationNumber}',
+        header.locationName,
+      ),
       join(
         header.positionName,
         header.hireDate.isEmpty

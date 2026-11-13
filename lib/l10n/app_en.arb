@@ -372,5 +372,13 @@
   "tspReason": "Reason",
   "tspIssuedAt": "Issued at",
   "tspIncluded": "Included",
-  "tspDisregarded": "Disregarded"
+  "tspDisregarded": "Disregarded",
+  "employmentLabel": "Employment",
+  "employmentRegistrationShort": "Reg.",
+  "employmentRequired": "You have more than one employment. Choose the employment of this punch and punch again.",
+  "employmentInvalid": "This employment is not valid for you now. Choose another one and punch again.",
+  "outsideGeofence": "Outside the geofence",
+  "tspLocation": "Location",
+  "tspRegistration": "Registration no.",
+  "tspTermination": "Termination"
 }

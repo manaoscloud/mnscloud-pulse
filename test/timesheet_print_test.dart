@@ -85,7 +85,10 @@ Map<String, dynamic> fullBody() => {
 
 class _FakeApi extends PulseApi {
   @override
-  Future<Map<String, dynamic>> timesheet(String month) async => fullBody();
+  Future<Map<String, dynamic>> timesheet(
+    String month, {
+    String? employmentUUID,
+  }) async => fullBody();
 }
 
 void main() {

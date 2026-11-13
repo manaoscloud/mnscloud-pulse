@@ -91,7 +91,12 @@ class PunchSync extends ChangeNotifier {
             // The marks wait for a session (and a new registration).
             await grants.invalidate(accountUUID);
             useDevice = false;
-          } else if (failure.code == 'PULSE_INVALID_PUNCH') {
+          } else if (failure.code == 'PULSE_EMPLOYMENT_REQUIRED') {
+            // A mark queued without its employment (older app version): it stays for the
+            // employee to see, and the next ones still go.
+            index++;
+          } else if (failure.code == 'PULSE_INVALID_PUNCH' ||
+              failure.code == 'PULSE_EMPLOYMENT_INVALID') {
             // The API refused the mark itself; it can never be recorded as it is.
             await queue.remove(punch.idempotencyKey);
             await queue.removePhoto(punch.idempotencyKey);

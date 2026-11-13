@@ -1256,6 +1256,32 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get tspDisregarded => 'Desconsiderada';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Você tem mais de um vínculo. Escolha o vínculo desta marcação e marque novamente.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo não é válido para você agora. Escolha outro e marque novamente.';
+
+  @override
+  String get outsideGeofence => 'Fora da cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'Matrícula';
+
+  @override
+  String get tspTermination => 'Desligamento';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2509,4 +2535,30 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get tspDisregarded => 'Desconsiderada';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Você tem mais de um vínculo. Escolha o vínculo desta marcação e marque novamente.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo não é válido para você agora. Escolha outro e marque novamente.';
+
+  @override
+  String get outsideGeofence => 'Fora da cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'Matrícula';
+
+  @override
+  String get tspTermination => 'Desligamento';
 }

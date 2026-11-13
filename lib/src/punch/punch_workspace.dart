@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../core/employment_choice.dart';
 import '../core/ids.dart';
 import '../core/location.dart';
 import '../core/punch_camera.dart';
@@ -34,6 +35,12 @@ List<Map<String, dynamic>> receiptsOfLast48h(
   kept.sort((a, b) => b.$1.compareTo(a.$1));
   return [for (final (_, punch) in kept) punch];
 }
+
+/// The API flagged the mark as taken outside the geofence of its location.
+bool isOutsideGeofence(Map<String, dynamic> punch) =>
+    punch['OutsideGeofence'] == true ||
+    punch['OutsideGeofence'] == 1 ||
+    ((punch['Flags'] as List?)?.contains('outside_geofence') ?? false);
 
 /// Employee home: official time, the suggested next mark (every mark stays available), the
 /// delivery state of marks taken without connection and the recent marks with their receipt.
@@ -87,6 +94,9 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   bool _messageError = false;
   Timer? _retry;
 
+  /// Employment of the next mark; chosen by the employee when there are several.
+  String? _employmentUUID;
+
   /// Bumped when a mark reaches the API, so the today summary reads the new state.
   final _delivered = ValueNotifier<int>(0);
 
@@ -97,6 +107,11 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   void initState() {
     super.initState();
     widget.sync.addListener(_synced);
+    _employmentUUID = EmploymentChoice.resolve(
+      widget.account.employments,
+      null,
+    );
+    unawaited(_loadEmployment());
     unawaited(_start());
   }
 
@@ -106,6 +121,30 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     _retry?.cancel();
     _delivered.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadEmployment() async {
+    final employments = widget.account.employments;
+    if (employments.length < 2) return;
+    final saved = await EmploymentChoice.read(
+      widget.account.timeClockAccountUUID,
+    );
+    if (!mounted) return;
+    setState(
+      () => _employmentUUID = EmploymentChoice.resolve(employments, saved),
+    );
+  }
+
+  void _chooseEmployment(String uuid) {
+    setState(() {
+      _employmentUUID = uuid;
+      if (_message == 'employmentRequired' || _message == 'employmentInvalid') {
+        _message = null;
+      }
+    });
+    unawaited(
+      EmploymentChoice.write(widget.account.timeClockAccountUUID, uuid),
+    );
   }
 
   Future<void> _start() async {
@@ -278,6 +317,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       latitude: location?.latitude,
       longitude: location?.longitude,
       accuracyMeters: location?.accuracyMeters,
+      employmentUUID: _employmentUUID,
     );
     // Kept on the device before sending: a lost answer or no connection never loses the mark.
     await _queue.add(punch);
@@ -339,6 +379,15 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       } else if (failure.code == 'PULSE_RATE_LIMITED') {
         message = 'rateLimited';
         error = true;
+      } else if (failure.code == 'PULSE_EMPLOYMENT_REQUIRED' ||
+          failure.code == 'PULSE_EMPLOYMENT_INVALID') {
+        // Nothing was recorded: the employee chooses the employment and punches again.
+        await _queue.remove(punch.idempotencyKey);
+        await _queue.removePhoto(punch.idempotencyKey);
+        message = failure.code == 'PULSE_EMPLOYMENT_REQUIRED'
+            ? 'employmentRequired'
+            : 'employmentInvalid';
+        error = true;
       } else {
         await _queue.remove(punch.idempotencyKey);
         await _queue.removePhoto(punch.idempotencyKey);
@@ -398,6 +447,8 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     'punchSynced' => l.punchSynced,
     'punchQueued' => l.punchQueued,
     'rateLimited' => l.rateLimited,
+    'employmentRequired' => l.employmentRequired,
+    'employmentInvalid' => l.employmentInvalid,
     _ => l.requestError,
   };
 
@@ -436,13 +487,29 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         ),
         Text(
           [
-            widget.account.companyName,
-            if (widget.account.hrAccountName != widget.account.companyName)
+            if (widget.account.employments.length == 1)
+              widget.account.employments.first.label(
+                l.employmentRegistrationShort,
+              )
+            else
+              widget.account.companyName,
+            if (widget.account.employments.length != 1 &&
+                widget.account.hrAccountName != widget.account.companyName)
               widget.account.hrAccountName,
             widget.account.loginCode,
           ].whereType<String>().where((part) => part.isNotEmpty).join(' · '),
           style: TextStyle(color: scheme.onSurfaceVariant),
         ),
+        if (widget.account.employments.length > 1) ...[
+          const SizedBox(height: 12),
+          EmploymentSelector(
+            key: const Key('punchEmployment'),
+            employments: widget.account.employments,
+            selected: _employmentUUID,
+            enabled: !_busy,
+            onChanged: _chooseEmployment,
+          ),
+        ],
         const SizedBox(height: 20),
         _OfficialClock(clock: widget.clock),
         const SizedBox(height: 8),
@@ -559,7 +626,20 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
               leading: const Icon(Icons.receipt_long_outlined),
               title: Text(punchLabel(l, punch['Type']?.toString() ?? '')),
               subtitle: Text(_whenText(context, punch['OccurredAt'])),
-              trailing: Text(l.nsrLabel(punch['NSR'].toString())),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(l.nsrLabel(punch['NSR'].toString())),
+                  if (isOutsideGeofence(punch))
+                    Text(
+                      l.outsideGeofence,
+                      key: Key('outsideGeofence-${punch['NSR']}'),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: scheme.error),
+                    ),
+                ],
+              ),
               onTap:
                   widget.api.signedIn &&
                       (punch['TimePunchUUID']?.toString() ?? '').isNotEmpty
@@ -598,6 +678,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
                   l.sentLater,
                 if (punch['NSR'] != null) l.nsrLabel(punch['NSR'].toString()),
                 if (punch['HasPhoto'] == true) l.withPhoto,
+                if (isOutsideGeofence(punch)) l.outsideGeofence,
               ].join('\n'),
               textAlign: TextAlign.end,
               style: Theme.of(context).textTheme.bodySmall,

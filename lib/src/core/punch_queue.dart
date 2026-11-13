@@ -19,6 +19,7 @@ class QueuedPunch {
     this.latitude,
     this.longitude,
     this.accuracyMeters,
+    this.employmentUUID,
   });
 
   factory QueuedPunch.fromJson(Map<String, dynamic> json) => QueuedPunch(
@@ -28,6 +29,7 @@ class QueuedPunch {
     latitude: (json['latitude'] as num?)?.toDouble(),
     longitude: (json['longitude'] as num?)?.toDouble(),
     accuracyMeters: (json['accuracyMeters'] as num?)?.toDouble(),
+    employmentUUID: _nonEmpty(json['employmentUUID']),
   );
 
   final String idempotencyKey;
@@ -37,6 +39,9 @@ class QueuedPunch {
   final double? longitude;
   final double? accuracyMeters;
 
+  /// Employment the mark belongs to (chosen at the tap when the employee has several).
+  final String? employmentUUID;
+
   Map<String, dynamic> toJson() => {
     'idempotencyKey': idempotencyKey,
     'type': type,
@@ -44,12 +49,18 @@ class QueuedPunch {
     if (latitude != null) 'latitude': latitude,
     if (longitude != null) 'longitude': longitude,
     if (accuracyMeters != null) 'accuracyMeters': accuracyMeters,
+    if (employmentUUID != null) 'employmentUUID': employmentUUID,
   };
 
   /// Body of POST /pulse/punches. A first attempt is online (server clock); a mark sent from the
   /// queue later is offline and keeps the corrected device time of the tap.
   Map<String, dynamic> body({required bool offline, required String source}) =>
       {...toJson(), 'offline': offline, 'source': source};
+}
+
+String? _nonEmpty(Object? value) {
+  final text = value?.toString() ?? '';
+  return text.isEmpty ? null : text;
 }
 
 /// Owner of the photos of the shared time clock in [PunchStore] (accounts use their own uuid).

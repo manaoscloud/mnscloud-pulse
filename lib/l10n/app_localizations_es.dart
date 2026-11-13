@@ -1256,6 +1256,32 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get tspDisregarded => 'Desconsiderado';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Tienes más de un vínculo. Elige el vínculo de este fichaje y ficha de nuevo.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo no es válido para ti ahora. Elige otro y ficha de nuevo.';
+
+  @override
+  String get outsideGeofence => 'Fuera de la cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'N.º de matrícula';
+
+  @override
+  String get tspTermination => 'Baja';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2509,4 +2535,30 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get tspDisregarded => 'Desconsiderado';
+
+  @override
+  String get employmentLabel => 'Vínculo';
+
+  @override
+  String get employmentRegistrationShort => 'Mat.';
+
+  @override
+  String get employmentRequired =>
+      'Tienes más de un vínculo. Elige el vínculo de este fichaje y ficha de nuevo.';
+
+  @override
+  String get employmentInvalid =>
+      'Este vínculo no es válido para ti ahora. Elige otro y ficha de nuevo.';
+
+  @override
+  String get outsideGeofence => 'Fuera de la cerca';
+
+  @override
+  String get tspLocation => 'Local';
+
+  @override
+  String get tspRegistration => 'N.º de matrícula';
+
+  @override
+  String get tspTermination => 'Baja';
 }

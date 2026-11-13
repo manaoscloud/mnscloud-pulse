@@ -1248,6 +1248,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tspDisregarded => 'Disregarded';
+
+  @override
+  String get employmentLabel => 'Employment';
+
+  @override
+  String get employmentRegistrationShort => 'Reg.';
+
+  @override
+  String get employmentRequired =>
+      'You have more than one employment. Choose the employment of this punch and punch again.';
+
+  @override
+  String get employmentInvalid =>
+      'This employment is not valid for you now. Choose another one and punch again.';
+
+  @override
+  String get outsideGeofence => 'Outside the geofence';
+
+  @override
+  String get tspLocation => 'Location';
+
+  @override
+  String get tspRegistration => 'Registration no.';
+
+  @override
+  String get tspTermination => 'Termination';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2493,4 +2519,30 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get tspDisregarded => 'Disregarded';
+
+  @override
+  String get employmentLabel => 'Employment';
+
+  @override
+  String get employmentRegistrationShort => 'Reg.';
+
+  @override
+  String get employmentRequired =>
+      'You have more than one employment. Choose the employment of this punch and punch again.';
+
+  @override
+  String get employmentInvalid =>
+      'This employment is not valid for you now. Choose another one and punch again.';
+
+  @override
+  String get outsideGeofence => 'Outside the geofence';
+
+  @override
+  String get tspLocation => 'Location';
+
+  @override
+  String get tspRegistration => 'Registration no.';
+
+  @override
+  String get tspTermination => 'Termination';
 }

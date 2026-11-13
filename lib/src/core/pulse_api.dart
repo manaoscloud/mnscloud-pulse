@@ -38,6 +38,49 @@ class PulseFailure implements Exception {
   String toString() => 'PulseFailure($code)';
 }
 
+/// One employment in force of the employee (company, location and registration number), as the
+/// API lists it in `account.employments`.
+class PulseEmployment {
+  const PulseEmployment({
+    required this.employmentUUID,
+    this.companyUUID = '',
+    this.companyName = '',
+    this.locationUUID = '',
+    this.locationName = '',
+    this.registrationNumber = '',
+    this.hireDate = '',
+  });
+
+  factory PulseEmployment.fromJson(Map<String, dynamic> json) {
+    String text(String key) => json[key]?.toString() ?? '';
+    return PulseEmployment(
+      employmentUUID: text('employmentUUID'),
+      companyUUID: text('companyUUID'),
+      companyName: text('companyName'),
+      locationUUID: text('locationUUID'),
+      locationName: text('locationName'),
+      registrationNumber: text('registrationNumber'),
+      hireDate: text('hireDate'),
+    );
+  }
+
+  final String employmentUUID;
+  final String companyUUID;
+  final String companyName;
+  final String locationUUID;
+  final String locationName;
+  final String registrationNumber;
+  final String hireDate;
+
+  /// `Company · Location · Reg. 123`, leaving out what is empty.
+  String label(String registrationPrefix) => [
+    companyName,
+    locationName,
+    if (registrationNumber.isNotEmpty)
+      '$registrationPrefix $registrationNumber',
+  ].where((part) => part.isNotEmpty).join(' · ');
+}
+
 /// Signed-in employee as returned by the API (never stored on the device).
 class PulseAccount {
   const PulseAccount({
@@ -47,6 +90,7 @@ class PulseAccount {
     this.employeeName,
     this.companyName,
     this.hrAccountName,
+    this.employments = const [],
   });
 
   factory PulseAccount.fromJson(Map<String, dynamic> json) => PulseAccount(
@@ -56,6 +100,12 @@ class PulseAccount {
     employeeName: json['employeeName']?.toString(),
     companyName: json['companyName']?.toString(),
     hrAccountName: json['hrAccountName']?.toString(),
+    employments: [
+      for (final item in (json['employments'] as List?) ?? const [])
+        if (item is Map<String, dynamic> &&
+            (item['employmentUUID']?.toString() ?? '').isNotEmpty)
+          PulseEmployment.fromJson(item),
+    ],
   );
 
   final String timeClockAccountUUID;
@@ -67,6 +117,9 @@ class PulseAccount {
   /// Customer HR account (resale) of the time clock account; null for the reseller's own HR.
   final String? hrAccountName;
 
+  /// Employments in force; empty when the API lists none (the server then picks by itself).
+  final List<PulseEmployment> employments;
+
   PulseAccount passwordChanged() => PulseAccount(
     timeClockAccountUUID: timeClockAccountUUID,
     loginCode: loginCode,
@@ -74,6 +127,7 @@ class PulseAccount {
     employeeName: employeeName,
     companyName: companyName,
     hrAccountName: hrAccountName,
+    employments: employments,
   );
 }
 
@@ -492,8 +546,14 @@ class PulseApi {
   }
 
   /// Monthly timesheet (`month` is YYYY-MM): consolidated days with their marks and the totals.
-  Future<Map<String, dynamic>> timesheet(String month) async {
-    final data = await call('GET', '/pulse/timesheet?month=$month');
+  Future<Map<String, dynamic>> timesheet(
+    String month, {
+    String? employmentUUID,
+  }) async {
+    final employment = employmentUUID == null || employmentUUID.isEmpty
+        ? ''
+        : '&employmentUUID=${Uri.encodeQueryComponent(employmentUUID)}';
+    final data = await call('GET', '/pulse/timesheet?month=$month$employment');
     final body = data['data'];
     if (body is! Map<String, dynamic>) throw const PulseFailure('requestError');
     return body;
