@@ -26,6 +26,7 @@ import 'src/pwa/install_app_button.dart';
 import 'src/documents/documents_view.dart';
 import 'src/notifications/notifications_view.dart';
 import 'src/requests/requests_view.dart';
+import 'src/timesheet/closing_cards.dart';
 import 'src/timesheet/timesheet_view.dart';
 import 'l10n/app_localizations.dart';
 import 'src/version/app_update_overlay.dart';
@@ -177,6 +178,10 @@ class _PulseShellState extends State<PulseShell> {
   bool _requestsOpened = false;
   bool _documentsOpened = false;
 
+  /// Month a closing notice asked the timesheet to show; `closingsChanged` refreshes the notice.
+  final _focusMonth = ValueNotifier<String?>(null);
+  final _closingsChanged = ValueNotifier<int>(0);
+
   /// This device as the company time clock (read once at start; null = personal Pulse).
   late final KioskClient _kiosk = KioskClient(
     httpClient: widget.client,
@@ -200,6 +205,16 @@ class _PulseShellState extends State<PulseShell> {
       _requestsOpened = true;
     });
     if (requestUUID != null) _focusRequest.value = requestUUID;
+  }
+
+  /// Timesheet tab at a closed month waiting for acknowledgement.
+  void _openTimesheet(String monthKey) {
+    if (!mounted) return;
+    setState(() {
+      _tab = 1;
+      _timesheetOpened = true;
+    });
+    _focusMonth.value = monthKey;
   }
 
   /// Documents tab (inbox entry or push of a new HR document or company notice, `?tab=documents`).
@@ -293,6 +308,8 @@ class _PulseShellState extends State<PulseShell> {
     _newPasswordController.dispose();
     _clock.dispose();
     _focusRequest.dispose();
+    _focusMonth.dispose();
+    _closingsChanged.dispose();
     super.dispose();
   }
 
@@ -616,6 +633,15 @@ class _PulseShellState extends State<PulseShell> {
                               ),
                             ),
                           ),
+                        ClosingNoticeHost(
+                          key: ValueKey(
+                            'closings-${account.timeClockAccountUUID}',
+                          ),
+                          api: _api,
+                          refresh: _closingsChanged,
+                          onSessionEnded: _sessionEnded,
+                          onOpen: _openTimesheet,
+                        ),
                         PunchWorkspace(
                           key: ValueKey(account.timeClockAccountUUID),
                           api: _api,
@@ -641,6 +667,8 @@ class _PulseShellState extends State<PulseShell> {
                           clock: _clock,
                           onSessionEnded: _sessionEnded,
                           employments: account.employments,
+                          focusMonth: _focusMonth,
+                          onClosingsChanged: () => _closingsChanged.value++,
                         )
                       : const SizedBox.shrink(),
                 ),

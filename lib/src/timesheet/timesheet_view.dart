@@ -8,6 +8,8 @@ import '../core/pulse_api.dart';
 import '../core/server_clock.dart';
 import '../punch/punch_labels.dart';
 import '../receipt/receipt_print.dart';
+import 'closing_cards.dart';
+import 'closing_models.dart';
 import 'timesheet_labels.dart';
 import 'timesheet_print.dart';
 
@@ -22,7 +24,15 @@ class TimesheetView extends StatefulWidget {
     this.printer = printReceiptHtml,
     this.printAvailable,
     this.employments = const [],
+    this.focusMonth,
+    this.onClosingsChanged,
   });
+
+  /// Month (`YYYY-MM`) a notice asked to open; consumed once.
+  final ValueNotifier<String?>? focusMonth;
+
+  /// Called after an acknowledgement, so the main screen notice refreshes.
+  final VoidCallback? onClosingsChanged;
 
   /// Employments in force of the account: a selector shows when there is more than one.
   final List<PulseEmployment> employments;
@@ -49,6 +59,9 @@ class _TimesheetViewState extends State<TimesheetView> {
   bool _visible = false;
   int _request = 0;
   String? _employmentUUID;
+  List<TimesheetClosing> _closings = const [];
+  HourBank? _bank;
+  bool _acking = false;
 
   AppLocalizations get l => AppLocalizations.of(context)!;
 
@@ -57,6 +70,9 @@ class _TimesheetViewState extends State<TimesheetView> {
     return DateTime(now.year, now.month);
   }
 
+  TimesheetClosing? get _closingOfMonth =>
+      closingOfMonth(_closings, monthKey(_month));
+
   bool get _isCurrentMonth => !_month.isBefore(_currentMonth);
 
   /// Employments that overlap the month on screen; the selector shows when there are several.
@@ -64,6 +80,35 @@ class _TimesheetViewState extends State<TimesheetView> {
     for (final e in widget.employments)
       if (e.overlapsMonth(monthKey(_month))) e,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focusMonth?.addListener(_focus);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focus());
+  }
+
+  @override
+  void dispose() {
+    widget.focusMonth?.removeListener(_focus);
+    super.dispose();
+  }
+
+  /// A notice asked for a month: show it (never a future one).
+  void _focus() {
+    final key = widget.focusMonth?.value;
+    if (key == null || !mounted) return;
+    widget.focusMonth!.value = null;
+    final m = RegExp(r'^(\d{4})-(\d{2})$').firstMatch(key);
+    if (m == null) return;
+    final target = DateTime(int.parse(m[1]!), int.parse(m[2]!));
+    if (target.isAfter(_currentMonth)) return;
+    setState(() {
+      _month = target;
+      _data = null;
+    });
+    unawaited(_load());
+  }
 
   @override
   void didChangeDependencies() {
@@ -94,6 +139,7 @@ class _TimesheetViewState extends State<TimesheetView> {
         _data = data;
         _loading = false;
       });
+      unawaited(_loadClosing(request));
     } on PulseFailure catch (failure) {
       if (failure.sessionEnded) {
         widget.onSessionEnded(failure.code);
@@ -105,6 +151,75 @@ class _TimesheetViewState extends State<TimesheetView> {
         _loading = false;
       });
     }
+  }
+
+  /// Closings and hour bank need the network and never block the timesheet: a failure leaves the
+  /// sections out (nothing is cached or queued).
+  Future<void> _loadClosing(int request) async {
+    List<TimesheetClosing>? closings;
+    HourBank? bank;
+    try {
+      closings = TimesheetClosing.parseAll(
+        await widget.api.listTimesheetClosings(),
+      );
+    } on PulseFailure catch (failure) {
+      if (failure.sessionEnded) widget.onSessionEnded(failure.code);
+    }
+    try {
+      bank = HourBank(await widget.api.hourBank());
+    } on PulseFailure catch (failure) {
+      if (failure.sessionEnded) widget.onSessionEnded(failure.code);
+    }
+    if (!mounted || request != _request) return;
+    setState(() {
+      if (closings != null) _closings = closings;
+      _bank = bank;
+    });
+  }
+
+  Future<void> _acknowledge(TimesheetClosing closing) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.closingAckConfirmTitle),
+        content: Text(
+          l.closingAckConfirmBody(monthText(closing.monthKey)),
+          key: const Key('closingAckConfirmBody'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            key: const Key('closingAckConfirm'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l.closingAck),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _acking = true);
+    String? error;
+    try {
+      await widget.api.acknowledgeTimesheetClosing(closing.uuid);
+    } on PulseFailure catch (failure) {
+      if (failure.sessionEnded) {
+        widget.onSessionEnded(failure.code);
+        return;
+      }
+      // Reopened or gone: the list below is read again and shows the current state.
+      error = failure.code == 'networkError' ? l.networkError : l.requestError;
+    }
+    if (!mounted) return;
+    setState(() => _acking = false);
+    if (error != null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error)));
+    }
+    await _loadClosing(_request);
+    widget.onClosingsChanged?.call();
   }
 
   Future<void> _print() async {
@@ -190,6 +305,14 @@ class _TimesheetViewState extends State<TimesheetView> {
                 ],
               ),
             ),
+          if (_closingOfMonth != null)
+            ClosingCard(
+              closing: _closingOfMonth!,
+              onAcknowledge: _acking
+                  ? null
+                  : () => _acknowledge(_closingOfMonth!),
+            ),
+          if (_bank != null && _bank!.enabled) HourBankCard(bank: _bank!),
           if (data != null) ...[
             _HeaderCard(header: TimesheetHeader.fromJson(data['header'])),
             if (totalsOmitted(data))

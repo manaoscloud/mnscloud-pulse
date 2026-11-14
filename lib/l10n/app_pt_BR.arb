@@ -387,5 +387,59 @@
   "tspTotalsOmitted": "Totais por vínculo ainda não disponíveis: você tem outro vínculo neste mês.",
   "employmentAll": "Todos os vínculos",
   "punchTooOld": "Marcação de {when} não enviada: ficou mais de 7 dias sem conexão. Procure o RH.",
-  "punchNoticeDismiss": "Entendi"
+  "punchNoticeDismiss": "Entendi",
+  "closingTitle": "Fechamento",
+  "closingClosedAt": "Fechado em {when}",
+  "@closingClosedAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "closingAck": "Dar ciência",
+  "closingAcked": "Ciente em {when}",
+  "@closingAcked": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "closingAwaiting": "Aguardando sua ciência",
+  "closingAckConfirmTitle": "Dar ciência do fechamento",
+  "closingAckConfirmBody": "Confirmo que vi o espelho de ponto fechado de {month}.",
+  "@closingAckConfirmBody": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "closingWorked": "Trabalhadas",
+  "closingOvertime50": "Horas extras 50%",
+  "closingOvertime100": "Horas extras 100%",
+  "closingAbsences": "Faltas (dias)",
+  "closingDsrLost": "Semanas sem DSR",
+  "closingNotice": "{count, plural, =1{1 mês fechado aguardando sua ciência} other{{count} meses fechados aguardando sua ciência}}",
+  "@closingNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "closingNoticeOpen": "Ver",
+  "bankTitle": "Banco de horas",
+  "bankBalance": "Saldo",
+  "bankCredit": "Crédito",
+  "bankDebit": "Débito",
+  "bankPaid": "Pago",
+  "bankExpires": "Vence em",
+  "bankEntries": "Últimos lançamentos",
+  "bankNoEntries": "Nenhum lançamento.",
+  "bankKindCredit": "Crédito",
+  "bankKindDebit": "Débito",
+  "bankKindExpirePaid": "Pago (vencido)",
+  "bankKindManualPaid": "Pago"
 }

@@ -2430,6 +2430,162 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'OK'**
   String get punchNoticeDismiss;
+
+  /// No description provided for @closingTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Closing'**
+  String get closingTitle;
+
+  /// No description provided for @closingClosedAt.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Closed on {when}'**
+  String closingClosedAt(String when);
+
+  /// No description provided for @closingAck.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acknowledge'**
+  String get closingAck;
+
+  /// No description provided for @closingAcked.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acknowledged on {when}'**
+  String closingAcked(String when);
+
+  /// No description provided for @closingAwaiting.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Waiting for your acknowledgement'**
+  String get closingAwaiting;
+
+  /// No description provided for @closingAckConfirmTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Acknowledge the closing'**
+  String get closingAckConfirmTitle;
+
+  /// No description provided for @closingAckConfirmBody.
+  ///
+  /// In en_US, this message translates to:
+  /// **'I confirm that I saw the closed timesheet of {month}.'**
+  String closingAckConfirmBody(String month);
+
+  /// No description provided for @closingWorked.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Worked'**
+  String get closingWorked;
+
+  /// No description provided for @closingOvertime50.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Overtime 50%'**
+  String get closingOvertime50;
+
+  /// No description provided for @closingOvertime100.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Overtime 100%'**
+  String get closingOvertime100;
+
+  /// No description provided for @closingAbsences.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Absences (days)'**
+  String get closingAbsences;
+
+  /// No description provided for @closingDsrLost.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Weeks without paid rest'**
+  String get closingDsrLost;
+
+  /// No description provided for @closingNotice.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{count, plural, =1{1 closed month waiting for your acknowledgement} other{{count} closed months waiting for your acknowledgement}}'**
+  String closingNotice(int count);
+
+  /// No description provided for @closingNoticeOpen.
+  ///
+  /// In en_US, this message translates to:
+  /// **'View'**
+  String get closingNoticeOpen;
+
+  /// No description provided for @bankTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Hour bank'**
+  String get bankTitle;
+
+  /// No description provided for @bankBalance.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Balance'**
+  String get bankBalance;
+
+  /// No description provided for @bankCredit.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Credit'**
+  String get bankCredit;
+
+  /// No description provided for @bankDebit.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Debit'**
+  String get bankDebit;
+
+  /// No description provided for @bankPaid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Paid'**
+  String get bankPaid;
+
+  /// No description provided for @bankExpires.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Expires on'**
+  String get bankExpires;
+
+  /// No description provided for @bankEntries.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Latest entries'**
+  String get bankEntries;
+
+  /// No description provided for @bankNoEntries.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No entries.'**
+  String get bankNoEntries;
+
+  /// No description provided for @bankKindCredit.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Credit'**
+  String get bankKindCredit;
+
+  /// No description provided for @bankKindDebit.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Debit'**
+  String get bankKindDebit;
+
+  /// No description provided for @bankKindExpirePaid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Paid (expired)'**
+  String get bankKindExpirePaid;
+
+  /// No description provided for @bankKindManualPaid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Paid'**
+  String get bankKindManualPaid;
 }
 
 class _AppLocalizationsDelegate

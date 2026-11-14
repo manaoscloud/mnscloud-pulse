@@ -540,7 +540,8 @@ void main() {
   ) async {
     final queries = <String>[];
     final client = MockClient((request) async {
-      queries.add(request.url.query);
+      // Only the timesheet read (closings and hour bank have no month).
+      if (request.url.query.contains('month=')) queries.add(request.url.query);
       return json({
         'data': {
           'header': {
