@@ -1307,6 +1307,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get employmentAll => 'Todos os vínculos';
+
+  @override
+  String punchTooOld(String when) {
+    return 'Marcação de $when não enviada: ficou mais de 7 dias sem conexão. Procure o RH.';
+  }
+
+  @override
+  String get punchNoticeDismiss => 'Entendi';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2611,4 +2619,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get employmentAll => 'Todos os vínculos';
+
+  @override
+  String punchTooOld(String when) {
+    return 'Marcação de $when não enviada: ficou mais de 7 dias sem conexão. Procure o RH.';
+  }
+
+  @override
+  String get punchNoticeDismiss => 'Entendi';
 }

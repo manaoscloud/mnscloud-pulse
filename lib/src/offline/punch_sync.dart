@@ -54,6 +54,7 @@ class PunchSync extends ChangeNotifier {
     final queue = PunchQueue(accountUUID);
     var sent = 0;
     var photosSent = 0;
+    var refused = 0;
     var offline = false;
     String? sessionEnded;
     var useSession = api.signedIn && api.accountUUID == accountUUID;
@@ -116,6 +117,11 @@ class PunchSync extends ChangeNotifier {
               await queue.update(punch.waitingForEmployment());
               index++;
             }
+          } else if (failure.code == punchTooOldCode) {
+            // Too long offline: never retried; the employee gets a notice to contact HR.
+            await queue.discardRefused(punch, failure.code);
+            refused++;
+            index++;
           } else if (failure.code == 'PULSE_INVALID_PUNCH') {
             // The API refused the mark itself; it can never be recorded as it is.
             await queue.remove(punch.idempotencyKey);
@@ -138,7 +144,7 @@ class PunchSync extends ChangeNotifier {
         if (photos.sessionEnded != null) sessionEnded ??= photos.sessionEnded;
       }
     } finally {
-      if (sent > 0 || photosSent > 0) notifyListeners();
+      if (sent > 0 || photosSent > 0 || refused > 0) notifyListeners();
     }
     return FlushResult(
       sent: sent,

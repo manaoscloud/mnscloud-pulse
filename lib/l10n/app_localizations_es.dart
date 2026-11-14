@@ -1307,6 +1307,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get employmentAll => 'Todos los vínculos';
+
+  @override
+  String punchTooOld(String when) {
+    return 'Registro de $when no enviado: pasó más de 7 días sin conexión. Consulte a RR. HH.';
+  }
+
+  @override
+  String get punchNoticeDismiss => 'Entendido';
 }
 
 /// The translations for Spanish Castilian, as used in Spain (`es_ES`).
@@ -2611,4 +2619,12 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get employmentAll => 'Todos los vínculos';
+
+  @override
+  String punchTooOld(String when) {
+    return 'Registro de $when no enviado: pasó más de 7 días sin conexión. Consulte a RR. HH.';
+  }
+
+  @override
+  String get punchNoticeDismiss => 'Entendido';
 }

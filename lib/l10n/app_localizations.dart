@@ -2418,6 +2418,18 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'All employments'**
   String get employmentAll;
+
+  /// No description provided for @punchTooOld.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Punch of {when} not sent: more than 7 days without connection. Contact HR.'**
+  String punchTooOld(String when);
+
+  /// No description provided for @punchNoticeDismiss.
+  ///
+  /// In en_US, this message translates to:
+  /// **'OK'**
+  String get punchNoticeDismiss;
 }
 
 class _AppLocalizationsDelegate
