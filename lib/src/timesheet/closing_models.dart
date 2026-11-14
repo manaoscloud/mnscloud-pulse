@@ -49,11 +49,15 @@ class HourBankEntry {
   String get expiresOn => json['ExpiresOn']?.toString() ?? '';
 }
 
-/// Hour bank of the employee. [enabled] only in `bank` mode (hidden in `payment` mode).
+/// Hour bank of the employee. [enabled] in `bank` mode, and in `payment` mode only while there is
+/// a balance or entries (credits of an earlier bank policy still expire and are paid).
 class HourBank {
   const HourBank(this.json);
   final Map<String, dynamic> json;
-  bool get enabled => json['OvertimeMode']?.toString() == 'bank';
+  bool get enabled =>
+      json['OvertimeMode']?.toString() == 'bank' ||
+      balance != 0 ||
+      entries.isNotEmpty;
   int get balance => minutesOf(json['BalanceMinutes']);
   String get nextExpiresOn => json['NextExpiresOn']?.toString() ?? '';
   List<HourBankEntry> get entries => [

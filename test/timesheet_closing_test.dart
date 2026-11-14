@@ -37,8 +37,9 @@ Map<String, dynamic> closingJson({bool acked = false, String mode = 'bank'}) =>
     };
 
 class Fake {
-  Fake({this.mode = 'bank'});
+  Fake({this.mode = 'bank', this.emptyBank = false});
   final String mode;
+  final bool emptyBank;
   bool acked = false;
   int acks = 0;
   bool offline = false;
@@ -73,12 +74,14 @@ class Fake {
       return json({
         'data': {
           'OvertimeMode': mode,
-          'BalanceMinutes': 90,
+          'BalanceMinutes': emptyBank ? 0 : 90,
           'NextExpiresOn': '2027-04-30',
-          'Entries': [
-            {'MonthKey': thisMonth, 'Kind': 'credit', 'Minutes': 120},
-            {'MonthKey': thisMonth, 'Kind': 'expire_paid', 'Minutes': 30},
-          ],
+          'Entries': emptyBank
+              ? []
+              : [
+                  {'MonthKey': thisMonth, 'Kind': 'credit', 'Minutes': 120},
+                  {'MonthKey': thisMonth, 'Kind': 'expire_paid', 'Minutes': 30},
+                ],
         },
       });
     }
@@ -134,8 +137,18 @@ void main() {
         {'Kind': 'credit'},
       ],
     });
-    expect(bank.enabled, isFalse);
+    expect(bank.enabled, isTrue);
     expect(bank.entries, hasLength(1));
+    expect(
+      HourBank({'OvertimeMode': 'payment', 'BalanceMinutes': 30}).enabled,
+      isTrue,
+    );
+    expect(
+      HourBank({'OvertimeMode': 'payment', 'BalanceMinutes': 0, 'Entries': []})
+          .enabled,
+      isFalse,
+    );
+    expect(HourBank({'OvertimeMode': 'bank'}).enabled, isTrue);
   });
 
   test('api calls hit the closing endpoints', () async {
@@ -211,23 +224,31 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('hour bank shows in bank mode only', (tester) async {
-    phone(tester);
-    await tester.pumpWidget(host(Fake()));
-    await settle(tester);
-    expect(find.byKey(const Key('hourBankCard')), findsOneWidget);
-    expect(textOf(tester, 'hourBankBalance'), 'Balance: +01:30');
-    expect(find.textContaining('Paid (expired)'), findsOneWidget);
-    expect(textOf(tester, 'hourBankExpires'), 'Expires on 30/04/2027');
-    await tester.pumpWidget(const SizedBox());
+  testWidgets(
+    'hour bank shows in bank mode or while a payment-mode bank has balance',
+    (tester) async {
+      phone(tester);
+      await tester.pumpWidget(host(Fake()));
+      await settle(tester);
+      expect(find.byKey(const Key('hourBankCard')), findsOneWidget);
+      expect(textOf(tester, 'hourBankBalance'), 'Balance: +01:30');
+      expect(find.textContaining('Paid (expired)'), findsOneWidget);
+      expect(textOf(tester, 'hourBankExpires'), 'Expires on 30/04/2027');
+      await tester.pumpWidget(const SizedBox());
 
-    await tester.pumpWidget(host(Fake(mode: 'payment')));
-    await settle(tester);
-    expect(find.byKey(const Key('closingCard')), findsOneWidget);
-    expect(find.byKey(const Key('hourBankCard')), findsNothing);
-    expect(find.byKey(const Key('closingBankBalance')), findsNothing);
-    await tester.pumpWidget(const SizedBox());
-  });
+      await tester.pumpWidget(host(Fake(mode: 'payment')));
+      await settle(tester);
+      expect(find.byKey(const Key('hourBankCard')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+
+      await tester.pumpWidget(host(Fake(mode: 'payment', emptyBank: true)));
+      await settle(tester);
+      expect(find.byKey(const Key('closingCard')), findsOneWidget);
+      expect(find.byKey(const Key('hourBankCard')), findsNothing);
+      expect(find.byKey(const Key('closingBankBalance')), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets('main screen notice lists pending months and opens one', (
     tester,
