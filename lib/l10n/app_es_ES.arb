@@ -387,5 +387,59 @@
   "tspTotalsOmitted": "Los totales por vínculo aún no están disponibles: tienes otro vínculo este mes.",
   "employmentAll": "Todos los vínculos",
   "punchTooOld": "Registro de {when} no enviado: pasó más de 7 días sin conexión. Consulte a RR. HH.",
-  "punchNoticeDismiss": "Entendido"
+  "punchNoticeDismiss": "Entendido",
+  "closingTitle": "Cierre",
+  "closingClosedAt": "Cerrado el {when}",
+  "@closingClosedAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "closingAck": "Dar constancia",
+  "closingAcked": "Enterado el {when}",
+  "@closingAcked": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "closingAwaiting": "Esperando tu constancia",
+  "closingAckConfirmTitle": "Dar constancia del cierre",
+  "closingAckConfirmBody": "Confirmo que vi la hoja de horas cerrada de {month}.",
+  "@closingAckConfirmBody": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "closingWorked": "Trabajadas",
+  "closingOvertime50": "Horas extra 50%",
+  "closingOvertime100": "Horas extra 100%",
+  "closingAbsences": "Ausencias (días)",
+  "closingDsrLost": "Semanas sin descanso pago",
+  "closingNotice": "{count, plural, =1{1 mes cerrado esperando tu constancia} other{{count} meses cerrados esperando tu constancia}}",
+  "@closingNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "closingNoticeOpen": "Ver",
+  "bankTitle": "Banco de horas",
+  "bankBalance": "Saldo",
+  "bankCredit": "Crédito",
+  "bankDebit": "Débito",
+  "bankPaid": "Pagado",
+  "bankExpires": "Vence el",
+  "bankEntries": "Últimos movimientos",
+  "bankNoEntries": "Sin movimientos.",
+  "bankKindCredit": "Crédito",
+  "bankKindDebit": "Débito",
+  "bankKindExpirePaid": "Pagado (vencido)",
+  "bankKindManualPaid": "Pagado"
 }

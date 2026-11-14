@@ -387,5 +387,59 @@
   "tspTotalsOmitted": "Totals per employment are not available yet: you have another employment this month.",
   "employmentAll": "All employments",
   "punchTooOld": "Punch of {when} not sent: more than 7 days without connection. Contact HR.",
-  "punchNoticeDismiss": "OK"
+  "punchNoticeDismiss": "OK",
+  "closingTitle": "Closing",
+  "closingClosedAt": "Closed on {when}",
+  "@closingClosedAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "closingAck": "Acknowledge",
+  "closingAcked": "Acknowledged on {when}",
+  "@closingAcked": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "closingAwaiting": "Waiting for your acknowledgement",
+  "closingAckConfirmTitle": "Acknowledge the closing",
+  "closingAckConfirmBody": "I confirm that I saw the closed timesheet of {month}.",
+  "@closingAckConfirmBody": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "closingWorked": "Worked",
+  "closingOvertime50": "Overtime 50%",
+  "closingOvertime100": "Overtime 100%",
+  "closingAbsences": "Absences (days)",
+  "closingDsrLost": "Weeks without paid rest",
+  "closingNotice": "{count, plural, =1{1 closed month waiting for your acknowledgement} other{{count} closed months waiting for your acknowledgement}}",
+  "@closingNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "closingNoticeOpen": "View",
+  "bankTitle": "Hour bank",
+  "bankBalance": "Balance",
+  "bankCredit": "Credit",
+  "bankDebit": "Debit",
+  "bankPaid": "Paid",
+  "bankExpires": "Expires on",
+  "bankEntries": "Latest entries",
+  "bankNoEntries": "No entries.",
+  "bankKindCredit": "Credit",
+  "bankKindDebit": "Debit",
+  "bankKindExpirePaid": "Paid (expired)",
+  "bankKindManualPaid": "Paid"
 }

@@ -818,6 +818,34 @@ class PulseApi {
     await call('POST', '/pulse/documents/$uuid/acknowledge');
   }
 
+  /// Closed months of the employee (newest first) with their snapshot and acknowledgement state.
+  /// Needs the network: closings are never cached or queued offline.
+  Future<List<Map<String, dynamic>>> listTimesheetClosings({
+    int limit = 24,
+    int offset = 0,
+  }) async => _items(
+    await call('GET', '/pulse/timesheet-closings?limit=$limit&offset=$offset'),
+  );
+
+  /// Acknowledges a closed month (ciência). Online only, never queued; a repeat is harmless
+  /// (`Duplicate`). `PULSE_NOT_FOUND` and `PULSE_CLOSING_NOT_OPEN` (reopened) are failures.
+  Future<Map<String, dynamic>> acknowledgeTimesheetClosing(String uuid) async {
+    final data = await call(
+      'POST',
+      '/pulse/timesheet-closings/$uuid/acknowledge',
+    );
+    final body = data['data'];
+    return body is Map<String, dynamic> ? body : const {};
+  }
+
+  /// Own hour bank: overtime mode, balance, next expiry and the latest ledger entries.
+  Future<Map<String, dynamic>> hourBank() async {
+    final data = await call('GET', '/pulse/hour-bank');
+    final body = data['data'];
+    if (body is! Map<String, dynamic>) throw const PulseFailure('requestError');
+    return body;
+  }
+
   /// Sends a document to HR; a retry with [documentUUID] returns the stored one.
   Future<void> sendDocument(
     String documentUUID,

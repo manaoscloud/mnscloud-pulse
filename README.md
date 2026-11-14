@@ -42,6 +42,7 @@ The client reads the public API base from deployment configuration and talks to 
 - `GET /api/v1/pulse/time` (official server time)
 - `POST /api/v1/pulse/punches`, `GET /api/v1/pulse/punches`
 - `GET /api/v1/pulse/today`, `GET /api/v1/pulse/timesheet?month=YYYY-MM`
+- `GET /api/v1/pulse/timesheet-closings`, `POST /api/v1/pulse/timesheet-closings/{uuid}/acknowledge`, `GET /api/v1/pulse/hour-bank` (closed months, ciência and hour bank; online only, never queued offline)
 
 ## Session
 

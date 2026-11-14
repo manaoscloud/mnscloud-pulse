@@ -1307,6 +1307,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get punchNoticeDismiss => 'OK';
+
+  @override
+  String get closingTitle => 'Closing';
+
+  @override
+  String closingClosedAt(String when) {
+    return 'Closed on $when';
+  }
+
+  @override
+  String get closingAck => 'Acknowledge';
+
+  @override
+  String closingAcked(String when) {
+    return 'Acknowledged on $when';
+  }
+
+  @override
+  String get closingAwaiting => 'Waiting for your acknowledgement';
+
+  @override
+  String get closingAckConfirmTitle => 'Acknowledge the closing';
+
+  @override
+  String closingAckConfirmBody(String month) {
+    return 'I confirm that I saw the closed timesheet of $month.';
+  }
+
+  @override
+  String get closingWorked => 'Worked';
+
+  @override
+  String get closingOvertime50 => 'Overtime 50%';
+
+  @override
+  String get closingOvertime100 => 'Overtime 100%';
+
+  @override
+  String get closingAbsences => 'Absences (days)';
+
+  @override
+  String get closingDsrLost => 'Weeks without paid rest';
+
+  @override
+  String closingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count closed months waiting for your acknowledgement',
+      one: '1 closed month waiting for your acknowledgement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get closingNoticeOpen => 'View';
+
+  @override
+  String get bankTitle => 'Hour bank';
+
+  @override
+  String get bankBalance => 'Balance';
+
+  @override
+  String get bankCredit => 'Credit';
+
+  @override
+  String get bankDebit => 'Debit';
+
+  @override
+  String get bankPaid => 'Paid';
+
+  @override
+  String get bankExpires => 'Expires on';
+
+  @override
+  String get bankEntries => 'Latest entries';
+
+  @override
+  String get bankNoEntries => 'No entries.';
+
+  @override
+  String get bankKindCredit => 'Credit';
+
+  @override
+  String get bankKindDebit => 'Debit';
+
+  @override
+  String get bankKindExpirePaid => 'Paid (expired)';
+
+  @override
+  String get bankKindManualPaid => 'Paid';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2611,4 +2703,96 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get punchNoticeDismiss => 'OK';
+
+  @override
+  String get closingTitle => 'Closing';
+
+  @override
+  String closingClosedAt(String when) {
+    return 'Closed on $when';
+  }
+
+  @override
+  String get closingAck => 'Acknowledge';
+
+  @override
+  String closingAcked(String when) {
+    return 'Acknowledged on $when';
+  }
+
+  @override
+  String get closingAwaiting => 'Waiting for your acknowledgement';
+
+  @override
+  String get closingAckConfirmTitle => 'Acknowledge the closing';
+
+  @override
+  String closingAckConfirmBody(String month) {
+    return 'I confirm that I saw the closed timesheet of $month.';
+  }
+
+  @override
+  String get closingWorked => 'Worked';
+
+  @override
+  String get closingOvertime50 => 'Overtime 50%';
+
+  @override
+  String get closingOvertime100 => 'Overtime 100%';
+
+  @override
+  String get closingAbsences => 'Absences (days)';
+
+  @override
+  String get closingDsrLost => 'Weeks without paid rest';
+
+  @override
+  String closingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count closed months waiting for your acknowledgement',
+      one: '1 closed month waiting for your acknowledgement',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get closingNoticeOpen => 'View';
+
+  @override
+  String get bankTitle => 'Hour bank';
+
+  @override
+  String get bankBalance => 'Balance';
+
+  @override
+  String get bankCredit => 'Credit';
+
+  @override
+  String get bankDebit => 'Debit';
+
+  @override
+  String get bankPaid => 'Paid';
+
+  @override
+  String get bankExpires => 'Expires on';
+
+  @override
+  String get bankEntries => 'Latest entries';
+
+  @override
+  String get bankNoEntries => 'No entries.';
+
+  @override
+  String get bankKindCredit => 'Credit';
+
+  @override
+  String get bankKindDebit => 'Debit';
+
+  @override
+  String get bankKindExpirePaid => 'Paid (expired)';
+
+  @override
+  String get bankKindManualPaid => 'Paid';
 }

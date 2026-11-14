@@ -1315,6 +1315,98 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get punchNoticeDismiss => 'Entendi';
+
+  @override
+  String get closingTitle => 'Fechamento';
+
+  @override
+  String closingClosedAt(String when) {
+    return 'Fechado em $when';
+  }
+
+  @override
+  String get closingAck => 'Dar ciência';
+
+  @override
+  String closingAcked(String when) {
+    return 'Ciente em $when';
+  }
+
+  @override
+  String get closingAwaiting => 'Aguardando sua ciência';
+
+  @override
+  String get closingAckConfirmTitle => 'Dar ciência do fechamento';
+
+  @override
+  String closingAckConfirmBody(String month) {
+    return 'Confirmo que vi o espelho de ponto fechado de $month.';
+  }
+
+  @override
+  String get closingWorked => 'Trabalhadas';
+
+  @override
+  String get closingOvertime50 => 'Horas extras 50%';
+
+  @override
+  String get closingOvertime100 => 'Horas extras 100%';
+
+  @override
+  String get closingAbsences => 'Faltas (dias)';
+
+  @override
+  String get closingDsrLost => 'Semanas sem DSR';
+
+  @override
+  String closingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count meses fechados aguardando sua ciência',
+      one: '1 mês fechado aguardando sua ciência',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get closingNoticeOpen => 'Ver';
+
+  @override
+  String get bankTitle => 'Banco de horas';
+
+  @override
+  String get bankBalance => 'Saldo';
+
+  @override
+  String get bankCredit => 'Crédito';
+
+  @override
+  String get bankDebit => 'Débito';
+
+  @override
+  String get bankPaid => 'Pago';
+
+  @override
+  String get bankExpires => 'Vence em';
+
+  @override
+  String get bankEntries => 'Últimos lançamentos';
+
+  @override
+  String get bankNoEntries => 'Nenhum lançamento.';
+
+  @override
+  String get bankKindCredit => 'Crédito';
+
+  @override
+  String get bankKindDebit => 'Débito';
+
+  @override
+  String get bankKindExpirePaid => 'Pago (vencido)';
+
+  @override
+  String get bankKindManualPaid => 'Pago';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2627,4 +2719,96 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get punchNoticeDismiss => 'Entendi';
+
+  @override
+  String get closingTitle => 'Fechamento';
+
+  @override
+  String closingClosedAt(String when) {
+    return 'Fechado em $when';
+  }
+
+  @override
+  String get closingAck => 'Dar ciência';
+
+  @override
+  String closingAcked(String when) {
+    return 'Ciente em $when';
+  }
+
+  @override
+  String get closingAwaiting => 'Aguardando sua ciência';
+
+  @override
+  String get closingAckConfirmTitle => 'Dar ciência do fechamento';
+
+  @override
+  String closingAckConfirmBody(String month) {
+    return 'Confirmo que vi o espelho de ponto fechado de $month.';
+  }
+
+  @override
+  String get closingWorked => 'Trabalhadas';
+
+  @override
+  String get closingOvertime50 => 'Horas extras 50%';
+
+  @override
+  String get closingOvertime100 => 'Horas extras 100%';
+
+  @override
+  String get closingAbsences => 'Faltas (dias)';
+
+  @override
+  String get closingDsrLost => 'Semanas sem DSR';
+
+  @override
+  String closingNotice(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count meses fechados aguardando sua ciência',
+      one: '1 mês fechado aguardando sua ciência',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get closingNoticeOpen => 'Ver';
+
+  @override
+  String get bankTitle => 'Banco de horas';
+
+  @override
+  String get bankBalance => 'Saldo';
+
+  @override
+  String get bankCredit => 'Crédito';
+
+  @override
+  String get bankDebit => 'Débito';
+
+  @override
+  String get bankPaid => 'Pago';
+
+  @override
+  String get bankExpires => 'Vence em';
+
+  @override
+  String get bankEntries => 'Últimos lançamentos';
+
+  @override
+  String get bankNoEntries => 'Nenhum lançamento.';
+
+  @override
+  String get bankKindCredit => 'Crédito';
+
+  @override
+  String get bankKindDebit => 'Débito';
+
+  @override
+  String get bankKindExpirePaid => 'Pago (vencido)';
+
+  @override
+  String get bankKindManualPaid => 'Pago';
 }
