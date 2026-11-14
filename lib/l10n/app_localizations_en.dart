@@ -1380,6 +1380,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bankPaid => 'Paid';
 
   @override
+  String get closingCompensated => 'Compensated hours in the month';
+
+  @override
   String get bankExpires => 'Expires on';
 
   @override
@@ -2774,6 +2777,9 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get bankPaid => 'Paid';
+
+  @override
+  String get closingCompensated => 'Compensated hours in the month';
 
   @override
   String get bankExpires => 'Expires on';

@@ -117,6 +117,31 @@ void phone(WidgetTester tester) {
 }
 
 void main() {
+  test('compensation closing exposes compensated minutes tolerantly', () {
+    final c = TimesheetClosing({
+      ...closingJson(mode: 'compensation'),
+      'CompensatedMinutes': 135,
+      'BankAgreement': 'individual',
+    });
+    expect(c.isCompensation, isTrue);
+    expect(c.isBank, isFalse);
+    expect(c.compensatedMinutes, 135);
+    expect(c.bankAgreement, 'individual');
+    final old = TimesheetClosing(closingJson());
+    expect(old.compensatedMinutes, 0);
+    expect(old.bankAgreement, '');
+  });
+
+  testWidgets('compensation mode shows compensated hours, not bank totals', (
+    tester,
+  ) async {
+    phone(tester);
+    await tester.pumpWidget(host(Fake(mode: 'compensation')));
+    await settle(tester);
+    expect(find.byKey(const Key('closingCompensated')), findsOneWidget);
+    expect(find.byKey(const Key('closingBankBalance')), findsNothing);
+  });
+
   test('closing and hour bank payloads parse', () {
     final closings = TimesheetClosing.parseAll([
       closingJson(),

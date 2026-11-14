@@ -97,6 +97,12 @@ class ClosingCard extends StatelessWidget {
                   l.closingDsrLost,
                   closing.minutes('DsrLostDays').toString(),
                 ),
+                if (closing.isCompensation)
+                  stat(
+                    'closingCompensated',
+                    l.closingCompensated,
+                    formatMinutes(closing.compensatedMinutes),
+                  ),
                 if (bank) ...[
                   stat(
                     'closingBankCredit',

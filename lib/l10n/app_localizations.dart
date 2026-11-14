@@ -2545,6 +2545,12 @@ abstract class AppLocalizations {
   /// **'Paid'**
   String get bankPaid;
 
+  /// No description provided for @closingCompensated.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Compensated hours in the month'**
+  String get closingCompensated;
+
   /// No description provided for @bankExpires.
   ///
   /// In en_US, this message translates to:

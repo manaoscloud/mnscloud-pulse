@@ -1388,6 +1388,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get bankPaid => 'Pago';
 
   @override
+  String get closingCompensated => 'Horas compensadas no mês';
+
+  @override
   String get bankExpires => 'Vence em';
 
   @override
@@ -2790,6 +2793,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get bankPaid => 'Pago';
+
+  @override
+  String get closingCompensated => 'Horas compensadas no mês';
 
   @override
   String get bankExpires => 'Vence em';

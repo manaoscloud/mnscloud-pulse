@@ -587,6 +587,7 @@
   "bankCredit": "Credit",
   "bankDebit": "Debit",
   "bankPaid": "Paid",
+  "closingCompensated": "Compensated hours in the month",
   "bankExpires": "Expires on",
   "bankEntries": "Latest entries",
   "bankNoEntries": "No entries.",

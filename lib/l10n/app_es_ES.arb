@@ -435,6 +435,7 @@
   "bankCredit": "Crédito",
   "bankDebit": "Débito",
   "bankPaid": "Pagado",
+  "closingCompensated": "Horas compensadas en el mes",
   "bankExpires": "Vence el",
   "bankEntries": "Últimos movimientos",
   "bankNoEntries": "Sin movimientos.",

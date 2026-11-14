@@ -10,6 +10,13 @@ class TimesheetClosing {
   String get closedAt => json['ClosedAt']?.toString() ?? '';
   String get overtimeMode => json['OvertimeMode']?.toString() ?? 'payment';
   bool get isBank => overtimeMode == 'bank';
+  bool get isCompensation => overtimeMode == 'compensation';
+
+  /// Minutes compensated in the month; older APIs omit the field (0).
+  int get compensatedMinutes => minutesOf(json['CompensatedMinutes']);
+
+  /// `individual`, `collective` or empty (not applicable / older API).
+  String get bankAgreement => json['BankAgreement']?.toString() ?? '';
   bool get acknowledged =>
       json['Acknowledged'] == true || json['Acknowledged'] == 1;
   String get acknowledgedAt => json['AcknowledgedAt']?.toString() ?? '';
