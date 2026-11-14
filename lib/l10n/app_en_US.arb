@@ -524,5 +524,8 @@
   "employmentAssign": "Assign employment and send",
   "@employmentWaiting": {"placeholders": {"count": {"type": "int"}}},
   "tspTotalsOmitted": "Totals per employment are not available yet: you have another employment this month.",
-  "employmentAll": "All employments"
+  "employmentAll": "All employments",
+  "punchTooOld": "Punch of {when} not sent: more than 7 days without connection. Contact HR.",
+  "@punchTooOld": {"placeholders": {"when": {"type": "String"}}},
+  "punchNoticeDismiss": "OK"
 }

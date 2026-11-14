@@ -1299,6 +1299,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employmentAll => 'All employments';
+
+  @override
+  String punchTooOld(String when) {
+    return 'Punch of $when not sent: more than 7 days without connection. Contact HR.';
+  }
+
+  @override
+  String get punchNoticeDismiss => 'OK';
 }
 
 /// The translations for English, as used in the United States (`en_US`).
@@ -2595,4 +2603,12 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get employmentAll => 'All employments';
+
+  @override
+  String punchTooOld(String when) {
+    return 'Punch of $when not sent: more than 7 days without connection. Contact HR.';
+  }
+
+  @override
+  String get punchNoticeDismiss => 'OK';
 }

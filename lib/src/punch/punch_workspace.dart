@@ -84,6 +84,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   /// Marks with receipt (NSR) of the last 48 hours, newest first.
   List<Map<String, dynamic>> _receipts = [];
   List<QueuedPunch> _pending = [];
+  List<PunchNotice> _notices = [];
   bool _online = true;
   bool _busy = false;
   bool _flushing = false;
@@ -162,6 +163,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     final serverTime = await widget.api.serverTime();
     if (serverTime != null) widget.clock.accept(serverTime);
     _pending = await _queue.load();
+    _notices = await _queue.notices();
     await _autoAssign();
     await _flush();
     await _reload();
@@ -212,6 +214,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
   /// Marks delivered by another pass (tick, reconnection, foreground): refresh the state.
   Future<void> _synced() async {
     _pending = await _queue.load();
+    _notices = await _queue.notices();
     if (!mounted) return;
     setState(() {});
     _delivered.value++;
@@ -232,6 +235,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
         return;
       }
       _pending = await _queue.load();
+      _notices = await _queue.notices();
       if (mounted) setState(() => _online = !result.offline);
     } finally {
       _flushing = false;
@@ -346,6 +350,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       // Opened without a session (offline): the device grant sends it when there is connection.
       await _flush();
       _pending = await _queue.load();
+      _notices = await _queue.notices();
       if (!mounted) return;
       setState(() {
         _busy = false;
@@ -405,6 +410,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
           );
           await _flush();
           _pending = await _queue.load();
+          _notices = await _queue.notices();
           message =
               _pending.any((p) => p.idempotencyKey == punch.idempotencyKey)
               ? 'punchQueued'
@@ -424,6 +430,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       }
     }
     _pending = await _queue.load();
+    _notices = await _queue.notices();
     if (!mounted) return;
     setState(() {
       _busy = false;
@@ -562,6 +569,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
           ],
         ),
         if (_waiting.isNotEmpty) _assignBanner(context),
+        for (final notice in _notices) _noticeBanner(context, notice),
         TodayCard(api: widget.api, reload: _delivered),
         const SizedBox(height: 20),
         if (_noLocation)
@@ -716,6 +724,38 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     );
   }
 
+  /// dd/MM HH:mm of the mark in the device's time zone.
+  String _noticeTime(DateTime utc) {
+    final t = utc.toLocal();
+    String two(int v) => v.toString().padLeft(2, '0');
+    return '${two(t.day)}/${two(t.month)} ${two(t.hour)}:${two(t.minute)}';
+  }
+
+  /// A queued mark the API refused for good (too long offline): shown until acknowledged.
+  Widget _noticeBanner(BuildContext context, PunchNotice notice) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      key: Key('punchNotice-${notice.punchKey}'),
+      color: scheme.errorContainer,
+      margin: const EdgeInsets.only(top: 12),
+      child: ListTile(
+        title: Text(
+          l.punchTooOld(_noticeTime(notice.occurredAt)),
+          style: TextStyle(color: scheme.onErrorContainer),
+        ),
+        trailing: TextButton(
+          key: Key('dismissPunchNotice-${notice.punchKey}'),
+          onPressed: () async {
+            await _queue.dismissNotice(notice.punchKey);
+            _notices = await _queue.notices();
+            if (mounted) setState(() {});
+          },
+          child: Text(l.punchNoticeDismiss),
+        ),
+      ),
+    );
+  }
+
   List<QueuedPunch> get _waiting => [
     for (final p in _pending)
       if (p.needsEmployment) p,
@@ -784,6 +824,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
     if (!changed) return;
     await _flush();
     _pending = await _queue.load();
+    _notices = await _queue.notices();
     if (mounted) setState(() {});
   }
 
@@ -795,6 +836,7 @@ class _PunchWorkspaceState extends State<PunchWorkspace> {
       }
       await _flush();
       _pending = await _queue.load();
+      _notices = await _queue.notices();
       if (_online) await _reload();
     } finally {
       if (mounted) setState(() => _busy = false);

@@ -158,6 +158,13 @@ class PunchStore {
         bytes BLOB NOT NULL,
         created_at TEXT NOT NULL) STRICT;
       CREATE INDEX IF NOT EXISTS pending_punch_photo_owner ON pending_punch_photo (owner, created_at);
+      CREATE TABLE IF NOT EXISTS punch_notice (
+        punch_key TEXT PRIMARY KEY,
+        account_uuid TEXT NOT NULL,
+        code TEXT NOT NULL,
+        type TEXT NOT NULL,
+        occurred_at TEXT NOT NULL,
+        created_at TEXT NOT NULL) STRICT;
     ''');
   }
 
@@ -351,7 +358,58 @@ class PunchStore {
     'DELETE FROM pending_punch WHERE idempotency_key = ?',
     [idempotencyKey],
   );
+
+  /// Records that the API permanently refused [punch] so the employee is told (kept until
+  /// acknowledged, across restarts).
+  void addNotice(String accountUUID, QueuedPunch punch, String code) =>
+      _db.execute(
+        'INSERT OR IGNORE INTO punch_notice '
+        '(punch_key, account_uuid, code, type, occurred_at, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        [
+          punch.idempotencyKey,
+          accountUUID,
+          code,
+          punch.type,
+          punch.occurredAt.toIso8601String(),
+          DateTime.now().toUtc().toIso8601String(),
+        ],
+      );
+
+  List<PunchNotice> notices(String accountUUID) => [
+    for (final row in _db.select(
+      'SELECT punch_key, code, type, occurred_at FROM punch_notice '
+      'WHERE account_uuid = ? ORDER BY occurred_at',
+      [accountUUID],
+    ))
+      PunchNotice(
+        punchKey: row['punch_key'] as String,
+        code: row['code'] as String,
+        type: row['type'] as String,
+        occurredAt: DateTime.parse(row['occurred_at'] as String).toUtc(),
+      ),
+  ];
+
+  void removeNotice(String punchKey) =>
+      _db.execute('DELETE FROM punch_notice WHERE punch_key = ?', [punchKey]);
 }
+
+/// A queued mark the API refused for good and removed from the queue; shown until acknowledged.
+class PunchNotice {
+  const PunchNotice({
+    required this.punchKey,
+    required this.code,
+    required this.type,
+    required this.occurredAt,
+  });
+
+  final String punchKey;
+  final String code;
+  final String type;
+  final DateTime occurredAt;
+}
+
+/// The API refuses an offline mark recorded too long ago (HTTP 422); the rule lives on the server.
+const punchTooOldCode = 'PULSE_PUNCH_TOO_OLD';
 
 /// Queue of one account over the shared [PunchStore]. Marks of earlier versions, kept in plain
 /// `shared_preferences`, move into the encrypted store on the first read and leave the old place.
@@ -397,6 +455,23 @@ class PunchQueue {
 
   Future<void> remove(String idempotencyKey) async {
     (await _store()).remove(idempotencyKey);
+    await persistPunchDatabase();
+  }
+
+  /// Removes a permanently refused mark (and its photo) and keeps a notice for the employee.
+  Future<void> discardRefused(QueuedPunch punch, String code) async {
+    final store = await _store();
+    store.remove(punch.idempotencyKey);
+    store.removePhoto(punch.idempotencyKey);
+    store.addNotice(accountUUID, punch, code);
+    await persistPunchDatabase();
+  }
+
+  Future<List<PunchNotice>> notices() async =>
+      (await _store()).notices(accountUUID);
+
+  Future<void> dismissNotice(String punchKey) async {
+    (await _store()).removeNotice(punchKey);
     await persistPunchDatabase();
   }
 

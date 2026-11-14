@@ -385,5 +385,7 @@
   "employmentWaiting": "{count, plural, =1{1 punch is waiting for an employment} other{{count} punches are waiting for an employment}}",
   "employmentAssign": "Assign employment and send",
   "tspTotalsOmitted": "Totals per employment are not available yet: you have another employment this month.",
-  "employmentAll": "All employments"
+  "employmentAll": "All employments",
+  "punchTooOld": "Punch of {when} not sent: more than 7 days without connection. Contact HR.",
+  "punchNoticeDismiss": "OK"
 }

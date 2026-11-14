@@ -385,5 +385,7 @@
   "employmentWaiting": "{count, plural, =1{1 marcação aguarda um vínculo} other{{count} marcações aguardam um vínculo}}",
   "employmentAssign": "Atribuir vínculo e enviar",
   "tspTotalsOmitted": "Totais por vínculo ainda não disponíveis: você tem outro vínculo neste mês.",
-  "employmentAll": "Todos os vínculos"
+  "employmentAll": "Todos os vínculos",
+  "punchTooOld": "Marcação de {when} não enviada: ficou mais de 7 dias sem conexão. Procure o RH.",
+  "punchNoticeDismiss": "Entendi"
 }
