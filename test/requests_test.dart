@@ -249,6 +249,16 @@ void main() {
         ),
         l.requestSwapPeerInvalid,
       );
+      const badDate = PulseFailure(
+        'VALIDATION_FAILED',
+        status: 400,
+        fields: ['date'],
+      );
+      expect(
+        requestFailureText(l, badDate, swap: true),
+        l.requestSwapDateInvalid,
+      );
+      expect(requestFailureText(l, badDate), l.requestError);
       expect(requestTypeLabel(l, 'shift_swap'), 'Shift swap');
       expect(peerStatusLabel(l, 'accepted'), 'accepted');
       expect(peerStatusLabel(l, 'pending'), 'awaiting answer');

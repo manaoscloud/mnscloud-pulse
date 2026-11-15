@@ -54,7 +54,11 @@ String peerStatusLabel(AppLocalizations l, String status) => switch (status) {
   _ => l.requestSwapWaiting,
 };
 
-String requestFailureText(AppLocalizations l, PulseFailure failure) {
+String requestFailureText(
+  AppLocalizations l,
+  PulseFailure failure, {
+  bool swap = false,
+}) {
   if (failure.code == 'networkError') return l.networkError;
   if (failure.code == 'HR_SWAP_NOT_ALLOWED') return l.requestSwapNotAllowed;
   if (failure.code == 'HR_TIMESHEET_CLOSED') return l.requestPeriodClosed;
@@ -62,7 +66,9 @@ String requestFailureText(AppLocalizations l, PulseFailure failure) {
       failure.fields.contains('peerEmployeeUUID')) {
     return l.requestSwapPeerInvalid;
   }
-  if (failure.fields.contains('swapDate') || failure.fields.contains('date')) {
+  if (swap &&
+      (failure.fields.contains('swapDate') ||
+          failure.fields.contains('date'))) {
     return l.requestSwapDateInvalid;
   }
   final message = failure.message ?? '';
@@ -719,7 +725,7 @@ class _RequestFormState extends State<RequestForm> {
             ? l.requestAttachmentUnavailable
             : _type == 'shift_swap' && failure.code == 'networkError'
             ? l.requestSwapOffline
-            : requestFailureText(l, failure);
+            : requestFailureText(l, failure, swap: _type == 'shift_swap');
       });
     }
   }
