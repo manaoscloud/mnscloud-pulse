@@ -1147,12 +1147,6 @@ abstract class AppLocalizations {
   /// **'refused'**
   String get requestSwapRefused;
 
-  /// No description provided for @requestSwapFrom.
-  ///
-  /// In en_US, this message translates to:
-  /// **'Request from {name}'**
-  String requestSwapFrom(String name);
-
   /// No description provided for @requestSwapAccept.
   ///
   /// In en_US, this message translates to:
@@ -1182,6 +1176,42 @@ abstract class AppLocalizations {
   /// In en_US, this message translates to:
   /// **'Colleague: {status}'**
   String requestSwapColleagueStatus(String status);
+
+  /// No description provided for @requestSwapPeerDetail.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Request from {name}: your day {mine} for the requester\'s day {theirs}'**
+  String requestSwapPeerDetail(String name, String mine, String theirs);
+
+  /// No description provided for @requestSwapPeerSameDay.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Request from {name}: swap on {day}'**
+  String requestSwapPeerSameDay(String name, String day);
+
+  /// No description provided for @requestReasonTooLong.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The reason can have up to 500 characters in a swap.'**
+  String get requestReasonTooLong;
+
+  /// No description provided for @requestSwapPeerGone.
+  ///
+  /// In en_US, this message translates to:
+  /// **'You can no longer take this swap.'**
+  String get requestSwapPeerGone;
+
+  /// No description provided for @requestSwapRefuseTitle.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Refuse this swap?'**
+  String get requestSwapRefuseTitle;
+
+  /// No description provided for @requestSwapRefuseText.
+  ///
+  /// In en_US, this message translates to:
+  /// **'The refusal is final and the request ends.'**
+  String get requestSwapRefuseText;
 
   /// No description provided for @requestAlreadyDecided.
   ///

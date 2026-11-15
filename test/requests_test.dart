@@ -259,6 +259,35 @@ void main() {
         l.requestSwapDateInvalid,
       );
       expect(requestFailureText(l, badDate), l.requestError);
+      const tooLong = PulseFailure(
+        'VALIDATION_FAILED',
+        status: 400,
+        fields: ['reason'],
+      );
+      expect(
+        requestFailureText(l, tooLong, swap: true),
+        l.requestReasonTooLong,
+      );
+      expect(requestFailureText(l, tooLong), l.requestError);
+      expect(
+        requestFailureText(
+          l,
+          const PulseFailure(
+            'VALIDATION_FAILED',
+            status: 400,
+            message: 'A pending request already covers this date.',
+            fields: ['date'],
+          ),
+          swap: true,
+        ),
+        l.requestDuplicate,
+      );
+      const gone = PulseFailure('HR_SWAP_PEER_INVALID', status: 409);
+      expect(
+        requestFailureText(l, gone, peerSide: true),
+        l.requestSwapPeerGone,
+      );
+      expect(requestFailureText(l, gone), l.requestSwapPeerInvalid);
       expect(requestTypeLabel(l, 'shift_swap'), 'Shift swap');
       expect(peerStatusLabel(l, 'accepted'), 'accepted');
       expect(peerStatusLabel(l, 'pending'), 'awaiting answer');
@@ -352,12 +381,19 @@ void main() {
       await settle(tester);
       expect(find.text('Shift swap'), findsOneWidget);
       expect(
-        find.text('Request from Ana Souza', findRichText: true),
-        findsNothing,
+        find.text('Request from Ana Souza: swap on 12/1/2026'),
+        findsOneWidget,
       );
-      expect(find.textContaining('Request from Ana Souza'), findsOneWidget);
+      expect(find.byKey(const ValueKey('conversation-peer-1')), findsNothing);
       expect(find.text('Colleague: awaiting answer'), findsOneWidget);
       expect(find.text('Cancel request'), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('swap-refuse-peer-1')));
+      await settle(tester);
+      expect(find.text('Refuse this swap?'), findsOneWidget);
+      await tester.tap(find.text('Back'));
+      await settle(tester);
+      expect(decisions, isEmpty);
 
       await tester.tap(find.byKey(const ValueKey('swap-accept-peer-1')));
       await settle(tester);

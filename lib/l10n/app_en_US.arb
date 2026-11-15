@@ -208,14 +208,6 @@
   "requestSwapWaiting": "awaiting answer",
   "requestSwapAccepted": "accepted",
   "requestSwapRefused": "refused",
-  "requestSwapFrom": "Request from {name}",
-  "@requestSwapFrom": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "requestSwapAccept": "Accept",
   "requestSwapRefuse": "Refuse",
   "requestSwapOffline": "Swaps and answers need a connection. Try again when you are online.",
@@ -241,6 +233,35 @@
       }
     }
   },
+  "requestSwapPeerDetail": "Request from {name}: your day {mine} for the requester's day {theirs}",
+  "@requestSwapPeerDetail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "mine": {
+        "type": "String"
+      },
+      "theirs": {
+        "type": "String"
+      }
+    }
+  },
+  "requestSwapPeerSameDay": "Request from {name}: swap on {day}",
+  "@requestSwapPeerSameDay": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "requestReasonTooLong": "The reason can have up to 500 characters in a swap.",
+  "requestSwapPeerGone": "You can no longer take this swap.",
+  "requestSwapRefuseTitle": "Refuse this swap?",
+  "requestSwapRefuseText": "The refusal is final and the request ends.",
   "requestAlreadyDecided": "This request was already answered.",
   "requestAttachmentUnavailable": "Certificates cannot be sent right now. Send the request without it and give it to HR.",
   "requestAnswer": "Answer: {note}",

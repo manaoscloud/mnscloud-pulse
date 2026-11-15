@@ -58,22 +58,24 @@ String requestFailureText(
   AppLocalizations l,
   PulseFailure failure, {
   bool swap = false,
+  bool peerSide = false,
 }) {
   if (failure.code == 'networkError') return l.networkError;
   if (failure.code == 'HR_SWAP_NOT_ALLOWED') return l.requestSwapNotAllowed;
   if (failure.code == 'HR_TIMESHEET_CLOSED') return l.requestPeriodClosed;
   if (failure.code == 'HR_SWAP_PEER_INVALID' ||
       failure.fields.contains('peerEmployeeUUID')) {
-    return l.requestSwapPeerInvalid;
+    return peerSide ? l.requestSwapPeerGone : l.requestSwapPeerInvalid;
   }
+  final message = failure.message ?? '';
+  if (failure.fields.contains('file')) return l.requestFileInvalid;
+  if (message.contains('pending request')) return l.requestDuplicate;
+  if (swap && failure.fields.contains('reason')) return l.requestReasonTooLong;
   if (swap &&
       (failure.fields.contains('swapDate') ||
           failure.fields.contains('date'))) {
     return l.requestSwapDateInvalid;
   }
-  final message = failure.message ?? '';
-  if (failure.fields.contains('file')) return l.requestFileInvalid;
-  if (message.contains('pending request')) return l.requestDuplicate;
   if (message.contains('open timesheet period')) return l.requestPeriodClosed;
   if (message.contains('overlaps')) return l.requestOverlap;
   if (message.contains('already disregarded')) return l.requestAlreadyTreated;
@@ -127,6 +129,7 @@ class _RequestsViewState extends State<RequestsView> {
   List<Map<String, dynamic>>? _items;
   String? _error;
   bool _loading = false;
+  bool _deciding = false;
   bool _visible = false;
   int _request = 0;
 
@@ -278,17 +281,42 @@ class _RequestsViewState extends State<RequestsView> {
 
   Future<void> _decide(Map<String, dynamic> item, String decision) async {
     final uuid = item['RequestUUID']?.toString();
-    if (uuid == null) return;
+    if (uuid == null || _deciding) return;
+    if (decision == 'refuse') {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l.requestSwapRefuseTitle),
+          content: Text(l.requestSwapRefuseText),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l.back),
+            ),
+            FilledButton(
+              key: const Key('confirmSwapRefuse'),
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l.requestSwapRefuse),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !mounted) return;
+    }
+    setState(() => _deciding = true);
     try {
       await widget.api.peerDecision(uuid, decision);
     } on PulseFailure catch (failure) {
       if (_ended(failure) || !mounted) return;
       final text = failure.code == 'networkError'
           ? l.requestSwapOffline
-          : requestFailureText(l, failure);
+          : requestFailureText(l, failure, peerSide: true);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
     }
-    if (mounted) unawaited(_load());
+    if (mounted) {
+      setState(() => _deciding = false);
+      unawaited(_load());
+    }
   }
 
   String _detail(Map<String, dynamic> item) {
@@ -300,15 +328,25 @@ class _RequestsViewState extends State<RequestsView> {
       return '${punchLabel(l, item['ContestedPunchType']?.toString() ?? '')} · ${_showInstant(context, item['ContestedOccurredAt'])}';
     }
     if (type == 'shift_swap') {
-      final mine = _showDay(context, item['Date']?.toString());
-      final theirs = _showDay(
-        context,
-        (item['SwapDate'] ?? item['Date'])?.toString(),
+      final date = item['Date']?.toString();
+      final swapDate = (item['SwapDate'] ?? item['Date'])?.toString();
+      if (item['Role'] == 'peer') {
+        final name = item['RequesterName']?.toString() ?? '';
+        if (swapDate == date) {
+          return l.requestSwapPeerSameDay(name, _showDay(context, date));
+        }
+        // Seen from the colleague: "mine" is the swap date, "theirs" the requester's date.
+        return l.requestSwapPeerDetail(
+          name,
+          _showDay(context, swapDate),
+          _showDay(context, date),
+        );
+      }
+      return l.requestSwapDetail(
+        item['PeerEmployeeName']?.toString() ?? '',
+        _showDay(context, date),
+        _showDay(context, swapDate),
       );
-      final peer = item['Role'] == 'peer'
-          ? (item['RequesterName']?.toString() ?? '')
-          : (item['PeerEmployeeName']?.toString() ?? '');
-      return l.requestSwapDetail(peer, mine, theirs);
     }
     final start = _showDay(context, item['Date']?.toString());
     final end = item['EndDate']?.toString();
@@ -389,11 +427,7 @@ class _RequestsViewState extends State<RequestsView> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      item['Type'] == 'shift_swap' && item['Role'] == 'peer'
-                          ? '${l.requestSwapFrom(item['RequesterName']?.toString() ?? '')} · ${_detail(item)}'
-                          : _detail(item),
-                    ),
+                    Text(_detail(item)),
                     if (item['Type'] == 'shift_swap')
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
@@ -444,27 +478,30 @@ class _RequestsViewState extends State<RequestsView> {
                       child: Wrap(
                         alignment: WrapAlignment.end,
                         children: [
-                          TextButton.icon(
-                            key: ValueKey(
-                              'conversation-${item['RequestUUID']}',
-                            ),
-                            onPressed: () => _conversation(item),
-                            icon: const Icon(
-                              Icons.chat_bubble_outline,
-                              size: 18,
-                            ),
-                            label: Text(
-                              l.requestConversation(
-                                (item['MessageCount'] as num?)?.toInt() ?? 0,
+                          if (item['Role'] != 'peer')
+                            TextButton.icon(
+                              key: ValueKey(
+                                'conversation-${item['RequestUUID']}',
+                              ),
+                              onPressed: () => _conversation(item),
+                              icon: const Icon(
+                                Icons.chat_bubble_outline,
+                                size: 18,
+                              ),
+                              label: Text(
+                                l.requestConversation(
+                                  (item['MessageCount'] as num?)?.toInt() ?? 0,
+                                ),
                               ),
                             ),
-                          ),
                           if (_peerPending(item)) ...[
                             TextButton(
                               key: ValueKey(
                                 'swap-refuse-${item['RequestUUID']}',
                               ),
-                              onPressed: () => _decide(item, 'refuse'),
+                              onPressed: _deciding
+                                  ? null
+                                  : () => _decide(item, 'refuse'),
                               child: Text(l.requestSwapRefuse),
                             ),
                             FilledButton(
@@ -474,7 +511,9 @@ class _RequestsViewState extends State<RequestsView> {
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size(0, 44),
                               ),
-                              onPressed: () => _decide(item, 'accept'),
+                              onPressed: _deciding
+                                  ? null
+                                  : () => _decide(item, 'accept'),
                               child: Text(l.requestSwapAccept),
                             ),
                           ],
@@ -660,6 +699,9 @@ class _RequestFormState extends State<RequestForm> {
     }
     if (_type == 'absence' && _endDate.isBefore(_date)) {
       return l.requestEndBeforeStart;
+    }
+    if (_type == 'shift_swap' && _reason.text.trim().length > 500) {
+      return l.requestReasonTooLong;
     }
     if (_type == 'shift_swap' && _peerUUID == null) {
       return l.requestSwapColleagueRequired;
@@ -921,7 +963,7 @@ class _RequestFormState extends State<RequestForm> {
               key: const Key('requestReason'),
               controller: _reason,
               enabled: !_sending,
-              maxLength: 1000,
+              maxLength: _type == 'shift_swap' ? 500 : 1000,
               minLines: 2,
               maxLines: 5,
               decoration: InputDecoration(labelText: l.requestReason),

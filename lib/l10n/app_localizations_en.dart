@@ -577,11 +577,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestSwapRefused => 'refused';
 
   @override
-  String requestSwapFrom(String name) {
-    return 'Request from $name';
-  }
-
-  @override
   String get requestSwapAccept => 'Accept';
 
   @override
@@ -600,6 +595,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String requestSwapColleagueStatus(String status) {
     return 'Colleague: $status';
   }
+
+  @override
+  String requestSwapPeerDetail(String name, String mine, String theirs) {
+    return 'Request from $name: your day $mine for the requester\'s day $theirs';
+  }
+
+  @override
+  String requestSwapPeerSameDay(String name, String day) {
+    return 'Request from $name: swap on $day';
+  }
+
+  @override
+  String get requestReasonTooLong =>
+      'The reason can have up to 500 characters in a swap.';
+
+  @override
+  String get requestSwapPeerGone => 'You can no longer take this swap.';
+
+  @override
+  String get requestSwapRefuseTitle => 'Refuse this swap?';
+
+  @override
+  String get requestSwapRefuseText =>
+      'The refusal is final and the request ends.';
 
   @override
   String get requestAlreadyDecided => 'This request was already answered.';
@@ -2047,11 +2066,6 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   String get requestSwapRefused => 'refused';
 
   @override
-  String requestSwapFrom(String name) {
-    return 'Request from $name';
-  }
-
-  @override
   String get requestSwapAccept => 'Accept';
 
   @override
@@ -2070,6 +2084,30 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
   String requestSwapColleagueStatus(String status) {
     return 'Colleague: $status';
   }
+
+  @override
+  String requestSwapPeerDetail(String name, String mine, String theirs) {
+    return 'Request from $name: your day $mine for the requester\'s day $theirs';
+  }
+
+  @override
+  String requestSwapPeerSameDay(String name, String day) {
+    return 'Request from $name: swap on $day';
+  }
+
+  @override
+  String get requestReasonTooLong =>
+      'The reason can have up to 500 characters in a swap.';
+
+  @override
+  String get requestSwapPeerGone => 'You can no longer take this swap.';
+
+  @override
+  String get requestSwapRefuseTitle => 'Refuse this swap?';
+
+  @override
+  String get requestSwapRefuseText =>
+      'The refusal is final and the request ends.';
 
   @override
   String get requestAlreadyDecided => 'This request was already answered.';

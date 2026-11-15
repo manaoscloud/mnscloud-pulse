@@ -578,11 +578,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get requestSwapRefused => 'recusou';
 
   @override
-  String requestSwapFrom(String name) {
-    return 'Pedido de $name';
-  }
-
-  @override
   String get requestSwapAccept => 'Aceitar';
 
   @override
@@ -601,6 +596,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String requestSwapColleagueStatus(String status) {
     return 'Colega: $status';
   }
+
+  @override
+  String requestSwapPeerDetail(String name, String mine, String theirs) {
+    return 'Pedido de $name: seu dia $mine pelo dia $theirs do solicitante';
+  }
+
+  @override
+  String requestSwapPeerSameDay(String name, String day) {
+    return 'Pedido de $name: troca no dia $day';
+  }
+
+  @override
+  String get requestReasonTooLong =>
+      'O motivo pode ter até 500 caracteres em uma troca.';
+
+  @override
+  String get requestSwapPeerGone => 'Você não pode mais assumir esta troca.';
+
+  @override
+  String get requestSwapRefuseTitle => 'Recusar esta troca?';
+
+  @override
+  String get requestSwapRefuseText =>
+      'A recusa é definitiva e o pedido é encerrado.';
 
   @override
   String get requestAlreadyDecided => 'Essa solicitação já foi respondida.';
@@ -2056,11 +2075,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get requestSwapRefused => 'recusou';
 
   @override
-  String requestSwapFrom(String name) {
-    return 'Pedido de $name';
-  }
-
-  @override
   String get requestSwapAccept => 'Aceitar';
 
   @override
@@ -2079,6 +2093,30 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String requestSwapColleagueStatus(String status) {
     return 'Colega: $status';
   }
+
+  @override
+  String requestSwapPeerDetail(String name, String mine, String theirs) {
+    return 'Pedido de $name: seu dia $mine pelo dia $theirs do solicitante';
+  }
+
+  @override
+  String requestSwapPeerSameDay(String name, String day) {
+    return 'Pedido de $name: troca no dia $day';
+  }
+
+  @override
+  String get requestReasonTooLong =>
+      'O motivo pode ter até 500 caracteres em uma troca.';
+
+  @override
+  String get requestSwapPeerGone => 'Você não pode mais assumir esta troca.';
+
+  @override
+  String get requestSwapRefuseTitle => 'Recusar esta troca?';
+
+  @override
+  String get requestSwapRefuseText =>
+      'A recusa é definitiva e o pedido é encerrado.';
 
   @override
   String get requestAlreadyDecided => 'Essa solicitação já foi respondida.';
