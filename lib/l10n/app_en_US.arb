@@ -194,6 +194,53 @@
   "requestOverlap": "These days already have an absence.",
   "requestAlreadyTreated": "This mark was already disregarded.",
   "requestFutureTime": "The time cannot be in the future.",
+  "requestSwap": "Shift swap",
+  "requestSwapColleague": "Colleague",
+  "requestSwapSearch": "Search colleague",
+  "requestSwapNoColleagues": "No colleague found.",
+  "requestSwapMyDate": "My date",
+  "requestSwapTheirDate": "Colleague's date",
+  "requestSwapRules": "Your colleague must accept first, then HR approves. On two different dates you must be off on your colleague's date and your colleague off on yours. The date cannot be in the past.",
+  "requestSwapColleagueRequired": "Choose the colleague.",
+  "requestSwapNotAllowed": "This swap is not allowed for these days. Check the schedules or talk to HR.",
+  "requestSwapPeerInvalid": "This colleague cannot receive a swap. Choose another one.",
+  "requestSwapDateInvalid": "Check the dates: they cannot be in the past.",
+  "requestSwapWaiting": "awaiting answer",
+  "requestSwapAccepted": "accepted",
+  "requestSwapRefused": "refused",
+  "requestSwapFrom": "Request from {name}",
+  "@requestSwapFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "requestSwapAccept": "Accept",
+  "requestSwapRefuse": "Refuse",
+  "requestSwapOffline": "Swaps and answers need a connection. Try again when you are online.",
+  "requestSwapDetail": "{peer}: my {mine}, theirs {theirs}",
+  "@requestSwapDetail": {
+    "placeholders": {
+      "peer": {
+        "type": "String"
+      },
+      "mine": {
+        "type": "String"
+      },
+      "theirs": {
+        "type": "String"
+      }
+    }
+  },
+  "requestSwapColleagueStatus": "Colleague: {status}",
+  "@requestSwapColleagueStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "requestAlreadyDecided": "This request was already answered.",
   "requestAttachmentUnavailable": "Certificates cannot be sent right now. Send the request without it and give it to HR.",
   "requestAnswer": "Answer: {note}",

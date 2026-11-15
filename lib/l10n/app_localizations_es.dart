@@ -533,6 +533,77 @@ class AppLocalizationsEs extends AppLocalizations {
   String get requestFutureTime => 'La hora no puede estar en el futuro.';
 
   @override
+  String get requestSwap => 'Cambio de turno';
+
+  @override
+  String get requestSwapColleague => 'Compañero';
+
+  @override
+  String get requestSwapSearch => 'Buscar compañero';
+
+  @override
+  String get requestSwapNoColleagues => 'Ningún compañero encontrado.';
+
+  @override
+  String get requestSwapMyDate => 'Mi fecha';
+
+  @override
+  String get requestSwapTheirDate => 'Fecha del compañero';
+
+  @override
+  String get requestSwapRules =>
+      'El compañero debe aceptar primero y luego RR. HH. aprueba. En dos fechas distintas debes estar libre en la fecha del compañero y el compañero libre en la tuya. La fecha no puede ser pasada.';
+
+  @override
+  String get requestSwapColleagueRequired => 'Elige al compañero.';
+
+  @override
+  String get requestSwapNotAllowed =>
+      'Este cambio no está permitido para esos días. Revisa los horarios o habla con RR. HH.';
+
+  @override
+  String get requestSwapPeerInvalid =>
+      'Este compañero no puede recibir un cambio. Elige otro.';
+
+  @override
+  String get requestSwapDateInvalid =>
+      'Revisa las fechas: no pueden ser pasadas.';
+
+  @override
+  String get requestSwapWaiting => 'esperando respuesta';
+
+  @override
+  String get requestSwapAccepted => 'aceptó';
+
+  @override
+  String get requestSwapRefused => 'rechazó';
+
+  @override
+  String requestSwapFrom(String name) {
+    return 'Solicitud de $name';
+  }
+
+  @override
+  String get requestSwapAccept => 'Aceptar';
+
+  @override
+  String get requestSwapRefuse => 'Rechazar';
+
+  @override
+  String get requestSwapOffline =>
+      'Los cambios y respuestas necesitan conexión. Inténtalo de nuevo cuando estés en línea.';
+
+  @override
+  String requestSwapDetail(String peer, String mine, String theirs) {
+    return '$peer: mía $mine, del compañero $theirs';
+  }
+
+  @override
+  String requestSwapColleagueStatus(String status) {
+    return 'Compañero: $status';
+  }
+
+  @override
   String get requestAlreadyDecided => 'Esa solicitud ya fue respondida.';
 
   @override
@@ -1938,6 +2009,77 @@ class AppLocalizationsEsEs extends AppLocalizationsEs {
 
   @override
   String get requestFutureTime => 'La hora no puede estar en el futuro.';
+
+  @override
+  String get requestSwap => 'Cambio de turno';
+
+  @override
+  String get requestSwapColleague => 'Compañero';
+
+  @override
+  String get requestSwapSearch => 'Buscar compañero';
+
+  @override
+  String get requestSwapNoColleagues => 'Ningún compañero encontrado.';
+
+  @override
+  String get requestSwapMyDate => 'Mi fecha';
+
+  @override
+  String get requestSwapTheirDate => 'Fecha del compañero';
+
+  @override
+  String get requestSwapRules =>
+      'El compañero debe aceptar primero y luego RR. HH. aprueba. En dos fechas distintas debes estar libre en la fecha del compañero y el compañero libre en la tuya. La fecha no puede ser pasada.';
+
+  @override
+  String get requestSwapColleagueRequired => 'Elige al compañero.';
+
+  @override
+  String get requestSwapNotAllowed =>
+      'Este cambio no está permitido para esos días. Revisa los horarios o habla con RR. HH.';
+
+  @override
+  String get requestSwapPeerInvalid =>
+      'Este compañero no puede recibir un cambio. Elige otro.';
+
+  @override
+  String get requestSwapDateInvalid =>
+      'Revisa las fechas: no pueden ser pasadas.';
+
+  @override
+  String get requestSwapWaiting => 'esperando respuesta';
+
+  @override
+  String get requestSwapAccepted => 'aceptó';
+
+  @override
+  String get requestSwapRefused => 'rechazó';
+
+  @override
+  String requestSwapFrom(String name) {
+    return 'Solicitud de $name';
+  }
+
+  @override
+  String get requestSwapAccept => 'Aceptar';
+
+  @override
+  String get requestSwapRefuse => 'Rechazar';
+
+  @override
+  String get requestSwapOffline =>
+      'Los cambios y respuestas necesitan conexión. Inténtalo de nuevo cuando estés en línea.';
+
+  @override
+  String requestSwapDetail(String peer, String mine, String theirs) {
+    return '$peer: mía $mine, del compañero $theirs';
+  }
+
+  @override
+  String requestSwapColleagueStatus(String status) {
+    return 'Compañero: $status';
+  }
 
   @override
   String get requestAlreadyDecided => 'Esa solicitud ya fue respondida.';

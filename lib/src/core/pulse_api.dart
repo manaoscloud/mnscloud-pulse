@@ -647,6 +647,30 @@ class PulseApi {
     await call('POST', '/pulse/requests', body: body);
   }
 
+  /// Colleagues of the employee that can receive a shift swap (names only), searched by [search].
+  Future<List<Map<String, dynamic>>> listColleagues({
+    String search = '',
+    int limit = 30,
+  }) async {
+    final query = search.isEmpty
+        ? ''
+        : '&search=${Uri.encodeQueryComponent(search)}';
+    final data = await call('GET', '/pulse/colleagues?limit=$limit$query');
+    final items = (data['data'] as Map<String, dynamic>?)?['items'];
+    return items is List
+        ? items.whereType<Map<String, dynamic>>().toList()
+        : const [];
+  }
+
+  /// The colleague of a shift swap accepts or refuses it; online only, never queued.
+  Future<void> peerDecision(String uuid, String decision) async {
+    await call(
+      'POST',
+      '/pulse/requests/$uuid/peer-decision',
+      body: {'decision': decision},
+    );
+  }
+
   Future<void> cancelRequest(String uuid) async {
     await call('POST', '/pulse/requests/$uuid/cancel');
   }

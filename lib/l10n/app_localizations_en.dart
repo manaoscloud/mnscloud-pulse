@@ -531,6 +531,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestFutureTime => 'The time cannot be in the future.';
 
   @override
+  String get requestSwap => 'Shift swap';
+
+  @override
+  String get requestSwapColleague => 'Colleague';
+
+  @override
+  String get requestSwapSearch => 'Search colleague';
+
+  @override
+  String get requestSwapNoColleagues => 'No colleague found.';
+
+  @override
+  String get requestSwapMyDate => 'My date';
+
+  @override
+  String get requestSwapTheirDate => 'Colleague\'s date';
+
+  @override
+  String get requestSwapRules =>
+      'Your colleague must accept first, then HR approves. On two different dates you must be off on your colleague\'s date and your colleague off on yours. The date cannot be in the past.';
+
+  @override
+  String get requestSwapColleagueRequired => 'Choose the colleague.';
+
+  @override
+  String get requestSwapNotAllowed =>
+      'This swap is not allowed for these days. Check the schedules or talk to HR.';
+
+  @override
+  String get requestSwapPeerInvalid =>
+      'This colleague cannot receive a swap. Choose another one.';
+
+  @override
+  String get requestSwapDateInvalid =>
+      'Check the dates: they cannot be in the past.';
+
+  @override
+  String get requestSwapWaiting => 'awaiting answer';
+
+  @override
+  String get requestSwapAccepted => 'accepted';
+
+  @override
+  String get requestSwapRefused => 'refused';
+
+  @override
+  String requestSwapFrom(String name) {
+    return 'Request from $name';
+  }
+
+  @override
+  String get requestSwapAccept => 'Accept';
+
+  @override
+  String get requestSwapRefuse => 'Refuse';
+
+  @override
+  String get requestSwapOffline =>
+      'Swaps and answers need a connection. Try again when you are online.';
+
+  @override
+  String requestSwapDetail(String peer, String mine, String theirs) {
+    return '$peer: my $mine, theirs $theirs';
+  }
+
+  @override
+  String requestSwapColleagueStatus(String status) {
+    return 'Colleague: $status';
+  }
+
+  @override
   String get requestAlreadyDecided => 'This request was already answered.';
 
   @override
@@ -1928,6 +1999,77 @@ class AppLocalizationsEnUs extends AppLocalizationsEn {
 
   @override
   String get requestFutureTime => 'The time cannot be in the future.';
+
+  @override
+  String get requestSwap => 'Shift swap';
+
+  @override
+  String get requestSwapColleague => 'Colleague';
+
+  @override
+  String get requestSwapSearch => 'Search colleague';
+
+  @override
+  String get requestSwapNoColleagues => 'No colleague found.';
+
+  @override
+  String get requestSwapMyDate => 'My date';
+
+  @override
+  String get requestSwapTheirDate => 'Colleague\'s date';
+
+  @override
+  String get requestSwapRules =>
+      'Your colleague must accept first, then HR approves. On two different dates you must be off on your colleague\'s date and your colleague off on yours. The date cannot be in the past.';
+
+  @override
+  String get requestSwapColleagueRequired => 'Choose the colleague.';
+
+  @override
+  String get requestSwapNotAllowed =>
+      'This swap is not allowed for these days. Check the schedules or talk to HR.';
+
+  @override
+  String get requestSwapPeerInvalid =>
+      'This colleague cannot receive a swap. Choose another one.';
+
+  @override
+  String get requestSwapDateInvalid =>
+      'Check the dates: they cannot be in the past.';
+
+  @override
+  String get requestSwapWaiting => 'awaiting answer';
+
+  @override
+  String get requestSwapAccepted => 'accepted';
+
+  @override
+  String get requestSwapRefused => 'refused';
+
+  @override
+  String requestSwapFrom(String name) {
+    return 'Request from $name';
+  }
+
+  @override
+  String get requestSwapAccept => 'Accept';
+
+  @override
+  String get requestSwapRefuse => 'Refuse';
+
+  @override
+  String get requestSwapOffline =>
+      'Swaps and answers need a connection. Try again when you are online.';
+
+  @override
+  String requestSwapDetail(String peer, String mine, String theirs) {
+    return '$peer: my $mine, theirs $theirs';
+  }
+
+  @override
+  String requestSwapColleagueStatus(String status) {
+    return 'Colleague: $status';
+  }
 
   @override
   String get requestAlreadyDecided => 'This request was already answered.';

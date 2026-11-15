@@ -9,13 +9,19 @@ import '../core/pulse_api.dart';
 import '../core/server_clock.dart';
 import '../punch/punch_labels.dart';
 
-const requestTypes = ['missing_punch', 'punch_contest', 'absence'];
+const requestTypes = [
+  'missing_punch',
+  'punch_contest',
+  'absence',
+  'shift_swap',
+];
 const absenceTypes = ['medical_certificate', 'justified', 'day_off', 'leave'];
 
 String requestTypeLabel(AppLocalizations l, String type) => switch (type) {
   'missing_punch' => l.requestMissingPunch,
   'punch_contest' => l.requestPunchContest,
   'absence' => l.requestAbsence,
+  'shift_swap' => l.requestSwap,
   _ => type,
 };
 
@@ -42,8 +48,23 @@ String requestStatusLabel(AppLocalizations l, String status) =>
 bool attachmentStorageFailed(PulseFailure failure) =>
     failure.status == 500 || failure.status == 503;
 
+String peerStatusLabel(AppLocalizations l, String status) => switch (status) {
+  'accepted' => l.requestSwapAccepted,
+  'refused' => l.requestSwapRefused,
+  _ => l.requestSwapWaiting,
+};
+
 String requestFailureText(AppLocalizations l, PulseFailure failure) {
   if (failure.code == 'networkError') return l.networkError;
+  if (failure.code == 'HR_SWAP_NOT_ALLOWED') return l.requestSwapNotAllowed;
+  if (failure.code == 'HR_TIMESHEET_CLOSED') return l.requestPeriodClosed;
+  if (failure.code == 'HR_SWAP_PEER_INVALID' ||
+      failure.fields.contains('peerEmployeeUUID')) {
+    return l.requestSwapPeerInvalid;
+  }
+  if (failure.fields.contains('swapDate') || failure.fields.contains('date')) {
+    return l.requestSwapDateInvalid;
+  }
   final message = failure.message ?? '';
   if (failure.fields.contains('file')) return l.requestFileInvalid;
   if (message.contains('pending request')) return l.requestDuplicate;
@@ -243,6 +264,27 @@ class _RequestsViewState extends State<RequestsView> {
     if (mounted) unawaited(_load());
   }
 
+  bool _peerPending(Map<String, dynamic> item) =>
+      item['Type'] == 'shift_swap' &&
+      item['Role'] == 'peer' &&
+      item['Status'] == 'pending' &&
+      (item['PeerStatus'] ?? 'pending') == 'pending';
+
+  Future<void> _decide(Map<String, dynamic> item, String decision) async {
+    final uuid = item['RequestUUID']?.toString();
+    if (uuid == null) return;
+    try {
+      await widget.api.peerDecision(uuid, decision);
+    } on PulseFailure catch (failure) {
+      if (_ended(failure) || !mounted) return;
+      final text = failure.code == 'networkError'
+          ? l.requestSwapOffline
+          : requestFailureText(l, failure);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+    }
+    if (mounted) unawaited(_load());
+  }
+
   String _detail(Map<String, dynamic> item) {
     final type = item['Type']?.toString() ?? '';
     if (type == 'missing_punch') {
@@ -250,6 +292,17 @@ class _RequestsViewState extends State<RequestsView> {
     }
     if (type == 'punch_contest') {
       return '${punchLabel(l, item['ContestedPunchType']?.toString() ?? '')} · ${_showInstant(context, item['ContestedOccurredAt'])}';
+    }
+    if (type == 'shift_swap') {
+      final mine = _showDay(context, item['Date']?.toString());
+      final theirs = _showDay(
+        context,
+        (item['SwapDate'] ?? item['Date'])?.toString(),
+      );
+      final peer = item['Role'] == 'peer'
+          ? (item['RequesterName']?.toString() ?? '')
+          : (item['PeerEmployeeName']?.toString() ?? '');
+      return l.requestSwapDetail(peer, mine, theirs);
     }
     final start = _showDay(context, item['Date']?.toString());
     final end = item['EndDate']?.toString();
@@ -330,7 +383,24 @@ class _RequestsViewState extends State<RequestsView> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(_detail(item)),
+                    Text(
+                      item['Type'] == 'shift_swap' && item['Role'] == 'peer'
+                          ? '${l.requestSwapFrom(item['RequesterName']?.toString() ?? '')} · ${_detail(item)}'
+                          : _detail(item),
+                    ),
+                    if (item['Type'] == 'shift_swap')
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          l.requestSwapColleagueStatus(
+                            peerStatusLabel(
+                              l,
+                              item['PeerStatus']?.toString() ?? 'pending',
+                            ),
+                          ),
+                          style: TextStyle(color: scheme.onSurfaceVariant),
+                        ),
+                      ),
                     if ((item['Reason']?.toString() ?? '').isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 6),
@@ -383,7 +453,27 @@ class _RequestsViewState extends State<RequestsView> {
                               ),
                             ),
                           ),
-                          if (item['Status'] == 'pending')
+                          if (_peerPending(item)) ...[
+                            TextButton(
+                              key: ValueKey(
+                                'swap-refuse-${item['RequestUUID']}',
+                              ),
+                              onPressed: () => _decide(item, 'refuse'),
+                              child: Text(l.requestSwapRefuse),
+                            ),
+                            FilledButton(
+                              key: ValueKey(
+                                'swap-accept-${item['RequestUUID']}',
+                              ),
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(0, 44),
+                              ),
+                              onPressed: () => _decide(item, 'accept'),
+                              child: Text(l.requestSwapAccept),
+                            ),
+                          ],
+                          if (item['Status'] == 'pending' &&
+                              item['Role'] != 'peer')
                             TextButton(
                               onPressed: () => _cancel(item),
                               child: Text(l.requestCancelAction),
@@ -466,6 +556,10 @@ class _RequestFormState extends State<RequestForm> {
   String _punchType = 'clock_out';
   String _absenceType = 'medical_certificate';
   String? _punchUUID;
+  String? _peerUUID;
+  String? _peerName;
+  late DateTime _swapDate = _today;
+  bool _swapDateSet = false;
   List<Map<String, dynamic>>? _punches;
   (List<int>, String)? _file;
   String? _uploaded;
@@ -502,9 +596,27 @@ class _RequestFormState extends State<RequestForm> {
       showDatePicker(
         context: context,
         initialDate: initial,
-        firstDate: _firstDay,
+        firstDate: _type == 'shift_swap' ? _today : _firstDay,
         lastDate: last ?? _today.add(const Duration(days: 366)),
       );
+
+  Future<void> _pickColleague() async {
+    final picked = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => ColleaguePicker(
+        api: widget.api,
+        onSessionEnded: widget.onSessionEnded,
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _peerUUID = picked['EmployeeUUID']?.toString();
+      _peerName = picked['Name']?.toString();
+      _error = null;
+    });
+  }
 
   Future<void> _pickCertificate() async {
     final picker = widget.pickFile;
@@ -543,6 +655,9 @@ class _RequestFormState extends State<RequestForm> {
     if (_type == 'absence' && _endDate.isBefore(_date)) {
       return l.requestEndBeforeStart;
     }
+    if (_type == 'shift_swap' && _peerUUID == null) {
+      return l.requestSwapColleagueRequired;
+    }
     return null;
   }
 
@@ -575,6 +690,11 @@ class _RequestFormState extends State<RequestForm> {
           'punchType': _punchType,
         },
         if (_type == 'punch_contest') 'punchUUID': _punchUUID,
+        if (_type == 'shift_swap') ...{
+          'date': _day(_date),
+          'peerEmployeeUUID': _peerUUID,
+          if (_swapDateSet) 'swapDate': _day(_swapDate),
+        },
         if (_type == 'absence') ...{
           'date': _day(_date),
           'endDate': _day(_endDate),
@@ -597,6 +717,8 @@ class _RequestFormState extends State<RequestForm> {
                 _uploaded == null &&
                 _file != null
             ? l.requestAttachmentUnavailable
+            : _type == 'shift_swap' && failure.code == 'networkError'
+            ? l.requestSwapOffline
             : requestFailureText(l, failure);
       });
     }
@@ -634,26 +756,32 @@ class _RequestFormState extends State<RequestForm> {
           children: [
             Text(l.requestNew, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            SegmentedButton<String>(
-              segments: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
                 for (final type in requestTypes)
-                  ButtonSegment(
-                    value: type,
+                  ChoiceChip(
+                    key: ValueKey('type-$type'),
                     label: Text(requestTypeLabel(l, type)),
+                    selected: _type == type,
+                    onSelected: _sending
+                        ? null
+                        : (_) {
+                            setState(() {
+                              _type = type;
+                              _error = null;
+                              if (type == 'shift_swap' &&
+                                  _date.isBefore(_today)) {
+                                _date = _today;
+                              }
+                            });
+                            if (type == 'punch_contest' && _punches == null) {
+                              unawaited(_loadPunches());
+                            }
+                          },
                   ),
               ],
-              selected: {_type},
-              onSelectionChanged: _sending
-                  ? null
-                  : (selection) {
-                      setState(() {
-                        _type = selection.first;
-                        _error = null;
-                      });
-                      if (_type == 'punch_contest' && _punches == null) {
-                        unawaited(_loadPunches());
-                      }
-                    },
             ),
             const SizedBox(height: 12),
             if (_type == 'missing_punch') ...[
@@ -717,6 +845,32 @@ class _RequestFormState extends State<RequestForm> {
                       ),
                   ],
                 ),
+              ),
+            ],
+            if (_type == 'shift_swap') ...[
+              Text(
+                l.requestSwapRules,
+                style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
+              ),
+              ListTile(
+                key: const Key('swapColleague'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.person_search),
+                title: Text(l.requestSwapColleague),
+                subtitle: Text(_peerName ?? '—'),
+                onTap: _sending ? null : _pickColleague,
+              ),
+              _dateTile(l.requestSwapMyDate, _date, (d) {
+                _date = d;
+                if (!_swapDateSet) _swapDate = d;
+              }),
+              _dateTile(
+                l.requestSwapTheirDate,
+                _swapDateSet ? _swapDate : _date,
+                (d) {
+                  _swapDate = d;
+                  _swapDateSet = true;
+                },
               ),
             ],
             if (_type == 'absence') ...[
@@ -783,6 +937,134 @@ class _RequestFormState extends State<RequestForm> {
                   : Text(l.requestSend),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Search of a colleague for a shift swap (`GET /pulse/colleagues`); pops the chosen item.
+class ColleaguePicker extends StatefulWidget {
+  const ColleaguePicker({
+    super.key,
+    required this.api,
+    required this.onSessionEnded,
+  });
+
+  final PulseApi api;
+  final void Function(String code) onSessionEnded;
+
+  @override
+  State<ColleaguePicker> createState() => _ColleaguePickerState();
+}
+
+class _ColleaguePickerState extends State<ColleaguePicker> {
+  final _search = TextEditingController();
+  List<Map<String, dynamic>>? _items;
+  String? _error;
+  Timer? _debounce;
+  int _request = 0;
+
+  AppLocalizations get l => AppLocalizations.of(context)!;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _search.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final request = ++_request;
+    try {
+      final items = await widget.api.listColleagues(
+        search: _search.text.trim(),
+      );
+      if (!mounted || request != _request) return;
+      setState(() {
+        _items = items;
+        _error = null;
+      });
+    } on PulseFailure catch (failure) {
+      if (failure.sessionEnded) {
+        widget.onSessionEnded(failure.code);
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+      if (!mounted || request != _request) return;
+      setState(() {
+        _items = const [];
+        _error = requestFailureText(l, failure);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final items = _items;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SizedBox(
+        height: 460,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l.requestSwapColleague,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                key: const Key('colleagueSearch'),
+                controller: _search,
+                decoration: InputDecoration(
+                  labelText: l.requestSwapSearch,
+                  prefixIcon: const Icon(Icons.search),
+                ),
+                onChanged: (_) {
+                  _debounce?.cancel();
+                  _debounce = Timer(
+                    const Duration(milliseconds: 300),
+                    () => unawaited(_load()),
+                  );
+                },
+              ),
+              if (items == null) const LinearProgressIndicator(),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(_error!, style: TextStyle(color: scheme.error)),
+                ),
+              if (items != null && items.isEmpty && _error == null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(l.requestSwapNoColleagues),
+                ),
+              Expanded(
+                child: ListView(
+                  children: [
+                    for (final item in items ?? const <Map<String, dynamic>>[])
+                      ListTile(
+                        key: ValueKey('colleague-${item['EmployeeUUID']}'),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.person_outline),
+                        title: Text(item['Name']?.toString() ?? ''),
+                        onTap: () => Navigator.pop(context, item),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

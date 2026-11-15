@@ -221,6 +221,174 @@ void main() {
   );
 
   test(
+    'swap errors become translated texts and peer statuses are labelled',
+    () {
+      final l = AppLocalizationsEnUs();
+      expect(
+        requestFailureText(
+          l,
+          const PulseFailure('HR_SWAP_NOT_ALLOWED', status: 409),
+        ),
+        l.requestSwapNotAllowed,
+      );
+      expect(
+        requestFailureText(
+          l,
+          const PulseFailure('HR_TIMESHEET_CLOSED', status: 409),
+        ),
+        l.requestPeriodClosed,
+      );
+      expect(
+        requestFailureText(
+          l,
+          const PulseFailure(
+            'VALIDATION_FAILED',
+            status: 400,
+            fields: ['peerEmployeeUUID'],
+          ),
+        ),
+        l.requestSwapPeerInvalid,
+      );
+      expect(requestTypeLabel(l, 'shift_swap'), 'Shift swap');
+      expect(peerStatusLabel(l, 'accepted'), 'accepted');
+      expect(peerStatusLabel(l, 'pending'), 'awaiting answer');
+    },
+  );
+
+  testWidgets(
+    'the employee asks a shift swap and answers one from a colleague',
+    (tester) async {
+      phone(tester);
+      final sent = <Map<String, dynamic>>[];
+      final decisions = <String>[];
+      final searches = <String>[];
+      var items = <Map<String, dynamic>>[
+        {
+          'RequestUUID': 'peer-1',
+          'Type': 'shift_swap',
+          'Status': 'pending',
+          'Role': 'peer',
+          'Date': '2026-12-01',
+          'SwapDate': '2026-12-01',
+          'RequesterName': 'Ana Souza',
+          'PeerEmployeeName': 'Test Employee',
+          'PeerStatus': 'pending',
+          'Reason': 'Consulta',
+        },
+      ];
+      final client = MockClient((request) async {
+        final path = request.url.path;
+        if (path.endsWith('/auth/refresh')) return json(session);
+        if (path.endsWith('/time')) {
+          return json({
+            'data': {'serverTime': DateTime.now().toUtc().toIso8601String()},
+          });
+        }
+        if (path.endsWith('/colleagues')) {
+          searches.add(request.url.queryParameters['search'] ?? '');
+          return json({
+            'data': {
+              'items': [
+                {'EmployeeUUID': 'emp-2', 'Name': 'Bruno Lima'},
+              ],
+            },
+          });
+        }
+        if (path.endsWith('/peer-decision')) {
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          decisions.add(
+            '${path.split('/')[path.split('/').length - 2]}:${body['decision']}',
+          );
+          items = [
+            {...items.first, 'PeerStatus': 'accepted'},
+          ];
+          return json({
+            'data': {'RequestUUID': 'peer-1', 'PeerStatus': 'accepted'},
+          });
+        }
+        if (path.endsWith('/requests') && request.method == 'GET') {
+          return json({
+            'data': {'items': items},
+          });
+        }
+        if (path.endsWith('/requests') && request.method == 'POST') {
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          sent.add(body);
+          return json({
+            'data': {'RequestUUID': body['uuid'], 'Duplicate': false},
+          });
+        }
+        if (path.endsWith('/punches') || path.endsWith('/today')) {
+          return json({
+            'data': {
+              'items': <Object>[],
+              'date': '2026-11-02',
+              'punches': <Object>[],
+            },
+          });
+        }
+        return json({'code': 'requestError'}, 404);
+      });
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en', 'US'),
+          home: PulseShell(client: client),
+        ),
+      );
+      await settle(tester);
+      await tester.tap(find.byKey(const Key('navRequests')));
+      await settle(tester);
+      expect(find.text('Shift swap'), findsOneWidget);
+      expect(
+        find.text('Request from Ana Souza', findRichText: true),
+        findsNothing,
+      );
+      expect(find.textContaining('Request from Ana Souza'), findsOneWidget);
+      expect(find.text('Colleague: awaiting answer'), findsOneWidget);
+      expect(find.text('Cancel request'), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('swap-accept-peer-1')));
+      await settle(tester);
+      expect(decisions, ['peer-1:accept']);
+      expect(find.text('Colleague: accepted'), findsOneWidget);
+      expect(find.byKey(const ValueKey('swap-accept-peer-1')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('newRequest')));
+      await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('type-shift_swap')));
+      await settle(tester);
+      expect(
+        find.textContaining('Your colleague must accept first'),
+        findsOneWidget,
+      );
+      await tester.enterText(find.byKey(const Key('requestReason')), 'Prova');
+      await tester.tap(find.byKey(const Key('sendRequest')));
+      await settle(tester);
+      expect(find.text('Choose the colleague.'), findsOneWidget);
+      expect(sent, isEmpty);
+
+      await tester.tap(find.byKey(const Key('swapColleague')));
+      await settle(tester);
+      await tester.tap(find.byKey(const ValueKey('colleague-emp-2')));
+      await settle(tester);
+      expect(find.text('Bruno Lima'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('sendRequest')));
+      await settle(tester);
+      expect(sent.length, 1);
+      expect(sent[0]['type'], 'shift_swap');
+      expect(sent[0]['peerEmployeeUUID'], 'emp-2');
+      expect(sent[0].containsKey('swapDate'), isFalse);
+      expect(
+        RegExp(r'^\d{4}-\d\d-\d\d$').hasMatch(sent[0]['date'] as String),
+        isTrue,
+      );
+      expect(searches, isNotEmpty);
+    },
+  );
+
+  test(
     'certificate storage failures (500/503) are told apart from refused files',
     () {
       expect(

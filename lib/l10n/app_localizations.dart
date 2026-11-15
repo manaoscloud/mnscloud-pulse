@@ -1063,6 +1063,126 @@ abstract class AppLocalizations {
   /// **'The time cannot be in the future.'**
   String get requestFutureTime;
 
+  /// No description provided for @requestSwap.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Shift swap'**
+  String get requestSwap;
+
+  /// No description provided for @requestSwapColleague.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Colleague'**
+  String get requestSwapColleague;
+
+  /// No description provided for @requestSwapSearch.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Search colleague'**
+  String get requestSwapSearch;
+
+  /// No description provided for @requestSwapNoColleagues.
+  ///
+  /// In en_US, this message translates to:
+  /// **'No colleague found.'**
+  String get requestSwapNoColleagues;
+
+  /// No description provided for @requestSwapMyDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'My date'**
+  String get requestSwapMyDate;
+
+  /// No description provided for @requestSwapTheirDate.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Colleague\'s date'**
+  String get requestSwapTheirDate;
+
+  /// No description provided for @requestSwapRules.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Your colleague must accept first, then HR approves. On two different dates you must be off on your colleague\'s date and your colleague off on yours. The date cannot be in the past.'**
+  String get requestSwapRules;
+
+  /// No description provided for @requestSwapColleagueRequired.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Choose the colleague.'**
+  String get requestSwapColleagueRequired;
+
+  /// No description provided for @requestSwapNotAllowed.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This swap is not allowed for these days. Check the schedules or talk to HR.'**
+  String get requestSwapNotAllowed;
+
+  /// No description provided for @requestSwapPeerInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'This colleague cannot receive a swap. Choose another one.'**
+  String get requestSwapPeerInvalid;
+
+  /// No description provided for @requestSwapDateInvalid.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Check the dates: they cannot be in the past.'**
+  String get requestSwapDateInvalid;
+
+  /// No description provided for @requestSwapWaiting.
+  ///
+  /// In en_US, this message translates to:
+  /// **'awaiting answer'**
+  String get requestSwapWaiting;
+
+  /// No description provided for @requestSwapAccepted.
+  ///
+  /// In en_US, this message translates to:
+  /// **'accepted'**
+  String get requestSwapAccepted;
+
+  /// No description provided for @requestSwapRefused.
+  ///
+  /// In en_US, this message translates to:
+  /// **'refused'**
+  String get requestSwapRefused;
+
+  /// No description provided for @requestSwapFrom.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Request from {name}'**
+  String requestSwapFrom(String name);
+
+  /// No description provided for @requestSwapAccept.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Accept'**
+  String get requestSwapAccept;
+
+  /// No description provided for @requestSwapRefuse.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Refuse'**
+  String get requestSwapRefuse;
+
+  /// No description provided for @requestSwapOffline.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Swaps and answers need a connection. Try again when you are online.'**
+  String get requestSwapOffline;
+
+  /// No description provided for @requestSwapDetail.
+  ///
+  /// In en_US, this message translates to:
+  /// **'{peer}: my {mine}, theirs {theirs}'**
+  String requestSwapDetail(String peer, String mine, String theirs);
+
+  /// No description provided for @requestSwapColleagueStatus.
+  ///
+  /// In en_US, this message translates to:
+  /// **'Colleague: {status}'**
+  String requestSwapColleagueStatus(String status);
+
   /// No description provided for @requestAlreadyDecided.
   ///
   /// In en_US, this message translates to:
